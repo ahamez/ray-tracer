@@ -1,0 +1,11 @@
+[package]
+name = "ray_tracer"
+version = "0.1.0"
+authors = ["Alexandre Hamez <alexandre.hamez@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+float-cmp = "0.8.0"
+
+[profile.release]
+debug = true
