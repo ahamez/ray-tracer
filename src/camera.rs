@@ -100,18 +100,21 @@ mod tests {
     use std::f64::consts::PI;
 
     use super::*;
-    use crate::{color::Color, point::Point, transformation::view_transform, tuple::Tuple, vector::Vector};
+    use crate::{
+        color::Color, epsilon::EPSILON, point::Point, transformation::view_transform, tuple::Tuple,
+        vector::Vector,
+    };
 
     #[test]
     fn pixel_size_for_a_horizontal_canvas() {
         let c = Camera::new(200, 125, PI / 2.0);
-        assert!(approx_eq!(f64, c.pixel_size, 0.01, epsilon = 0.00001));
+        assert!(approx_eq!(f64, c.pixel_size, 0.01, epsilon = EPSILON));
     }
 
     #[test]
     fn pixel_size_for_a_vertical_canvas() {
         let c = Camera::new(125, 200, PI / 2.0);
-        assert!(approx_eq!(f64, c.pixel_size, 0.01, epsilon = 0.00001));
+        assert!(approx_eq!(f64, c.pixel_size, 0.01, epsilon = EPSILON));
     }
 
     #[test]

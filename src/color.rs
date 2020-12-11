@@ -1,5 +1,7 @@
 use float_cmp::approx_eq;
 
+use crate::epsilon::EPSILON;
+
 // --------------------------------------------------------------------------------------------- //
 
 #[derive(Clone, Copy, Debug)]
@@ -55,19 +57,15 @@ impl Color {
             b: 1.0,
         }
     }
-
-    pub fn eq_epsilon(&self, other: &Color, epsilon: f64) -> bool {
-        approx_eq!(f64, self.r, other.r, epsilon = epsilon)
-            && approx_eq!(f64, self.g, other.g, epsilon = epsilon)
-            && approx_eq!(f64, self.b, other.b, epsilon = epsilon)
-    }
 }
 
 // --------------------------------------------------------------------------------------------- //
 
 impl PartialEq for Color {
     fn eq(&self, other: &Color) -> bool {
-        self.eq_epsilon(other, 0.00001)
+        approx_eq!(f64, self.r, other.r, epsilon = EPSILON)
+            && approx_eq!(f64, self.g, other.g, epsilon = EPSILON)
+            && approx_eq!(f64, self.b, other.b, epsilon = EPSILON)
     }
 
     fn ne(&self, other: &Color) -> bool {

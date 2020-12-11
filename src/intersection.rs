@@ -2,7 +2,7 @@
 
 use std::cmp::Ordering;
 
-use crate::{object::Object, point::Point, ray::Ray, vector::Vector};
+use crate::{epsilon::EPSILON, object::Object, point::Point, ray::Ray, vector::Vector};
 
 // --------------------------------------------------------------------------------------------- //
 
@@ -109,7 +109,7 @@ impl IntersectionState {
             (false, normal_v)
         };
 
-        let over_point = point + normal_v * Self::over_point_epsilon();
+        let over_point = point + normal_v * EPSILON;
 
         IntersectionState {
             t: intersection.t,
@@ -140,10 +140,6 @@ impl IntersectionState {
 
     pub fn normal_v(&self) -> Vector {
         self.normal_v
-    }
-
-    fn over_point_epsilon() -> f64 {
-        1.0e-5
     }
 }
 
@@ -301,7 +297,7 @@ mod tests {
 
         let comps = IntersectionState::new(&i, &r);
 
-        assert!(comps.over_point.z() < IntersectionState::over_point_epsilon() / 2.0);
+        assert!(comps.over_point.z() < EPSILON / 2.0);
         assert!(comps.point.z() > comps.over_point.z());
     }
 }

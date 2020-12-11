@@ -2,7 +2,7 @@
 
 use float_cmp::approx_eq;
 
-use crate::tuple::Tuple;
+use crate::{epsilon::EPSILON, tuple::Tuple};
 
 // --------------------------------------------------------------------------------------------- //
 
@@ -16,12 +16,6 @@ pub struct Vector {
 // --------------------------------------------------------------------------------------------- //
 
 impl Vector {
-    pub fn eq_epsilon(&self, other: &Vector, epsilon: f64) -> bool {
-        approx_eq!(f64, self.x, other.x, epsilon = epsilon)
-            && approx_eq!(f64, self.y, other.y, epsilon = epsilon)
-            && approx_eq!(f64, self.z, other.z, epsilon = epsilon)
-    }
-
     pub fn magnitude(&self) -> f64 {
         f64::sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
     }
@@ -71,7 +65,9 @@ impl Tuple for Vector {
 
 impl PartialEq for Vector {
     fn eq(&self, other: &Vector) -> bool {
-        self.eq_epsilon(other, 0.00001)
+        approx_eq!(f64, self.x, other.x, epsilon = EPSILON)
+            && approx_eq!(f64, self.y, other.y, epsilon = EPSILON)
+            && approx_eq!(f64, self.z, other.z, epsilon = EPSILON)
     }
 
     fn ne(&self, other: &Vector) -> bool {
@@ -454,7 +450,7 @@ mod tests {
     #[test]
     fn reflecting_a_vector_off_a_slanted_surface() {
         let v = Vector::new(0.0, -1.0, 0.0);
-        let n = Vector::new(f64::sqrt(2.0)/2.0, f64::sqrt(2.0)/2.0, 0.0);
+        let n = Vector::new(f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0, 0.0);
 
         assert_eq!(v.reflect(&n), Vector::new(1.0, 0.0, 0.0));
     }

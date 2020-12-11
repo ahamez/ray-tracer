@@ -2,6 +2,7 @@
 
 use float_cmp::approx_eq;
 
+use crate::epsilon::EPSILON;
 use crate::tuple::Tuple;
 
 // --------------------------------------------------------------------------------------------- //
@@ -31,21 +32,6 @@ impl Matrix {
                 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
             ],
         }
-    }
-
-    fn eq_epsilon(&self, other: &Matrix, epsilon: f64) -> bool {
-        if self.size != other.size {
-            return false;
-        }
-
-        for i in 0..self.size {
-            for j in 0..self.size {
-                if !approx_eq!(f64, self[i][j], other[i][j], epsilon = epsilon) {
-                    return false;
-                }
-            }
-        }
-        true
     }
 
     pub fn transpose(&self) -> Matrix {
@@ -136,7 +122,18 @@ impl Matrix {
 
 impl PartialEq for Matrix {
     fn eq(&self, other: &Matrix) -> bool {
-        self.eq_epsilon(other, 0.001)
+        if self.size != other.size {
+            return false;
+        }
+
+        for i in 0..self.size {
+            for j in 0..self.size {
+                if !approx_eq!(f64, self[i][j], other[i][j], epsilon = EPSILON) {
+                    return false;
+                }
+            }
+        }
+        true
     }
 
     fn ne(&self, other: &Matrix) -> bool {
@@ -158,7 +155,6 @@ impl std::ops::Index<usize> for Matrix {
 // --------------------------------------------------------------------------------------------- //
 
 impl std::ops::IndexMut<usize> for Matrix {
-
     fn index_mut(&mut self, row: usize) -> &mut [f64] {
         let start = row * self.size;
         &mut self.data[start..start + self.size]
