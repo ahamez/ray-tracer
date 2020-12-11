@@ -1,12 +1,8 @@
-use std::fs::File;
-use std::io::Write;
-use std::path::Path;
+// --------------------------------------------------------------------------------------------- //
 
-use ray_tracer::canvas::Canvas;
-use ray_tracer::color::Color;
-use ray_tracer::point::Point;
-use ray_tracer::transformation::Transform;
-use ray_tracer::tuple::Tuple;
+use ray_tracer::{
+    canvas::Canvas, color::Color, point::Point, transformation::Transform, tuple::Tuple,
+};
 
 // --------------------------------------------------------------------------------------------- //
 
@@ -32,9 +28,5 @@ fn main() {
         }
     }
 
-    let ppm = canvas.ppm();
-
-    let path = Path::new("./clock.ppm");
-    let mut file = File::create(&path).unwrap();
-    file.write_all(ppm.as_bytes()).unwrap();
+    canvas.export("./clock.png").unwrap();
 }

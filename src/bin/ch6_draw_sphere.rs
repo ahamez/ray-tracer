@@ -1,19 +1,9 @@
 // --------------------------------------------------------------------------------------------- //
 
-use std::fs::File;
-use std::io::Write;
-use std::path::Path;
-
-use ray_tracer::canvas::Canvas;
-use ray_tracer::color::Color;
-use ray_tracer::light::Light;
-use ray_tracer::material::Material;
-use ray_tracer::object::Object;
-use ray_tracer::point::Point;
-use ray_tracer::ray::Ray;
-use ray_tracer::sphere::Sphere;
-use ray_tracer::transformation::Transform;
-use ray_tracer::tuple::Tuple;
+use ray_tracer::{
+    canvas::Canvas, color::Color, light::Light, material::Material, object::Object, point::Point,
+    ray::Ray, sphere::Sphere, transformation::Transform, tuple::Tuple,
+};
 
 // --------------------------------------------------------------------------------------------- //
 
@@ -76,8 +66,7 @@ fn main() {
         }
     }
 
-    let ppm = canvas.ppm();
-    let path = Path::new("./sphere_projection_with_lighting.ppm");
-    let mut file = File::create(&path).unwrap();
-    file.write_all(ppm.as_bytes()).unwrap();
+    canvas
+        .export("./sphere_projection_with_lighting.png")
+        .unwrap();
 }

@@ -3,9 +3,6 @@
 #![allow(unused_variables)]
 
 use std::f64::consts::PI;
-use std::fs::File;
-use std::io::Write;
-use std::path::Path;
 
 use ray_tracer::{
     camera::Camera,
@@ -53,8 +50,8 @@ fn main() {
                 .with_diffuse(0.7)
                 .with_specular(0.3),
         )
-        .translate(-0.5, 1.0, 0.5)
-        .shear(0.0, 1.0, 0.0, 1.0, 0.0, 0.0);
+        .translate(-0.5, 1.0, 0.5);
+    // .shear(0.0, 1.0, 0.0, 1.0, 0.0, 0.0);
 
     let middle2 = Sphere::new()
         .with_material(
@@ -94,28 +91,25 @@ fn main() {
     let world = World {
         objects: vec![
             Object::Plane(floor),
-            Object::Plane(wall),
+            // Object::Plane(wall),
             Object::Sphere(left),
             Object::Sphere(middle),
-            // Object::Sphere(middle2),
+            Object::Sphere(middle2),
             Object::Sphere(right),
         ],
-        lights: vec![light1, light3],
+        lights: vec![light1],
     };
 
     let from = Point::new(0.0, 1.5, -5.0);
     let to = Point::new(0.0, 1.0, 0.0);
     let up = Vector::new(0.0, 1.0, 0.0);
 
-    let factor = 10;
+    let factor = 20;
 
     let camera = Camera::new(100 * factor, 50 * factor, PI / 1.5)
         .with_transformation(&view_transform(&from, &to, &up));
 
     let canvas = camera.render(&world);
 
-    let ppm = canvas.ppm();
-    let path = Path::new("./plane.ppm");
-    let mut file = File::create(&path).unwrap();
-    file.write_all(ppm.as_bytes()).unwrap();
+    canvas.export("./plane.png").unwrap();
 }

@@ -2,22 +2,21 @@
 
 #![allow(unused_variables)]
 
-use std::f64::consts::PI;
-use std::fs::File;
-use std::io::Write;
-use std::path::Path;
+use core::f64::consts::PI;
 
-use ray_tracer::camera::Camera;
-use ray_tracer::color::Color;
-use ray_tracer::light::Light;
-use ray_tracer::material::Material;
-use ray_tracer::object::Object;
-use ray_tracer::point::Point;
-use ray_tracer::sphere::Sphere;
-use ray_tracer::transformation::{view_transform, Transform};
-use ray_tracer::tuple::Tuple;
-use ray_tracer::vector::Vector;
-use ray_tracer::world::World;
+use ray_tracer::{
+    camera::Camera,
+    color::Color,
+    light::Light,
+    material::Material,
+    object::Object,
+    point::Point,
+    sphere::Sphere,
+    transformation::{view_transform, Transform},
+    tuple::Tuple,
+    vector::Vector,
+    world::World,
+};
 
 // --------------------------------------------------------------------------------------------- //
 
@@ -122,8 +121,5 @@ fn main() {
 
     let canvas = camera.render(&world);
 
-    let ppm = canvas.ppm();
-    let path = Path::new("./camera.ppm");
-    let mut file = File::create(&path).unwrap();
-    file.write_all(ppm.as_bytes()).unwrap();
+    canvas.export("./camera.png").unwrap();
 }

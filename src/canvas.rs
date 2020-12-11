@@ -1,7 +1,6 @@
 // --------------------------------------------------------------------------------------------- //
 
 use crate::color::Color;
-use std::fmt::Write;
 
 // --------------------------------------------------------------------------------------------- //
 
@@ -27,32 +26,16 @@ impl Canvas {
         }
     }
 
-    pub fn ppm(&self) -> String {
-        let mut ppm = String::new();
-        self.write_ppm_header(&mut ppm);
+    pub fn export(&self, path: &str) -> image::ImageResult<()> {
+        let mut img = image::ImageBuffer::new(self.width as u32, self.height as u32);
 
-        // TODO: Split every 70 characters. See https://stackoverflow.com/a/57032118/21584?
-        for row in 0..self.height {
-            for col in 0..self.width - 1 {
-                let color = &self[row][col];
-                let (r, g, b) = scale_color(color);
-                write!(ppm, "{} {} {} ", r, g, b).unwrap();
-            }
-
-            let color = &self[row][self.width - 1];
+        for (x, y, pixel) in img.enumerate_pixels_mut() {
+            let color = &self[y as usize][x as usize];
             let (r, g, b) = scale_color(color);
-            write!(ppm, "{} {} {}", r, g, b).unwrap();
-
-            write!(ppm, "\n").unwrap();
+            *pixel = image::Rgb([r, g, b]);
         }
 
-        ppm
-    }
-
-    fn write_ppm_header(&self, ppm: &mut String) {
-        writeln!(ppm, "P3").unwrap();
-        writeln!(ppm, "{} {}", self.width, self.height).unwrap();
-        writeln!(ppm, "255").unwrap();
+        img.save(path)
     }
 }
 
@@ -109,52 +92,6 @@ mod tests {
 
         assert_eq!(canvas[2][3], Color::red());
         assert_eq!(canvas[0][1], Color::black());
-    }
-
-    #[test]
-    fn write_ppm_header() {
-        let canvas = Canvas::new(5, 3);
-        let mut ppm = String::new();
-        canvas.write_ppm_header(&mut ppm);
-
-        let expected = "P3
-5 3
-255
-";
-
-        assert_eq!(ppm, expected);
-    }
-
-    #[test]
-    fn ppm() {
-        let mut canvas = Canvas::new(5, 3);
-        canvas[0][0] = Color {
-            r: 1.5,
-            g: 0.0,
-            b: 0.0,
-        };
-        canvas[1][2] = Color {
-            r: 0.0,
-            g: 0.5,
-            b: 0.0,
-        };
-        canvas[2][4] = Color {
-            r: -0.5,
-            g: 0.0,
-            b: 1.0,
-        };
-
-        let ppm = canvas.ppm();
-
-        let expected = "P3
-5 3
-255
-255 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 127 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0 0 0 0 0 0 255
-";
-
-        assert_eq!(ppm, expected);
     }
 }
 

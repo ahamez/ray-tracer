@@ -1,12 +1,4 @@
-use std::fs::File;
-use std::io::Write;
-use std::path::Path;
-
-use ray_tracer::canvas::Canvas;
-use ray_tracer::color::Color;
-use ray_tracer::point::Point;
-use ray_tracer::tuple::Tuple;
-use ray_tracer::vector::Vector;
+use ray_tracer::{canvas::Canvas, color::Color, point::Point, tuple::Tuple, vector::Vector};
 
 // --------------------------------------------------------------------------------------------- //
 
@@ -48,17 +40,11 @@ fn main() {
 
     let mut canvas = Canvas::new_with_color(900, 500, Color::black());
     while p.position.y() > 0.0 {
-        // println!("{:?}", p);
         p = tick(&env, p);
         let row = 500 - (p.position.y() as usize) - 1;
         let col = p.position.x() as usize;
-        // println!("{} {}", row, col);
         canvas[row][col] = Color::red();
     }
 
-    let ppm = canvas.ppm();
-
-    let path = Path::new("./traj.ppm");
-    let mut file = File::create(&path).unwrap();
-    file.write_all(ppm.as_bytes()).unwrap();
+    canvas.export("./traj.png").unwrap();
 }
