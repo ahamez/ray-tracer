@@ -42,10 +42,6 @@ impl Sphere {
         self
     }
 
-    pub fn transformation(&self) -> &Matrix {
-        &self.transformation
-    }
-
     pub fn set_transformation(&mut self, transformation: Matrix) -> &mut Self {
         self.transformation = transformation;
         self
@@ -61,8 +57,6 @@ impl Sphere {
 
 impl Shape for Sphere {
     fn intersects(&self, ray: &Ray, is: &mut Vec<Intersection>) {
-        let ray = ray.apply_transformation(&self.transformation.invert().unwrap());
-
         let sphere_to_ray = ray.origin - Point::new(0.0, 0.0, 0.0);
 
         let a = ray.direction ^ ray.direction;
@@ -88,16 +82,16 @@ impl Shape for Sphere {
         }
     }
 
-    fn normal_at(&self, world_point: &Point) -> Vector {
-        let object_point = self.transformation.invert().unwrap() * *world_point;
-        let object_normal = object_point - Point::zero();
-        let world_normal = self.transformation.invert().unwrap().transpose() * object_normal;
-
-        world_normal.normalize()
+    fn normal_at(&self, object_point: &Point) -> Vector {
+        *object_point - Point::zero()
     }
 
     fn material(&self) -> &Material {
         &self.material
+    }
+
+    fn transformation(&self) -> &Matrix {
+        &self.transformation
     }
 }
 
@@ -224,7 +218,7 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let s = Sphere::new().with_transformation(scaling(2.0, 2.0, 2.0));
+        let s = Object::Sphere(Sphere::new().with_transformation(scaling(2.0, 2.0, 2.0)));
 
         let mut xs = vec![];
         s.intersects(&r, &mut xs);
@@ -278,7 +272,7 @@ mod tests {
 
     #[test]
     fn normal_on_a_translated_sphere() {
-        let s = Sphere::new().translate(0.0, 1.0, 0.0);
+        let s = Object::Sphere(Sphere::new().translate(0.0, 1.0, 0.0));
         assert_eq!(
             s.normal_at(&Point::new(0.0, 1.70711, -0.70711)),
             Vector::new(0.0, 0.70711, -0.70711)
@@ -287,9 +281,11 @@ mod tests {
 
     #[test]
     fn normal_on_a_transformed_sphere() {
-        let s = Sphere::new()
-            .scale(1.0, 0.5, 1.0)
-            .rotate_z(std::f64::consts::PI / 5.0);
+        let s = Object::Sphere(
+            Sphere::new()
+                .scale(1.0, 0.5, 1.0)
+                .rotate_z(std::f64::consts::PI / 5.0),
+        );
 
         assert_eq!(
             s.normal_at(&Point::new(

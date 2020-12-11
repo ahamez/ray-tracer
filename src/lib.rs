@@ -1,11 +1,13 @@
 pub mod camera;
 pub mod canvas;
 pub mod color;
+mod epsilon;
 pub mod intersection;
 pub mod light;
 pub mod material;
 pub mod matrix;
 pub mod object;
+pub mod plane;
 pub mod point;
 pub mod ray;
 pub mod shape;
