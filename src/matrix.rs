@@ -2,8 +2,7 @@
 
 use float_cmp::approx_eq;
 
-use crate::epsilon::EPSILON;
-use crate::tuple::Tuple;
+use crate::{epsilon::EPSILON, tuple::Tuple};
 
 // --------------------------------------------------------------------------------------------- //
 

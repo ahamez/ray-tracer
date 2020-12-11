@@ -1,9 +1,6 @@
 // --------------------------------------------------------------------------------------------- //
 
-use crate::color::Color;
-use crate::light::Light;
-use crate::point::Point;
-use crate::vector::Vector;
+use crate::{color::Color, light::Light, point::Point, vector::Vector};
 
 // --------------------------------------------------------------------------------------------- //
 

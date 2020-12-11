@@ -1,11 +1,9 @@
 // --------------------------------------------------------------------------------------------- //
 
-use crate::intersection::Intersection;
-use crate::material::Material;
-use crate::matrix::Matrix;
-use crate::point::Point;
-use crate::ray::Ray;
-use crate::vector::Vector;
+use crate::{
+    intersection::Intersection, material::Material, matrix::Matrix, point::Point, ray::Ray,
+    vector::Vector,
+};
 
 // --------------------------------------------------------------------------------------------- //
 
