@@ -53,10 +53,6 @@ impl PartialEq for Point {
             && approx_eq!(f64, self.y, other.y, epsilon = EPSILON)
             && approx_eq!(f64, self.z, other.z, epsilon = EPSILON)
     }
-
-    fn ne(&self, other: &Point) -> bool {
-        !self.eq(other)
-    }
 }
 
 // --------------------------------------------------------------------------------------------- //

@@ -135,10 +135,6 @@ impl PartialEq for Matrix {
         }
         true
     }
-
-    fn ne(&self, other: &Matrix) -> bool {
-        !self.eq(other)
-    }
 }
 
 // --------------------------------------------------------------------------------------------- //
@@ -221,10 +217,10 @@ impl std::fmt::Debug for Matrix {
             for j in 0..self.size {
                 write!(f, "{} ", self[i][j])?;
             }
-            write!(f, "\n")?;
+            writeln!(f)?;
         }
 
-        write!(f, "\n")
+        writeln!(f)
     }
 }
 

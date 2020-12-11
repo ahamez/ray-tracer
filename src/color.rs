@@ -67,10 +67,6 @@ impl PartialEq for Color {
             && approx_eq!(f64, self.g, other.g, epsilon = EPSILON)
             && approx_eq!(f64, self.b, other.b, epsilon = EPSILON)
     }
-
-    fn ne(&self, other: &Color) -> bool {
-        !self.eq(other)
-    }
 }
 
 // --------------------------------------------------------------------------------------------- //

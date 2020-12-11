@@ -69,10 +69,6 @@ impl PartialEq for Vector {
             && approx_eq!(f64, self.y, other.y, epsilon = EPSILON)
             && approx_eq!(f64, self.z, other.z, epsilon = EPSILON)
     }
-
-    fn ne(&self, other: &Vector) -> bool {
-        !self.eq(other)
-    }
 }
 
 // --------------------------------------------------------------------------------------------- //

@@ -1,5 +1,7 @@
 // --------------------------------------------------------------------------------------------- //
 
+use std::f64::consts::PI;
+
 use ray_tracer::{
     canvas::Canvas, color::Color, object::Object, point::Point, ray::Ray, sphere::Sphere,
     transformation::Transform, tuple::Tuple,
@@ -21,8 +23,8 @@ fn main() {
     let color: Color = Color::red();
     let shape = Sphere::new()
         .shear(1.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-        .rotate_z(3.14 / 4.0)
-        // .rotate_y(3.14 / 4.0)
+        .rotate_z(PI / 4.0)
+        // .rotate_y(PI / 4.0)
         .scale(1.0, 0.5, 1.0)
         .scale(0.7, 1.0, 1.0)
         .translate(0.0, 0.0, 1.0);

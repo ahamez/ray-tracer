@@ -43,6 +43,14 @@ impl Plane {
 
 // --------------------------------------------------------------------------------------------- //
 
+impl Default for Plane {
+    fn default() -> Self {
+        Plane::new()
+    }
+}
+
+// --------------------------------------------------------------------------------------------- //
+
 impl Shape for Plane {
     fn intersects(&self, ray: &Ray, is: &mut Vec<Intersection>) {
         if ray.direction.y().abs() < EPSILON {
