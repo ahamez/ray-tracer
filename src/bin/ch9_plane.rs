@@ -9,10 +9,8 @@ use ray_tracer::{
     color::Color,
     light::Light,
     material::Material,
-    object::Object,
-    plane::Plane,
     point::Point,
-    sphere::Sphere,
+    shape::Shape,
     transformation::{view_transform, Transform},
     tuple::Tuple,
     vector::Vector,
@@ -26,14 +24,14 @@ fn main() {
         .with_color(Color::new(1.0, 0.9, 0.9))
         .with_specular(0.0);
 
-    let floor = Plane::new().with_material(material);
+    let floor = Shape::new_plane().with_material(material);
 
-    let wall = Plane::new()
+    let wall = Shape::new_plane()
         .with_material(material.with_color(Color::new(0.0, 0.8, 0.8)))
         .translate(0.0, 0.0, 5.0)
         .rotate_x(PI / 2.0);
 
-    let left = Sphere::new()
+    let left = Shape::new_sphere()
         .with_material(
             Material::new()
                 .with_color(Color::new(1.0, 0.8, 0.1))
@@ -43,7 +41,7 @@ fn main() {
         .translate(-1.5, 0.33, -0.75)
         .scale(0.33, 0.33, 0.33);
 
-    let middle = Sphere::new()
+    let middle = Shape::new_sphere()
         .with_material(
             Material::new()
                 .with_color(Color::new(0.1, 1.0, 0.5))
@@ -53,7 +51,7 @@ fn main() {
         .translate(-0.5, 1.0, 0.5);
     // .shear(0.0, 1.0, 0.0, 1.0, 0.0, 0.0);
 
-    let middle2 = Sphere::new()
+    let middle2 = Shape::new_sphere()
         .with_material(
             Material::new()
                 .with_color(Color::new(0.1, 1.0, 0.5))
@@ -62,7 +60,7 @@ fn main() {
         )
         .translate(-0.5, 0.5, 0.5);
 
-    let right = Sphere::new()
+    let right = Shape::new_sphere()
         .with_material(
             Material::new()
                 .with_color(Color::new(0.5, 1.0, 0.1))
@@ -89,13 +87,13 @@ fn main() {
     };
 
     let world = World {
-        objects: vec![
-            Object::Plane(floor),
-            // Object::Plane(wall),
-            Object::Sphere(left),
-            Object::Sphere(middle),
-            Object::Sphere(middle2),
-            Object::Sphere(right),
+        shapes: vec![
+            floor,
+            // wall,
+            left,
+            middle,
+            middle2,
+            right,
         ],
         lights: vec![light1],
     };
@@ -104,7 +102,7 @@ fn main() {
     let to = Point::new(0.0, 1.0, 0.0);
     let up = Vector::new(0.0, 1.0, 0.0);
 
-    let factor = 20;
+    let factor = 15;
 
     let camera = Camera::new(100 * factor, 50 * factor, PI / 1.5)
         .with_transformation(&view_transform(&from, &to, &up));

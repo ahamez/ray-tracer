@@ -2,14 +2,14 @@
 
 use std::cmp::Ordering;
 
-use crate::{epsilon::EPSILON, object::Object, point::Point, ray::Ray, vector::Vector};
+use crate::{epsilon::EPSILON, point::Point, ray::Ray, shape::Shape, vector::Vector};
 
 // --------------------------------------------------------------------------------------------- //
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Intersection {
     pub t: f64,
-    pub object: Object,
+    pub shape: Shape,
 }
 
 // --------------------------------------------------------------------------------------------- //
@@ -87,7 +87,7 @@ impl std::ops::Index<usize> for Intersections {
 #[derive(Debug)]
 pub struct IntersectionState {
     t: f64,
-    object: Object,
+    shape: Shape,
     point: Point,
     over_point: Point,
     eye_v: Vector,
@@ -102,7 +102,7 @@ impl IntersectionState {
         let point = ray.position(intersection.t);
 
         let eye_v = -ray.direction;
-        let normal_v = intersection.object.normal_at(&point);
+        let normal_v = intersection.shape.normal_at(&point);
         let (inside, normal_v) = if (normal_v ^ eye_v) < 0.0 {
             (true, -normal_v)
         } else {
@@ -113,7 +113,7 @@ impl IntersectionState {
 
         IntersectionState {
             t: intersection.t,
-            object: intersection.object,
+            shape: intersection.shape,
             point,
             over_point,
             eye_v,
@@ -122,8 +122,8 @@ impl IntersectionState {
         }
     }
 
-    pub fn object(&self) -> Object {
-        self.object
+    pub fn object(&self) -> Shape {
+        self.shape
     }
 
     pub fn point(&self) -> Point {
@@ -147,40 +147,34 @@ impl IntersectionState {
 
 #[cfg(test)]
 mod tests {
-    use std::vec;
 
     use super::*;
-    use crate::object::Object;
-    use crate::sphere::Sphere;
-    use crate::transformation::Transform;
-    use crate::tuple::Tuple;
+
+    use crate::{shape::Shape, transformation::Transform, tuple::Tuple};
 
     #[test]
     fn an_intersection_encapsulates_t_and_object() {
-        let s = Sphere::new();
+        let shape = Shape::new_sphere();
         let t = 3.5;
-        let i = Intersection {
-            t,
-            object: Object::Sphere(s),
-        };
+        let i = Intersection { t, shape };
 
         assert_eq!(i.t, t);
-        assert_eq!(i.object, Object::Sphere(s));
+        assert_eq!(i.shape, shape);
     }
 
     #[test]
     fn sort_intersections() {
         let i0 = Intersection {
             t: 1.0,
-            object: Object::Sphere(Sphere::new()),
+            shape: Shape::new_sphere(),
         };
         let i1 = Intersection {
             t: -1.0,
-            object: Object::Sphere(Sphere::new()),
+            shape: Shape::new_sphere(),
         };
         let i2 = Intersection {
             t: 0.0,
-            object: Object::Sphere(Sphere::new()),
+            shape: Shape::new_sphere(),
         };
 
         let mut vec = vec![i0, i1, i2];
@@ -191,10 +185,10 @@ mod tests {
 
     #[test]
     fn hit_when_all_intersections_have_positive_t() {
-        let s = Object::Sphere(Sphere::new());
+        let shape = Shape::new_sphere();
 
-        let i0 = Intersection { t: 1.0, object: s };
-        let i1 = Intersection { t: 2.0, object: s };
+        let i0 = Intersection { t: 1.0, shape};
+        let i1 = Intersection { t: 2.0, shape};
         let is = Intersections::new(vec![i0, i1]);
 
         let i = is.hit();
@@ -204,10 +198,10 @@ mod tests {
 
     #[test]
     fn hit_when_some_intersections_have_negative_t() {
-        let s = Object::Sphere(Sphere::new());
+        let shape = Shape::new_sphere();
 
-        let i0 = Intersection { t: -1.0, object: s };
-        let i1 = Intersection { t: 2.0, object: s };
+        let i0 = Intersection { t: -1.0, shape };
+        let i1 = Intersection { t: 2.0, shape };
         let is = Intersections::new(vec![i0, i1]);
 
         let i = is.hit();
@@ -217,10 +211,10 @@ mod tests {
 
     #[test]
     fn hit_when_all_intersections_have_negative_t() {
-        let s = Object::Sphere(Sphere::new());
+        let shape = Shape::new_sphere();
 
-        let i0 = Intersection { t: -1.0, object: s };
-        let i1 = Intersection { t: -1.0, object: s };
+        let i0 = Intersection { t: -1.0, shape };
+        let i1 = Intersection { t: -1.0, shape };
         let is = Intersections::new(vec![i0, i1]);
 
         let i = is.hit();
@@ -230,12 +224,12 @@ mod tests {
 
     #[test]
     fn hit_is_always_the_lowest_nonnegative_intersection() {
-        let s = Object::Sphere(Sphere::new());
+        let shape = Shape::new_sphere();
 
-        let i0 = Intersection { t: 5.0, object: s };
-        let i1 = Intersection { t: 7.0, object: s };
-        let i2 = Intersection { t: -3.0, object: s };
-        let i3 = Intersection { t: 2.0, object: s };
+        let i0 = Intersection { t: 5.0, shape };
+        let i1 = Intersection { t: 7.0, shape };
+        let i2 = Intersection { t: -3.0, shape };
+        let i3 = Intersection { t: 2.0, shape };
         let is = Intersections::new(vec![i0, i1, i2, i3]);
 
         let i = is.hit();
@@ -251,12 +245,12 @@ mod tests {
         };
         let i = Intersection {
             t: 4.0,
-            object: Object::Sphere(Sphere::new()),
+            shape: Shape::new_sphere(),
         };
         let comps = IntersectionState::new(&i, &r);
 
         assert_eq!(comps.t, i.t);
-        assert_eq!(comps.object, i.object);
+        assert_eq!(comps.shape, i.shape);
         assert_eq!(comps.point, Point::new(0.0, 0.0, -1.0));
         assert_eq!(comps.eye_v, Vector::new(0.0, 0.0, -1.0));
         assert_eq!(comps.normal_v, Vector::new(0.0, 0.0, -1.0));
@@ -271,7 +265,7 @@ mod tests {
         };
         let i = Intersection {
             t: 1.0,
-            object: Object::Sphere(Sphere::new()),
+            shape: Shape::new_sphere(),
         };
         let comps = IntersectionState::new(&i, &r);
 
@@ -288,11 +282,11 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let shape = Sphere::new().translate(0.0, 0.0, 1.0);
+        let shape = Shape::new_sphere().translate(0.0, 0.0, 1.0);
 
         let i = Intersection {
             t: 5.0,
-            object: Object::Sphere(shape),
+            shape,
         };
 
         let comps = IntersectionState::new(&i, &r);

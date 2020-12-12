@@ -3,7 +3,7 @@
 use std::f64::consts::PI;
 
 use ray_tracer::{
-    canvas::Canvas, color::Color, object::Object, point::Point, ray::Ray, sphere::Sphere,
+    canvas::Canvas, color::Color, point::Point, ray::Ray, shape::Shape,
     transformation::Transform, tuple::Tuple,
 };
 
@@ -21,7 +21,7 @@ fn main() {
     let half = wall_size / 2.0;
 
     let color: Color = Color::red();
-    let shape = Sphere::new()
+    let shape = Shape::new_sphere()
         .shear(1.0, 0.0, 0.0, 0.0, 0.0, 0.0)
         .rotate_z(PI / 4.0)
         // .rotate_y(PI / 4.0)
@@ -42,7 +42,7 @@ fn main() {
                 direction,
             };
 
-            let intersections = ray.intersects(&[Object::Sphere(shape)]);
+            let intersections = ray.intersects(&[shape]);
             if !intersections.is_empty() {
                 canvas[x][y] = color;
             }

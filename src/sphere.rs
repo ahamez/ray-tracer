@@ -1,9 +1,6 @@
 // --------------------------------------------------------------------------------------------- //
 
-use crate::{
-    intersection::Intersection, material::Material, matrix::Matrix, object::Object, point::Point,
-    ray::Ray, shape::Shape, transformation::Transform, tuple::Tuple, vector::Vector,
-};
+use crate::{point::Point, ray::Ray, tuple::Tuple, vector::Vector};
 
 // --------------------------------------------------------------------------------------------- //
 
@@ -11,55 +8,13 @@ use crate::{
 // Intersection with rays will be computed reversing the sphere's transformation (which
 // includes the translation).
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Sphere {
-    transformation: Matrix,
-    material: Material,
-}
+pub struct Sphere {}
 
 // --------------------------------------------------------------------------------------------- //
 
 impl Sphere {
-    pub fn new() -> Self {
-        Sphere {
-            transformation: Matrix::id(),
-            material: Material::new(),
-        }
-    }
-
-    pub fn with_transformation(mut self, transformation: Matrix) -> Self {
-        self.transformation = transformation;
-        self
-    }
-
-    pub fn with_material(mut self, material: Material) -> Self {
-        self.material = material;
-        self
-    }
-
-    pub fn set_transformation(&mut self, transformation: Matrix) -> &mut Self {
-        self.transformation = transformation;
-        self
-    }
-
-    pub fn set_material(&mut self, material: Material) -> &mut Self {
-        self.material = material;
-        self
-    }
-}
-
-// --------------------------------------------------------------------------------------------- //
-
-impl Default for Sphere {
-    fn default() -> Self {
-        Sphere::new()
-    }
-}
-
-// --------------------------------------------------------------------------------------------- //
-
-impl Shape for Sphere {
     #[allow(clippy::eq_op)]
-    fn intersects(&self, ray: &Ray, is: &mut Vec<Intersection>) {
+    pub fn intersects(ray: &Ray) -> Vec<f64> {
         let sphere_to_ray = ray.origin - Point::new(0.0, 0.0, 0.0);
 
         let a = ray.direction ^ ray.direction;
@@ -74,38 +29,14 @@ impl Shape for Sphere {
             let t1 = (-b - sqrt_discriminant) / double_a;
             let t2 = (-b + sqrt_discriminant) / double_a;
 
-            is.push(Intersection {
-                t: t1,
-                object: Object::Sphere(*self),
-            });
-            is.push(Intersection {
-                t: t2,
-                object: Object::Sphere(*self),
-            });
+            vec![t1, t2]
+        } else {
+            vec![]
         }
     }
 
-    fn normal_at(&self, object_point: &Point) -> Vector {
+    pub fn normal_at(object_point: &Point) -> Vector {
         *object_point - Point::zero()
-    }
-
-    fn material(&self) -> &Material {
-        &self.material
-    }
-
-    fn transformation(&self) -> &Matrix {
-        &self.transformation
-    }
-}
-
-// --------------------------------------------------------------------------------------------- //
-
-impl Transform for Sphere {
-    fn apply_transformation(&self, transformation: &Matrix) -> Self {
-        Sphere {
-            transformation: self.transformation * *transformation,
-            ..*self
-        }
     }
 }
 
@@ -114,22 +45,11 @@ impl Transform for Sphere {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::transformation::scaling;
-    use crate::vector::Vector;
 
-    #[test]
-    fn a_sphere_default_transformation_is_id() {
-        let s = Sphere::new();
-        assert_eq!(s.transformation(), &Matrix::id());
-    }
-
-    #[test]
-    fn changing_a_sphere_transformation() {
-        let mut s = Sphere::new();
-        let transformation = Matrix::new(4);
-        s.set_transformation(transformation);
-        assert_eq!(s.transformation(), &transformation);
-    }
+    use crate::{
+        shape::Shape,
+        transformation::{scaling, Transform},
+    };
 
     #[test]
     fn a_ray_intersects_a_sphere_at_two_points() {
@@ -138,14 +58,11 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let s = Sphere::new();
-
-        let mut xs = vec![];
-        s.intersects(&r, &mut xs);
+        let xs = Sphere::intersects(&r);
 
         assert_eq!(xs.len(), 2);
-        assert_eq!(xs[0].t, 4.0);
-        assert_eq!(xs[1].t, 6.0);
+        assert_eq!(xs[0], 4.0);
+        assert_eq!(xs[1], 6.0);
     }
 
     #[test]
@@ -155,14 +72,11 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let s = Sphere::new();
-
-        let mut xs = vec![];
-        s.intersects(&r, &mut xs);
+        let xs = Sphere::intersects(&r);
 
         assert_eq!(xs.len(), 2);
-        assert_eq!(xs[0].t, 5.0);
-        assert_eq!(xs[1].t, 5.0);
+        assert_eq!(xs[0], 5.0);
+        assert_eq!(xs[1], 5.0);
     }
 
     #[test]
@@ -172,10 +86,7 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let s = Sphere::new();
-
-        let mut xs = vec![];
-        s.intersects(&r, &mut xs);
+        let xs = Sphere::intersects(&r);
 
         assert_eq!(xs.len(), 0);
     }
@@ -187,14 +98,11 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let s = Sphere::new();
-
-        let mut xs = vec![];
-        s.intersects(&r, &mut xs);
+        let xs = Sphere::intersects(&r);
 
         assert_eq!(xs.len(), 2);
-        assert_eq!(xs[0].t, -1.0);
-        assert_eq!(xs[1].t, 1.0);
+        assert_eq!(xs[0], -1.0);
+        assert_eq!(xs[1], 1.0);
     }
 
     #[test]
@@ -204,14 +112,11 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let s = Sphere::new();
-
-        let mut xs = vec![];
-        s.intersects(&r, &mut xs);
+        let xs = Sphere::intersects(&r);
 
         assert_eq!(xs.len(), 2);
-        assert_eq!(xs[0].t, -6.0);
-        assert_eq!(xs[1].t, -4.0);
+        assert_eq!(xs[0], -6.0);
+        assert_eq!(xs[1], -4.0);
     }
 
     #[test]
@@ -221,7 +126,7 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let s = Object::Sphere(Sphere::new().with_transformation(scaling(2.0, 2.0, 2.0)));
+        let s = Shape::new_sphere().with_transformation(scaling(2.0, 2.0, 2.0));
 
         let mut xs = vec![];
         s.intersects(&r, &mut xs);
@@ -233,49 +138,47 @@ mod tests {
 
     #[test]
     fn normal_on_a_sphere_at_a_point_on_x_axis() {
-        let s = Sphere::new();
         assert_eq!(
-            s.normal_at(&Point::new(1.0, 0.0, 0.0)),
+            Sphere::normal_at(&Point::new(1.0, 0.0, 0.0)),
             Vector::new(1.0, 0.0, 0.0)
         )
     }
 
     #[test]
     fn normal_on_a_sphere_at_a_point_on_y_axis() {
-        let s = Sphere::new();
         assert_eq!(
-            s.normal_at(&Point::new(0.0, 1.0, 0.0)),
+            Sphere::normal_at(&Point::new(0.0, 1.0, 0.0)),
             Vector::new(0.0, 1.0, 0.0)
         )
     }
 
     #[test]
     fn normal_on_a_sphere_at_a_point_on_z_axis() {
-        let s = Sphere::new();
         assert_eq!(
-            s.normal_at(&Point::new(0.0, 0.0, 1.0)),
+            Sphere::normal_at(&Point::new(0.0, 0.0, 1.0)),
             Vector::new(0.0, 0.0, 1.0)
         )
     }
 
     #[test]
     fn normal_on_a_sphere_at_a_nonaxial_point() {
-        let s = Sphere::new();
         let x = f64::sqrt(3.0) / 3.0;
-        assert_eq!(s.normal_at(&Point::new(x, x, x)), Vector::new(x, x, x))
+        assert_eq!(
+            Sphere::normal_at(&Point::new(x, x, x)),
+            Vector::new(x, x, x)
+        )
     }
 
     #[test]
     fn normal_is_a_normalized_vector() {
-        let s = Sphere::new();
         let x = f64::sqrt(3.0) / 3.0;
-        let n = s.normal_at(&Point::new(x, x, x));
+        let n = Sphere::normal_at(&Point::new(x, x, x));
         assert_eq!(n.normalize(), n);
     }
 
     #[test]
     fn normal_on_a_translated_sphere() {
-        let s = Object::Sphere(Sphere::new().translate(0.0, 1.0, 0.0));
+        let s = Shape::new_sphere().translate(0.0, 1.0, 0.0);
         assert_eq!(
             s.normal_at(&Point::new(0.0, 1.70711, -0.70711)),
             Vector::new(0.0, 0.70711, -0.70711)
@@ -284,11 +187,9 @@ mod tests {
 
     #[test]
     fn normal_on_a_transformed_sphere() {
-        let s = Object::Sphere(
-            Sphere::new()
-                .scale(1.0, 0.5, 1.0)
-                .rotate_z(std::f64::consts::PI / 5.0),
-        );
+        let s = Shape::new_sphere()
+            .scale(1.0, 0.5, 1.0)
+            .rotate_z(std::f64::consts::PI / 5.0);
 
         assert_eq!(
             s.normal_at(&Point::new(
