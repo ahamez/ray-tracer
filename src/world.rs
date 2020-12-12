@@ -7,6 +7,7 @@ use crate::{
     intersection::{IntersectionState, Intersections},
     light::Light,
     material::Material,
+    pattern::Pattern,
     point::Point,
     ray::Ray,
     shape::Shape,
@@ -54,6 +55,7 @@ impl World {
             let is_shadowed = self.is_shadowed(&comps.over_point());
 
             let color = comps.object().material().lighting(
+                &comps.object(),
                 &light,
                 &comps.over_point(),
                 &comps.eye_v(),
@@ -96,7 +98,7 @@ impl Default for World {
             shapes: vec![
                 Shape::new_sphere().with_material(
                     Material::new()
-                        .with_color(Color::new(0.8, 1.0, 0.6))
+                        .with_pattern(Pattern::new_plain(Color::new(0.8, 1.0, 0.6)))
                         .with_diffuse(0.7)
                         .with_specular(0.2),
                 ),
@@ -145,11 +147,8 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let shape = w.shapes[0];
-        let i = Intersection {
-            t: 4.0,
-            shape,
-        };
+        let shape = w.shapes[0].clone();
+        let i = Intersection { t: 4.0, shape };
 
         let comps = IntersectionState::new(&i, &ray);
         let color = w.shade_hit(&comps);
@@ -172,11 +171,8 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let shape = w.shapes[1];
-        let i = Intersection {
-            t: 0.5,
-            shape: shape,
-        };
+        let shape = w.shapes[1].clone();
+        let i = Intersection { t: 0.5, shape };
 
         let comps = IntersectionState::new(&i, &ray);
 
@@ -240,7 +236,7 @@ mod tests {
     fn the_color_with_an_intersection_behind_the_ray() {
         let outer = Shape::new_sphere().with_material(
             Material::new()
-                .with_color(Color::new(0.8, 1.0, 0.6))
+                .with_pattern(Pattern::new_plain(Color::new(0.8, 1.0, 0.6)))
                 .with_diffuse(0.7)
                 .with_specular(0.2)
                 .with_ambient(1.0),
@@ -260,7 +256,7 @@ mod tests {
             direction: Vector::new(0.0, 0.0, -1.0),
         };
 
-        assert_eq!(w.color_at(&ray), inner.material().color);
+        assert_eq!(w.color_at(&ray), Color::new(1.0, 1.0, 1.0));
     }
 
     #[test]

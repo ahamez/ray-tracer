@@ -6,7 +6,7 @@ use crate::{epsilon::EPSILON, point::Point, ray::Ray, shape::Shape, vector::Vect
 
 // --------------------------------------------------------------------------------------------- //
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Intersection {
     pub t: f64,
     pub shape: Shape,
@@ -113,7 +113,7 @@ impl IntersectionState {
 
         IntersectionState {
             t: intersection.t,
-            shape: intersection.shape,
+            shape: intersection.shape.clone(),
             point,
             over_point,
             eye_v,
@@ -122,8 +122,8 @@ impl IntersectionState {
         }
     }
 
-    pub fn object(&self) -> Shape {
-        self.shape
+    pub fn object(&self) -> &Shape {
+        &self.shape
     }
 
     pub fn point(&self) -> Point {
@@ -156,7 +156,7 @@ mod tests {
     fn an_intersection_encapsulates_t_and_object() {
         let shape = Shape::new_sphere();
         let t = 3.5;
-        let i = Intersection { t, shape };
+        let i = Intersection { t, shape: shape.clone() };
 
         assert_eq!(i.t, t);
         assert_eq!(i.shape, shape);
@@ -177,7 +177,7 @@ mod tests {
             shape: Shape::new_sphere(),
         };
 
-        let mut vec = vec![i0, i1, i2];
+        let mut vec = vec![i0.clone(), i1.clone(), i2.clone()];
         vec.sort();
 
         assert_eq!(vec, vec![i1, i2, i0]);
@@ -187,9 +187,9 @@ mod tests {
     fn hit_when_all_intersections_have_positive_t() {
         let shape = Shape::new_sphere();
 
-        let i0 = Intersection { t: 1.0, shape};
+        let i0 = Intersection { t: 1.0, shape: shape.clone()};
         let i1 = Intersection { t: 2.0, shape};
-        let is = Intersections::new(vec![i0, i1]);
+        let is = Intersections::new(vec![i0.clone(), i1]);
 
         let i = is.hit();
 
@@ -200,9 +200,9 @@ mod tests {
     fn hit_when_some_intersections_have_negative_t() {
         let shape = Shape::new_sphere();
 
-        let i0 = Intersection { t: -1.0, shape };
+        let i0 = Intersection { t: -1.0, shape: shape.clone() };
         let i1 = Intersection { t: 2.0, shape };
-        let is = Intersections::new(vec![i0, i1]);
+        let is = Intersections::new(vec![i0, i1.clone()]);
 
         let i = is.hit();
 
@@ -213,9 +213,9 @@ mod tests {
     fn hit_when_all_intersections_have_negative_t() {
         let shape = Shape::new_sphere();
 
-        let i0 = Intersection { t: -1.0, shape };
+        let i0 = Intersection { t: -1.0, shape: shape.clone() };
         let i1 = Intersection { t: -1.0, shape };
-        let is = Intersections::new(vec![i0, i1]);
+        let is = Intersections::new(vec![i0.clone(), i1.clone()]);
 
         let i = is.hit();
 
@@ -226,11 +226,11 @@ mod tests {
     fn hit_is_always_the_lowest_nonnegative_intersection() {
         let shape = Shape::new_sphere();
 
-        let i0 = Intersection { t: 5.0, shape };
-        let i1 = Intersection { t: 7.0, shape };
-        let i2 = Intersection { t: -3.0, shape };
+        let i0 = Intersection { t: 5.0, shape: shape.clone() };
+        let i1 = Intersection { t: 7.0, shape: shape.clone() };
+        let i2 = Intersection { t: -3.0, shape: shape.clone() };
         let i3 = Intersection { t: 2.0, shape };
-        let is = Intersections::new(vec![i0, i1, i2, i3]);
+        let is = Intersections::new(vec![i0, i1, i2, i3.clone()]);
 
         let i = is.hit();
 

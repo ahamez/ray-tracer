@@ -42,7 +42,7 @@ fn main() {
                 direction,
             };
 
-            let intersections = ray.intersects(&[shape]);
+            let intersections = ray.intersects(&[shape.clone()]);
             if !intersections.is_empty() {
                 canvas[x][y] = color;
             }

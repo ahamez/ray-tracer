@@ -7,7 +7,7 @@ use crate::{
 
 // --------------------------------------------------------------------------------------------- //
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Shape {
     object: Object,
     transformation: Matrix,
@@ -47,7 +47,7 @@ impl Shape {
         self.object.intersects(&ray).iter().for_each(|t| {
             is.push(Intersection {
                 t: *t,
-                shape: *self,
+                shape: self.clone(),
             })
         });
     }
@@ -63,6 +63,10 @@ impl Shape {
 
     pub fn material(&self) -> &Material {
         &self.material
+    }
+
+    pub fn transformation(&self) -> &Matrix {
+        &self.transformation
     }
 }
 
@@ -84,7 +88,7 @@ impl Transform for Shape {
     fn apply_transformation(&self, transformation: &Matrix) -> Self {
         Shape {
             transformation: self.transformation * *transformation,
-            ..*self
+            ..self.clone()
         }
     }
 }

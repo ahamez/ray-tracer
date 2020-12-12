@@ -18,12 +18,8 @@ fn main() {
     let pixel_size = wall_size / CANVAS_PIXELS as f64;
     let half = wall_size / 2.0;
 
-    // let material = Material::new().with_color(Color::new(1.0, 0.2, 1.0));
-    // vs
-    let material = Material {
-        color: Color::new(1.0, 0.2, 1.0),
-        ..Default::default()
-    };
+    let material = Material::new().with_color(Color::new(1.0, 0.2, 1.0));
+
     let shape = Shape::new_sphere()
         .with_material(material)
         // .rotate_z(3.14 / 4.0)
@@ -51,7 +47,7 @@ fn main() {
                 direction,
             };
 
-            let intersections = ray.intersects(&[shape]);
+            let intersections = ray.intersects(&[shape.clone()]);
             if let Some(hit) = intersections.hit() {
                 let point = ray.position(hit.t);
                 let normal_v = hit.shape.normal_at(&point);
@@ -59,7 +55,7 @@ fn main() {
                 let color = hit
                     .shape
                     .material()
-                    .lighting(&light, &point, &eye_v, &normal_v, false);
+                    .lighting(&Shape::new_sphere(), &light, &point, &eye_v, &normal_v, false);
 
                 canvas[x][y] = color;
             }

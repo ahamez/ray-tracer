@@ -25,11 +25,11 @@ fn main() {
         .with_specular(0.0);
 
     let floor = Shape::new_sphere()
-        .with_material(material)
+        .with_material(material.clone())
         .scale(10.0, 0.01, 10.0);
 
     let left_wall = Shape::new_sphere()
-        .with_material(material)
+        .with_material(material.clone())
         .translate(0.0, 0.0, 5.0)
         .rotate_y(-PI / 4.0)
         .rotate_x(PI / 2.0)
@@ -97,15 +97,7 @@ fn main() {
     };
 
     let world = World {
-        shapes: vec![
-            floor,
-            left_wall,
-            right_wall,
-            left,
-            middle,
-            middle2,
-            right,
-        ],
+        shapes: vec![floor, left_wall, right_wall, left, middle, middle2, right],
         lights: vec![light1, light3],
     };
 

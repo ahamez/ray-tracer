@@ -1,12 +1,14 @@
 // --------------------------------------------------------------------------------------------- //
 
-use crate::{color::Color, light::Light, point::Point, vector::Vector};
+use crate::{
+    color::Color, light::Light, pattern::Pattern, point::Point, shape::Shape, vector::Vector,
+};
 
 // --------------------------------------------------------------------------------------------- //
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Material {
-    pub color: Color,
+    pub pattern: Pattern,
     pub ambient: f64,
     pub diffuse: f64,
     pub specular: f64,
@@ -20,8 +22,13 @@ impl Material {
         Default::default()
     }
 
+    pub fn with_pattern(mut self, pattern: Pattern) -> Material {
+        self.pattern = pattern;
+        self
+    }
+
     pub fn with_color(mut self, color: Color) -> Material {
-        self.color = color;
+        self.pattern = Pattern::new_plain(color);
         self
     }
 
@@ -42,13 +49,15 @@ impl Material {
 
     pub fn lighting(
         &self,
+        object: &Shape,
         light: &Light,
         position: &Point,
         eye_v: &Vector,
         normal_v: &Vector,
         in_shadow: bool,
     ) -> Color {
-        let effective_color = self.color * light.intensity;
+        let color = self.pattern.pattern_at_object(&object, &position);
+        let effective_color = color * light.intensity;
         let ambient = effective_color * self.ambient;
 
         if in_shadow {
@@ -81,7 +90,7 @@ impl Material {
 impl Default for Material {
     fn default() -> Self {
         Material {
-            color: Color::white(),
+            pattern: Pattern::new_plain(Color::white()),
             ambient: 0.1,
             diffuse: 0.9,
             specular: 0.9,
@@ -106,7 +115,7 @@ mod tests {
         let light = Light::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 0.0, -10.0));
 
         assert_eq!(
-            m.lighting(&light, &position, &eye_v, &normal_v, false),
+            m.lighting(&Shape::new_sphere(), &light, &position, &eye_v, &normal_v, false),
             Color::new(1.9, 1.9, 1.9)
         );
     }
@@ -120,7 +129,7 @@ mod tests {
         let light = Light::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 0.0, -10.0));
 
         assert_eq!(
-            m.lighting(&light, &position, &eye_v, &normal_v, false),
+            m.lighting(&Shape::new_sphere(), &light, &position, &eye_v, &normal_v, false),
             Color::new(1.0, 1.0, 1.0)
         );
     }
@@ -134,7 +143,7 @@ mod tests {
         let light = Light::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 10.0, -10.0));
 
         assert_eq!(
-            m.lighting(&light, &position, &eye_v, &normal_v, false),
+            m.lighting(&Shape::new_sphere(), &light, &position, &eye_v, &normal_v, false),
             Color::new(0.7364, 0.7364, 0.7364)
         );
     }
@@ -148,7 +157,7 @@ mod tests {
         let light = Light::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 10.0, -10.0));
 
         assert_eq!(
-            m.lighting(&light, &position, &eye_v, &normal_v, false),
+            m.lighting(&Shape::new_sphere(), &light, &position, &eye_v, &normal_v, false),
             Color::new(1.6364, 1.6364, 1.6364)
         );
     }
@@ -162,7 +171,7 @@ mod tests {
         let light = Light::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 0.0, 10.0));
 
         assert_eq!(
-            m.lighting(&light, &position, &eye_v, &normal_v, false),
+            m.lighting(&Shape::new_sphere(), &light, &position, &eye_v, &normal_v, false),
             Color::new(0.1, 0.1, 0.1)
         );
     }
@@ -177,8 +186,30 @@ mod tests {
         let in_shadow = true;
 
         assert_eq!(
-            m.lighting(&light, &position, &eye_v, &normal_v, in_shadow),
+            m.lighting(&Shape::new_sphere(), &light, &position, &eye_v, &normal_v, in_shadow),
             Color::new(0.1, 0.1, 0.1)
+        );
+    }
+
+    #[test]
+    fn lighting_with_a_pattern_applied() {
+        let m = Material::new()
+            .with_pattern(Pattern::new_stripe(vec![Color::white(), Color::black()]))
+            .with_ambient(1.0)
+            .with_diffuse(0.0)
+            .with_specular(0.0);
+
+        let eye_v = Vector::new(0.0, 0.0, -1.0);
+        let normal_v = Vector::new(0.0, 0.0, -1.0);
+        let light = Light::new(Color::white(), Point::new(0.0, 0.0, -10.0));
+
+        assert_eq!(
+            m.lighting(&Shape::new_sphere(), &light, &Point::new(0.9, 0.0, 0.0), &eye_v, &normal_v, false),
+            Color::white()
+        );
+        assert_eq!(
+            m.lighting(&Shape::new_sphere(), &light, &Point::new(1.1, 0.0, 0.0), &eye_v, &normal_v, false),
+            Color::black()
         );
     }
 }

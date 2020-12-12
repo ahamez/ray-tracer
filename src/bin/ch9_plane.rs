@@ -9,6 +9,7 @@ use ray_tracer::{
     color::Color,
     light::Light,
     material::Material,
+    pattern::Pattern,
     point::Point,
     shape::Shape,
     transformation::{view_transform, Transform},
@@ -21,20 +22,26 @@ use ray_tracer::{
 
 fn main() {
     let material = Material::new()
-        .with_color(Color::new(1.0, 0.9, 0.9))
+        // .with_color(Color::new(1.0, 0.9, 0.9))
+        .with_pattern(Pattern::new_stripe(vec![
+            Color::new(1.0, 0.9, 0.9),
+            Color::blue(),
+        ]))
         .with_specular(0.0);
 
-    let floor = Shape::new_plane().with_material(material);
+    let floor = Shape::new_plane().with_material(material.clone());
 
     let wall = Shape::new_plane()
-        .with_material(material.with_color(Color::new(0.0, 0.8, 0.8)))
+        .with_material(material.clone().with_color(Color::new(0.0, 0.8, 0.8)))
         .translate(0.0, 0.0, 5.0)
         .rotate_x(PI / 2.0);
 
     let left = Shape::new_sphere()
         .with_material(
-            Material::new()
-                .with_color(Color::new(1.0, 0.8, 0.1))
+            material
+                .clone()
+                // Material::new()
+                //     .with_color(Color::new(1.0, 0.8, 0.1))
                 .with_diffuse(0.7)
                 .with_specular(0.3),
         )
@@ -43,8 +50,10 @@ fn main() {
 
     let middle = Shape::new_sphere()
         .with_material(
-            Material::new()
-                .with_color(Color::new(0.1, 1.0, 0.5))
+            material
+                .clone()
+                // Material::new()
+                //     .with_color(Color::new(0.1, 1.0, 0.5))
                 .with_diffuse(0.7)
                 .with_specular(0.3),
         )
@@ -54,7 +63,7 @@ fn main() {
     let middle2 = Shape::new_sphere()
         .with_material(
             Material::new()
-                .with_color(Color::new(0.1, 1.0, 0.5))
+                .with_pattern(Pattern::new_stripe(vec![Color::green(), Color::red()]))
                 .with_diffuse(0.7)
                 .with_specular(0.3),
         )
@@ -63,7 +72,8 @@ fn main() {
     let right = Shape::new_sphere()
         .with_material(
             Material::new()
-                .with_color(Color::new(0.5, 1.0, 0.1))
+                // .with_color(Color::new(0.5, 1.0, 0.1))
+                .with_pattern(Pattern::new_gradient(Color::red(), Color::green()))
                 .with_diffuse(0.7)
                 .with_specular(0.3),
         )
@@ -88,14 +98,10 @@ fn main() {
 
     let world = World {
         shapes: vec![
-            floor,
-            // wall,
-            left,
-            middle,
-            middle2,
-            right,
+            floor, // wall,
+            left, middle, middle2, right,
         ],
-        lights: vec![light1],
+        lights: vec![light1, light3],
     };
 
     let from = Point::new(0.0, 1.5, -5.0);
@@ -104,7 +110,7 @@ fn main() {
 
     let factor = 15;
 
-    let camera = Camera::new(100 * factor, 50 * factor, PI / 1.5)
+    let camera = Camera::new(100 * factor, 50 * factor, PI / 2.0)
         .with_transformation(&view_transform(&from, &to, &up));
 
     let canvas = camera.render(&world);

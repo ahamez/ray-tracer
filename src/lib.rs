@@ -6,6 +6,7 @@ pub mod intersection;
 pub mod light;
 pub mod material;
 mod matrix;
+pub mod pattern;
 mod plane;
 pub mod point;
 pub mod ray;

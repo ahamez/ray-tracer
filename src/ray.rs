@@ -28,7 +28,7 @@ impl Ray {
         let mut is = Vec::<Intersection>::with_capacity(256);
         shapes
             .iter()
-            .for_each(|&shape| shape.intersects(self, &mut is));
+            .for_each(|ref shape| shape.intersects(self, &mut is));
 
         Intersections::new(is)
     }
