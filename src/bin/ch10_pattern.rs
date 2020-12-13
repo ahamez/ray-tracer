@@ -22,11 +22,14 @@ use ray_tracer::{
 
 fn main() {
     let floor =
-        Object::new_plane().with_material(Material::new().with_pattern(Pattern::new_stripe(vec![
-            Color::new(0.5, 0.5, 0.5),
-            Color::white(),
-            Color::new(0.7, 0.6, 0.7),
-        ])));
+        // Object::new_plane().with_material(Material::new().with_pattern(Pattern::new_stripe(vec![
+        //     Color::new(0.5, 0.5, 0.5),
+        //     Color::white(),
+        //     Color::new(0.7, 0.6, 0.7),
+        // ])));
+
+        Object::new_plane().with_material(Material::new().
+            with_pattern(Pattern::new_checker(Color::white(), Color::new(0.5, 0.5, 0.5))));
 
     let wall = Object::new_plane()
         .with_material(
@@ -101,7 +104,7 @@ fn main() {
     let to = Point::new(0.0, 1.0, 0.0);
     let up = Vector::new(0.0, 1.0, 0.0);
 
-    let factor = 7;
+    let factor = 30;
 
     let camera = Camera::new(100 * factor, 50 * factor, PI / 1.5)
         .with_transformation(&view_transform(&from, &to, &up));

@@ -17,6 +17,13 @@ pub struct Pattern {
 // --------------------------------------------------------------------------------------------- //
 
 impl Pattern {
+    pub fn new_checker(c1: Color, c2: Color) -> Self {
+        Pattern {
+            pattern: Patterns::Checker(CheckerPattern { c1, c2 }),
+            ..Default::default()
+        }
+    }
+
     pub fn new_gradient(from: Color, to: Color) -> Self {
         Pattern {
             pattern: Patterns::Gradient(GradientPattern { from, to }),
@@ -47,6 +54,7 @@ impl Pattern {
 
     fn pattern_at(&self, point: &Point) -> Color {
         match &self.pattern {
+            Patterns::Checker(p) => p.pattern_at(point),
             Patterns::Gradient(p) => p.pattern_at(point),
             Patterns::Plain(p) => p.pattern_at(point),
             Patterns::Ring(p) => p.pattern_at(point),
@@ -96,10 +104,30 @@ impl Transform for Pattern {
 
 #[derive(Clone, Debug, PartialEq)]
 enum Patterns {
+    Checker(CheckerPattern),
     Gradient(GradientPattern),
     Plain(PlainPattern),
     Ring(RingPattern),
     Stripe(StripePattern),
+}
+
+// --------------------------------------------------------------------------------------------- //
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct CheckerPattern {
+    c1: Color,
+    c2: Color,
+}
+
+impl CheckerPattern {
+    fn pattern_at(&self, point: &Point) -> Color {
+        let sum = point.x().floor() + point.y().floor() + point.z().floor();
+        if sum % 2.0 == 0.0 {
+            self.c1
+        } else {
+            self.c2
+        }
+    }
 }
 
 // --------------------------------------------------------------------------------------------- //
