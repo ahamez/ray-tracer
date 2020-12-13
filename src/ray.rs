@@ -26,9 +26,14 @@ impl Ray {
 
     pub fn intersects(&self, objects: &[Object]) -> Intersections {
         let mut is = Vec::<Intersection>::with_capacity(256);
-        objects
-            .iter()
-            .for_each(|ref object| object.intersects(self, &mut is));
+        objects.iter().for_each(|object| {
+            object.intersects(self, |t: f64| {
+                is.push(Intersection {
+                    t,
+                    object: object.clone(),
+                })
+            })
+        });
 
         Intersections::new(is)
     }

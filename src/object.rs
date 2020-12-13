@@ -1,8 +1,8 @@
 // --------------------------------------------------------------------------------------------- //
 
 use crate::{
-    intersection::Intersection, material::Material, matrix::Matrix, plane, point::Point, ray::Ray,
-    sphere, transformation::Transform, vector::Vector,
+    material::Material, matrix::Matrix, plane, point::Point, ray::Ray, sphere,
+    transformation::Transform, vector::Vector,
 };
 
 // --------------------------------------------------------------------------------------------- //
@@ -43,15 +43,13 @@ impl Object {
         self
     }
 
-    pub fn intersects(&self, ray: &Ray, is: &mut Vec<Intersection>) {
-        let ray = ray.apply_transformation(&self.transformation_inverse);
+    pub fn intersects<F>(&self, ray: &Ray, push: F)
+    where
+        F: FnMut(f64),
+    {
+        let transformed_ray = ray.apply_transformation(&self.transformation_inverse);
 
-        self.shape.intersects(&ray, |t: f64| {
-            is.push(Intersection {
-                t,
-                object: self.clone(),
-            })
-        });
+        self.shape.intersects(&transformed_ray, push);
     }
 
     pub fn normal_at(&self, world_point: &Point) -> Vector {

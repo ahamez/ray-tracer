@@ -48,7 +48,7 @@ mod tests {
 
         let mut is = vec![];
 
-        p.intersects(&ray, &mut is);
+        p.intersects(&ray, |t: f64| is.push(t));
         assert!(is.len() == 0);
     }
 
@@ -62,7 +62,7 @@ mod tests {
 
         let mut is = vec![];
 
-        p.intersects(&ray, &mut is);
+        p.intersects(&ray, |t: f64| is.push(t));
         assert!(is.len() == 0);
     }
 
@@ -76,10 +76,9 @@ mod tests {
 
         let mut is = vec![];
 
-        p.intersects(&ray, &mut is);
+        p.intersects(&ray, |t: f64| is.push(t));
         assert!(is.len() == 1);
-        assert_eq!(is[0].t, 1.0);
-        assert_eq!(is[0].object, p);
+        assert_eq!(is[0], 1.0);
     }
 
     #[test]
@@ -92,10 +91,9 @@ mod tests {
 
         let mut is = vec![];
 
-        p.intersects(&ray, &mut is);
+        p.intersects(&ray, |t: f64| is.push(t));
         assert!(is.len() == 1);
-        assert_eq!(is[0].t, 1.0);
-        assert_eq!(is[0].object, p);
+        assert_eq!(is[0], 1.0);
     }
 }
 

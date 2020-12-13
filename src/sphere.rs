@@ -138,11 +138,11 @@ mod tests {
         let s = Object::new_sphere().with_transformation(scaling(2.0, 2.0, 2.0));
 
         let mut xs = vec![];
-        s.intersects(&r, &mut xs);
+        s.intersects(&r, |t: f64| xs.push(t));
 
         assert_eq!(xs.len(), 2);
-        assert_eq!(xs[0].t, 3.0);
-        assert_eq!(xs[1].t, 7.0);
+        assert_eq!(xs[0], 3.0);
+        assert_eq!(xs[1], 7.0);
     }
 
     #[test]
