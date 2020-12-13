@@ -50,24 +50,21 @@ pub struct Intersections(Vec<Intersection>);
 // --------------------------------------------------------------------------------------------- //
 
 impl Intersections {
-    pub fn new(mut vec: Vec<Intersection>) -> Self {
-        vec.sort();
-        Intersections(vec)
+    pub fn new(mut is: Vec<Intersection>) -> Self {
+        is.sort();
+        Intersections(is)
     }
 
     pub fn is_empty(&self) -> bool {
-        let &Intersections(vec) = &self;
-        vec.is_empty()
+        self.0.is_empty()
     }
 
     pub fn len(&self) -> usize {
-        let &Intersections(vec) = &self;
-        vec.len()
+        self.0.len()
     }
 
     pub fn hit(&self) -> Option<&Intersection> {
-        let Intersections(is) = self;
-        is.iter().find(|i| i.t >= 0.0)
+        self.0.iter().find(|i| i.t >= 0.0)
     }
 }
 
