@@ -71,12 +71,12 @@ impl Camera {
     pub fn render(&self, world: &World) -> Canvas {
         let mut image = Canvas::new(self.h_size, self.v_size);
 
-        for x in 0..self.h_size {
-            for y in 0..self.v_size {
-                let ray = self.ray_for_pixel(x as f64, y as f64);
+        for row in 0..self.v_size {
+            for col in 0..self.h_size {
+                let ray = self.ray_for_pixel(col as f64, row as f64);
                 let color = world.color_at(&ray);
 
-                image[y][x] = color;
+                image[row][col] = color;
             }
         }
 
