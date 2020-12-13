@@ -46,9 +46,9 @@ impl Object {
     pub fn intersects(&self, ray: &Ray, is: &mut Vec<Intersection>) {
         let ray = ray.apply_transformation(&self.transformation_inverse);
 
-        self.shape.intersects(&ray).iter().for_each(|t| {
+        self.shape.intersects(&ray, |t: f64| {
             is.push(Intersection {
-                t: *t,
+                t,
                 object: self.clone(),
             })
         });
@@ -112,10 +112,13 @@ enum Shape {
 // --------------------------------------------------------------------------------------------- //
 
 impl Shape {
-    pub fn intersects(&self, ray: &Ray) -> Vec<f64> {
+    pub fn intersects<F>(&self, ray: &Ray, push: F)
+    where
+        F: FnMut(f64),
+    {
         match self {
-            Shape::Plane() => plane::Plane::intersects(&ray),
-            Shape::Sphere() => sphere::Sphere::intersects(&ray),
+            Shape::Plane() => plane::Plane::intersects(&ray, push),
+            Shape::Sphere() => sphere::Sphere::intersects(&ray, push),
         }
     }
 

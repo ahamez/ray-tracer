@@ -10,11 +10,12 @@ pub struct Plane {}
 // --------------------------------------------------------------------------------------------- //
 
 impl Plane {
-    pub fn intersects(ray: &Ray) -> Vec<f64> {
-        if ray.direction.y().abs() < EPSILON {
-            vec![]
-        } else {
-            vec![-ray.origin.y() / ray.direction.y()]
+    pub fn intersects<F>(ray: &Ray, push: F)
+    where
+        F: FnOnce(f64),
+    {
+        if ray.direction.y().abs() >= EPSILON {
+            push(-ray.origin.y() / ray.direction.y())
         }
     }
 

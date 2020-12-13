@@ -14,7 +14,10 @@ pub struct Sphere {}
 
 impl Sphere {
     #[allow(clippy::eq_op)]
-    pub fn intersects(ray: &Ray) -> Vec<f64> {
+    pub fn intersects<F>(ray: &Ray, mut push: F)
+    where
+        F: FnMut(f64),
+    {
         let sphere_to_ray = ray.origin - Point::new(0.0, 0.0, 0.0);
 
         let a = ray.direction ^ ray.direction;
@@ -29,9 +32,8 @@ impl Sphere {
             let t1 = (-b - sqrt_discriminant) / double_a;
             let t2 = (-b + sqrt_discriminant) / double_a;
 
-            vec![t1, t2]
-        } else {
-            vec![]
+            push(t1);
+            push(t2);
         }
     }
 
@@ -44,6 +46,8 @@ impl Sphere {
 
 #[cfg(test)]
 mod tests {
+    use std::vec;
+
     use super::*;
 
     use crate::{
@@ -58,7 +62,8 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let xs = Sphere::intersects(&r);
+        let mut xs = vec![];
+        Sphere::intersects(&r, |t| xs.push(t));
 
         assert_eq!(xs.len(), 2);
         assert_eq!(xs[0], 4.0);
@@ -72,7 +77,8 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let xs = Sphere::intersects(&r);
+        let mut xs = vec![];
+        Sphere::intersects(&r, |t| xs.push(t));
 
         assert_eq!(xs.len(), 2);
         assert_eq!(xs[0], 5.0);
@@ -86,7 +92,8 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let xs = Sphere::intersects(&r);
+        let mut xs = vec![];
+        Sphere::intersects(&r, |t| xs.push(t));
 
         assert_eq!(xs.len(), 0);
     }
@@ -98,7 +105,8 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let xs = Sphere::intersects(&r);
+        let mut xs = vec![];
+        Sphere::intersects(&r, |t| xs.push(t));
 
         assert_eq!(xs.len(), 2);
         assert_eq!(xs[0], -1.0);
@@ -112,7 +120,8 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let xs = Sphere::intersects(&r);
+        let mut xs = vec![];
+        Sphere::intersects(&r, |t| xs.push(t));
 
         assert_eq!(xs.len(), 2);
         assert_eq!(xs[0], -6.0);
