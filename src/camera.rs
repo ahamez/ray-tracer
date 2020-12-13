@@ -52,7 +52,10 @@ impl Camera {
         self
     }
 
-    fn ray_for_pixel(&self, px: f64, py: f64) -> Ray {
+    fn ray_for_pixel(&self, px: usize, py: usize) -> Ray {
+        let px = px as f64;
+        let py = py as f64;
+
         let x_offset = (px + 0.5) * self.pixel_size;
         let y_offset = (py + 0.5) * self.pixel_size;
 
@@ -73,7 +76,7 @@ impl Camera {
 
         for row in 0..self.v_size {
             for col in 0..self.h_size {
-                let ray = self.ray_for_pixel(col as f64, row as f64);
+                let ray = self.ray_for_pixel(col, row);
                 let color = world.color_at(&ray);
 
                 image[row][col] = color;
@@ -125,7 +128,7 @@ mod tests {
     #[test]
     fn constructing_a_ray_through_the_center_of_the_canvas() {
         let c = Camera::new(201, 101, PI / 2.0);
-        let r = c.ray_for_pixel(100.0, 50.0);
+        let r = c.ray_for_pixel(100, 50);
 
         assert_eq!(r.origin, Point::new(0.0, 0.0, 0.0));
         assert_eq!(r.direction, Vector::new(0.0, 0.0, -1.0));
@@ -134,7 +137,7 @@ mod tests {
     #[test]
     fn constructing_a_ray_through_a_corner_of_the_canvas() {
         let c = Camera::new(201, 101, PI / 2.0);
-        let r = c.ray_for_pixel(0.0, 0.0);
+        let r = c.ray_for_pixel(0, 0);
 
         assert_eq!(r.origin, Point::new(0.0, 0.0, 0.0));
         assert_eq!(r.direction, Vector::new(0.66519, 0.33259, -0.66851));
@@ -145,7 +148,7 @@ mod tests {
         let c = Camera::new(201, 101, PI / 2.0)
             .rotate_y(PI / 4.0)
             .translate(0.0, -2.0, 5.0);
-        let r = c.ray_for_pixel(100.0, 50.0);
+        let r = c.ray_for_pixel(100, 50);
 
         assert_eq!(r.origin, Point::new(0.0, 2.0, -5.0));
         assert_eq!(
