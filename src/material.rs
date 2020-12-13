@@ -254,7 +254,7 @@ mod tests {
                 &normal_v,
                 false
             ),
-            Color::white()
+            Color::black()
         );
         assert_eq!(
             m.lighting(
@@ -265,7 +265,7 @@ mod tests {
                 &normal_v,
                 false
             ),
-            Color::black()
+            Color::white()
         );
     }
 }

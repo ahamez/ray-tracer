@@ -140,7 +140,12 @@ pub struct StripePattern {
 
 impl StripePattern {
     fn pattern_at(&self, point: &Point) -> Color {
-        let index = point.x().floor().abs() as usize % self.colors.len();
+        // As spheres are units, -1.0 <= x <= +1.0, we multiply by the number of
+        // colors in the pattern to make sure all colors are covered (otherwise index
+        // would always be 0 or 1)
+        // TODO, find a better way, we should to it only for unit spheres
+        let scaled_x = point.x() * self.colors.len() as f64;
+        let index = (scaled_x.floor().abs() as usize) % self.colors.len();
 
         self.colors[index]
     }
@@ -194,11 +199,7 @@ mod tests {
         };
 
         assert_eq!(
-            pattern.pattern_at(&Point::new(-2.0, 0.0, 0.0)),
-            Color::red()
-        );
-        assert_eq!(
-            pattern.pattern_at(&Point::new(-1.0, 0.0, 0.0)),
+            pattern.pattern_at(&Point::new(-0.2, 0.0, 0.0)),
             Color::black()
         );
         assert_eq!(
@@ -206,17 +207,13 @@ mod tests {
             Color::white()
         );
         assert_eq!(
+            pattern.pattern_at(&Point::new(0.4, 0.0, 0.0)),
+            Color::black()
+        );
+        assert_eq!(pattern.pattern_at(&Point::new(0.7, 0.0, 0.0)), Color::red());
+        assert_eq!(
             pattern.pattern_at(&Point::new(1.0, 0.0, 0.0)),
-            Color::black()
-        );
-        assert_eq!(pattern.pattern_at(&Point::new(2.0, 0.0, 0.0)), Color::red());
-        assert_eq!(
-            pattern.pattern_at(&Point::new(3.0, 0.0, 0.0)),
             Color::white()
-        );
-        assert_eq!(
-            pattern.pattern_at(&Point::new(4.0, 0.0, 0.0)),
-            Color::black()
         );
     }
 
@@ -226,7 +223,7 @@ mod tests {
         let pattern = Pattern::new_stripe(vec![Color::white(), Color::black()]);
 
         assert_eq!(
-            pattern.pattern_at_object(&object, &Point::new(1.5, 0.0, 0.0)),
+            pattern.pattern_at_object(&object, &Point::new(2.5, 0.0, 0.0)),
             Color::white()
         );
     }
@@ -238,7 +235,7 @@ mod tests {
             Pattern::new_stripe(vec![Color::white(), Color::black()]).scale(2.0, 2.0, 2.0);
 
         assert_eq!(
-            pattern.pattern_at_object(&object, &Point::new(1.5, 0.0, 0.0)),
+            pattern.pattern_at_object(&object, &Point::new(2.5, 0.0, 0.0)),
             Color::white()
         );
     }
