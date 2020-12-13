@@ -81,8 +81,8 @@ fn main() {
         .with_material(
             Material::new()
                 .with_pattern(Pattern::new_gradient(
-                    Color::new(0.5, 0.5, 0.5),
                     Color::new(0.7, 0.6, 0.7),
+                    Color::black(),
                 ))
                 .with_diffuse(0.7)
                 .with_specular(0.3),
@@ -90,26 +90,26 @@ fn main() {
         .translate(0.0, 1.0, -7.0)
         .scale(0.33, 0.33, 0.33);
 
-    let light1 = Light {
+    let light = Light {
         intensity: Color::white(),
         position: Point::new(-10.0, 10.0, -10.0),
     };
 
     let world = World {
         objects: vec![floor, wall, sphere, sphere2, sphere3],
-        lights: vec![light1],
+        lights: vec![light],
     };
 
-    let from = Point::new(-2.0, 1.5, -8.0);
+    let from = Point::new(-1.0, 2.0, -9.0);
     let to = Point::new(0.0, 1.0, 0.0);
     let up = Vector::new(0.0, 1.0, 0.0);
 
-    let factor = 30;
+    let factor = 20;
 
     let camera = Camera::new(100 * factor, 50 * factor, PI / 1.5)
         .with_transformation(&view_transform(&from, &to, &up));
 
-    let canvas = camera.render(&world);
+    let canvas = camera.par_render(&world);
 
     canvas.export("./pattern.png").unwrap();
 }

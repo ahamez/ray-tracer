@@ -140,10 +140,7 @@ pub struct GradientPattern {
 
 impl GradientPattern {
     fn pattern_at(&self, point: &Point) -> Color {
-        let distance = self.to - self.from;
-        let fraction = point.x() - point.x().floor();
-
-        self.from + distance * fraction
+        self.from + point.x() * (self.to - self.from)
     }
 }
 
