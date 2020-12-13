@@ -11,6 +11,7 @@ use crate::{
 pub struct Object {
     shape: Shape,
     transformation: Matrix,
+    transformation_inverse: Matrix,
     material: Material,
 }
 
@@ -33,6 +34,7 @@ impl Object {
 
     pub fn with_transformation(mut self, transformation: Matrix) -> Self {
         self.transformation = transformation;
+        self.transformation_inverse = transformation.invert().unwrap();
         self
     }
 
@@ -42,7 +44,7 @@ impl Object {
     }
 
     pub fn intersects(&self, ray: &Ray, is: &mut Vec<Intersection>) {
-        let ray = ray.apply_transformation(&self.transformation.invert().unwrap());
+        let ray = ray.apply_transformation(&self.transformation_inverse);
 
         self.shape.intersects(&ray).iter().for_each(|t| {
             is.push(Intersection {
@@ -53,10 +55,9 @@ impl Object {
     }
 
     pub fn normal_at(&self, world_point: &Point) -> Vector {
-        let transformation_inv = self.transformation.invert().unwrap();
-        let object_point = transformation_inv * *world_point;
+        let object_point = self.transformation_inverse * *world_point;
         let object_normal = self.shape.normal_at(&object_point);
-        let world_normal = transformation_inv.transpose() * object_normal;
+        let world_normal = self.transformation_inverse.transpose() * object_normal;
 
         world_normal.normalize()
     }
@@ -68,6 +69,10 @@ impl Object {
     pub fn transformation(&self) -> &Matrix {
         &self.transformation
     }
+
+    pub fn transformation_inverse(&self) -> &Matrix {
+        &self.transformation_inverse
+    }
 }
 
 // --------------------------------------------------------------------------------------------- //
@@ -77,6 +82,7 @@ impl Default for Object {
         Object {
             shape: Shape::Sphere(),
             transformation: Matrix::id(),
+            transformation_inverse: Matrix::id(),
             material: Material::new(),
         }
     }
@@ -86,8 +92,10 @@ impl Default for Object {
 
 impl Transform for Object {
     fn apply_transformation(&self, transformation: &Matrix) -> Self {
+        let new_transformation = self.transformation * *transformation;
         Object {
-            transformation: self.transformation * *transformation,
+            transformation: new_transformation,
+            transformation_inverse: new_transformation.invert().unwrap(),
             ..self.clone()
         }
     }

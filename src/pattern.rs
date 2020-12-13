@@ -11,6 +11,7 @@ use crate::{
 pub struct Pattern {
     pattern: Patterns,
     transformation: Matrix,
+    transformation_inverse: Matrix,
 }
 
 // --------------------------------------------------------------------------------------------- //
@@ -19,28 +20,28 @@ impl Pattern {
     pub fn new_gradient(from: Color, to: Color) -> Self {
         Pattern {
             pattern: Patterns::Gradient(GradientPattern { from, to }),
-            transformation: Matrix::id(),
+            ..Default::default()
         }
     }
 
     pub fn new_plain(color: Color) -> Self {
         Pattern {
             pattern: Patterns::Plain(PlainPattern { color }),
-            transformation: Matrix::id(),
+            ..Default::default()
         }
     }
 
     pub fn new_stripe(colors: Vec<Color>) -> Self {
         Pattern {
             pattern: Patterns::Stripe(StripePattern { colors }),
-            transformation: Matrix::id(),
+            ..Default::default()
         }
     }
 
     pub fn new_ring(colors: Vec<Color>) -> Self {
         Pattern {
             pattern: Patterns::Ring(RingPattern { colors }),
-            transformation: Matrix::id(),
+            ..Default::default()
         }
     }
 
@@ -54,11 +55,10 @@ impl Pattern {
     }
 
     pub fn pattern_at_object(&self, object: &Object, world_point: &Point) -> Color {
-        let object_transformation_inv = object.transformation().invert().unwrap();
-        let object_point = object_transformation_inv * *world_point;
+        let object_transformation_inv = object.transformation_inverse();
+        let object_point = *object_transformation_inv * *world_point;
 
-        let pattern_transformation_inv = self.transformation.invert().unwrap();
-        let pattern_point = pattern_transformation_inv * object_point;
+        let pattern_point = self.transformation_inverse * object_point;
 
         self.pattern_at(&pattern_point)
     }
@@ -66,10 +66,27 @@ impl Pattern {
 
 // --------------------------------------------------------------------------------------------- //
 
+impl Default for Pattern {
+    fn default() -> Self {
+        Pattern {
+            pattern: Patterns::Plain(PlainPattern {
+                color: Color::white(),
+            }),
+            transformation: Matrix::id(),
+            transformation_inverse: Matrix::id(),
+        }
+    }
+}
+
+// --------------------------------------------------------------------------------------------- //
+
 impl Transform for Pattern {
     fn apply_transformation(&self, transformation: &Matrix) -> Self {
+        let new_transformation = self.transformation * *transformation;
+
         Pattern {
-            transformation: self.transformation * *transformation,
+            transformation: new_transformation,
+            transformation_inverse: new_transformation.invert().unwrap(),
             ..self.clone()
         }
     }

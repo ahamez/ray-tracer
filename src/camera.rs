@@ -13,6 +13,7 @@ pub struct Camera {
     v_size: usize,
     fov: f64,
     transformation: Matrix,
+    transformation_inverse: Matrix,
     pixel_size: f64,
     half_width: f64,
     half_height: f64,
@@ -38,6 +39,7 @@ impl Camera {
             v_size,
             fov,
             transformation: Matrix::id(),
+            transformation_inverse: Matrix::id(),
             pixel_size,
             half_width,
             half_height,
@@ -46,6 +48,7 @@ impl Camera {
 
     pub fn with_transformation(mut self, transformation: &Matrix) -> Self {
         self.transformation = *transformation;
+        self.transformation_inverse = transformation.invert().unwrap();
         self
     }
 
@@ -56,7 +59,7 @@ impl Camera {
         let world_x = self.half_width - x_offset;
         let world_y = self.half_height - y_offset;
 
-        let transformation_inv = self.transformation.invert().unwrap();
+        let transformation_inv = self.transformation_inverse;
         let pixel = transformation_inv * Point::new(world_x, world_y, -1.0);
 
         let origin = transformation_inv * Point::zero();
@@ -85,8 +88,10 @@ impl Camera {
 
 impl Transform for Camera {
     fn apply_transformation(&self, transformation: &Matrix) -> Self {
+        let new_transformation = self.transformation * *transformation;
         Camera {
             transformation: self.transformation * *transformation,
+            transformation_inverse: new_transformation.invert().unwrap(),
             ..*self
         }
     }
