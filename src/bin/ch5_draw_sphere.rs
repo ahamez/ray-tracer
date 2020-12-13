@@ -3,7 +3,7 @@
 use std::f64::consts::PI;
 
 use ray_tracer::{
-    canvas::Canvas, color::Color, point::Point, ray::Ray, shape::Shape,
+    canvas::Canvas, color::Color, object::Object, point::Point, ray::Ray,
     transformation::Transform, tuple::Tuple,
 };
 
@@ -21,7 +21,7 @@ fn main() {
     let half = wall_size / 2.0;
 
     let color: Color = Color::red();
-    let shape = Shape::new_sphere()
+    let shape = Object::new_sphere()
         .shear(1.0, 0.0, 0.0, 0.0, 0.0, 0.0)
         .rotate_z(PI / 4.0)
         // .rotate_y(PI / 4.0)

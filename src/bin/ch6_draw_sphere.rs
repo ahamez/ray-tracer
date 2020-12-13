@@ -1,8 +1,8 @@
 // --------------------------------------------------------------------------------------------- //
 
 use ray_tracer::{
-    canvas::Canvas, color::Color, light::Light, material::Material, point::Point, ray::Ray,
-    shape::Shape, transformation::Transform, tuple::Tuple,
+    canvas::Canvas, color::Color, light::Light, material::Material, object::Object, point::Point,
+    ray::Ray, transformation::Transform, tuple::Tuple,
 };
 
 // --------------------------------------------------------------------------------------------- //
@@ -20,7 +20,7 @@ fn main() {
 
     let material = Material::new().with_color(Color::new(1.0, 0.2, 1.0));
 
-    let shape = Shape::new_sphere()
+    let object = Object::new_sphere()
         .with_material(material)
         // .rotate_z(3.14 / 4.0)
         // .rotate_y(3.14 / 2.0)
@@ -47,15 +47,19 @@ fn main() {
                 direction,
             };
 
-            let intersections = ray.intersects(&[shape.clone()]);
+            let intersections = ray.intersects(&[object.clone()]);
             if let Some(hit) = intersections.hit() {
                 let point = ray.position(hit.t);
-                let normal_v = hit.shape.normal_at(&point);
+                let normal_v = hit.object.normal_at(&point);
                 let eye_v = -ray.direction;
-                let color = hit
-                    .shape
-                    .material()
-                    .lighting(&Shape::new_sphere(), &light, &point, &eye_v, &normal_v, false);
+                let color = hit.object.material().lighting(
+                    &Object::new_sphere(),
+                    &light,
+                    &point,
+                    &eye_v,
+                    &normal_v,
+                    false,
+                );
 
                 canvas[x][y] = color;
             }

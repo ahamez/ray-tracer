@@ -7,10 +7,10 @@ use crate::{
     intersection::{IntersectionState, Intersections},
     light::Light,
     material::Material,
+    object::Object,
     pattern::Pattern,
     point::Point,
     ray::Ray,
-    shape::Shape,
     transformation::Transform,
     tuple::Tuple,
 };
@@ -20,7 +20,7 @@ use crate::{
 #[derive(Debug)]
 
 pub struct World {
-    pub shapes: Vec<Shape>,
+    pub objects: Vec<Object>,
     pub lights: Vec<Light>,
 }
 
@@ -29,7 +29,7 @@ pub struct World {
 impl World {
     pub fn new() -> World {
         World {
-            shapes: vec![],
+            objects: vec![],
             lights: vec![],
         }
     }
@@ -47,7 +47,7 @@ impl World {
     }
 
     fn intersects(&self, ray: &Ray) -> Intersections {
-        ray.intersects(&self.shapes)
+        ray.intersects(&self.objects)
     }
 
     fn shade_hit(&self, comps: &IntersectionState) -> Color {
@@ -95,14 +95,14 @@ impl World {
 impl Default for World {
     fn default() -> Self {
         World {
-            shapes: vec![
-                Shape::new_sphere().with_material(
+            objects: vec![
+                Object::new_sphere().with_material(
                     Material::new()
                         .with_pattern(Pattern::new_plain(Color::new(0.8, 1.0, 0.6)))
                         .with_diffuse(0.7)
                         .with_specular(0.2),
                 ),
-                Shape::new_sphere().scale(0.5, 0.5, 0.5),
+                Object::new_sphere().scale(0.5, 0.5, 0.5),
             ],
             lights: vec![Light::new(Color::white(), Point::new(-10.0, 10.0, -10.0))],
         }
@@ -114,7 +114,7 @@ impl Default for World {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{intersection::Intersection, shape::Shape, vector::Vector};
+    use crate::{intersection::Intersection, object::Object, vector::Vector};
 
     #[test]
     fn intersects_a_world_with_a_ray() {
@@ -147,8 +147,8 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let shape = w.shapes[0].clone();
-        let i = Intersection { t: 4.0, shape };
+        let object = w.objects[0].clone();
+        let i = Intersection { t: 4.0, object };
 
         let comps = IntersectionState::new(&i, &ray);
         let color = w.shade_hit(&comps);
@@ -171,8 +171,8 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let shape = w.shapes[1].clone();
-        let i = Intersection { t: 0.5, shape };
+        let object = w.objects[1].clone();
+        let i = Intersection { t: 0.5, object };
 
         let comps = IntersectionState::new(&i, &ray);
 
@@ -181,15 +181,15 @@ mod tests {
 
     #[test]
     fn shade_hit_is_given_an_intesection_in_shadow() {
-        let s1 = Shape::new_sphere();
-        let s2 = Shape::new_sphere().translate(0.0, 0.0, 10.0);
+        let s1 = Object::new_sphere();
+        let s2 = Object::new_sphere().translate(0.0, 0.0, 10.0);
 
         let w = World {
             lights: vec![Light {
                 intensity: Color::white(),
                 position: Point::new(0.0, 0.0, -10.0),
             }],
-            shapes: vec![s1],
+            objects: vec![s1],
         };
 
         let ray = Ray {
@@ -197,7 +197,7 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let i = Intersection { t: 4.0, shape: s2 };
+        let i = Intersection { t: 4.0, object: s2 };
 
         let comps = IntersectionState::new(&i, &ray);
 
@@ -234,7 +234,7 @@ mod tests {
 
     #[test]
     fn the_color_with_an_intersection_behind_the_ray() {
-        let outer = Shape::new_sphere().with_material(
+        let outer = Object::new_sphere().with_material(
             Material::new()
                 .with_pattern(Pattern::new_plain(Color::new(0.8, 1.0, 0.6)))
                 .with_diffuse(0.7)
@@ -242,12 +242,12 @@ mod tests {
                 .with_ambient(1.0),
         );
 
-        let inner = Shape::new_sphere()
+        let inner = Object::new_sphere()
             .with_material(Material::new().with_ambient(1.0))
             .scale(0.5, 0.5, 0.5);
 
         let w = World {
-            shapes: vec![outer, inner],
+            objects: vec![outer, inner],
             ..Default::default()
         };
 

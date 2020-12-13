@@ -264,10 +264,7 @@ mod tests {
                 p.rotate_x(PI / 4.0),
                 Point::new(0.0, f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0)
             );
-            assert_eq!(
-                p.rotate_x(PI / 2.0),
-                Point::new(0.0, 0.0, 1.0)
-            );
+            assert_eq!(p.rotate_x(PI / 2.0), Point::new(0.0, 0.0, 1.0));
         }
         {
             let p = Vector::new(0.0, 1.0, 0.0);
@@ -276,10 +273,7 @@ mod tests {
                 p.rotate_x(PI / 4.0),
                 Vector::new(0.0, f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0)
             );
-            assert_eq!(
-                p.rotate_x(PI / 2.0),
-                Vector::new(0.0, 0.0, 1.0)
-            );
+            assert_eq!(p.rotate_x(PI / 2.0), Vector::new(0.0, 0.0, 1.0));
         }
         {
             let p = Point::new(0.0, 1.0, 0.0);
@@ -295,10 +289,7 @@ mod tests {
                 p.rotate_y(PI / 4.0),
                 Point::new(f64::sqrt(2.0) / 2.0, 0.0, f64::sqrt(2.0) / 2.0)
             );
-            assert_eq!(
-                p.rotate_y(PI / 2.0),
-                Point::new(1.0, 0.0, 0.0)
-            );
+            assert_eq!(p.rotate_y(PI / 2.0), Point::new(1.0, 0.0, 0.0));
         }
         {
             let p = Vector::new(0.0, 0.0, 1.0);
@@ -306,10 +297,7 @@ mod tests {
                 p.rotate_y(PI / 4.0),
                 Vector::new(f64::sqrt(2.0) / 2.0, 0.0, f64::sqrt(2.0) / 2.0)
             );
-            assert_eq!(
-                p.rotate_y(PI / 2.0),
-                Vector::new(1.0, 0.0, 0.0)
-            );
+            assert_eq!(p.rotate_y(PI / 2.0), Vector::new(1.0, 0.0, 0.0));
         }
         // Z axis
         {
@@ -318,10 +306,7 @@ mod tests {
                 p.rotate_z(PI / 4.0),
                 Point::new(-f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0, 0.0)
             );
-            assert_eq!(
-                p.rotate_z(PI / 2.0),
-                Point::new(-1.0, 0.0, 0.0)
-            );
+            assert_eq!(p.rotate_z(PI / 2.0), Point::new(-1.0, 0.0, 0.0));
         }
         {
             let p = Vector::new(0.0, 1.0, 0.0);
@@ -329,10 +314,7 @@ mod tests {
                 p.rotate_z(PI / 4.0),
                 Vector::new(-f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0, 0.0)
             );
-            assert_eq!(
-                p.rotate_z(PI / 2.0),
-                Vector::new(-1.0, 0.0, 0.0)
-            );
+            assert_eq!(p.rotate_z(PI / 2.0), Vector::new(-1.0, 0.0, 0.0));
         }
     }
 

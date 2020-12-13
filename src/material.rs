@@ -1,7 +1,7 @@
 // --------------------------------------------------------------------------------------------- //
 
 use crate::{
-    color::Color, light::Light, pattern::Pattern, point::Point, shape::Shape, vector::Vector,
+    color::Color, light::Light, object::Object, pattern::Pattern, point::Point, vector::Vector,
 };
 
 // --------------------------------------------------------------------------------------------- //
@@ -49,7 +49,7 @@ impl Material {
 
     pub fn lighting(
         &self,
-        object: &Shape,
+        object: &Object,
         light: &Light,
         position: &Point,
         eye_v: &Vector,
@@ -115,7 +115,14 @@ mod tests {
         let light = Light::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 0.0, -10.0));
 
         assert_eq!(
-            m.lighting(&Shape::new_sphere(), &light, &position, &eye_v, &normal_v, false),
+            m.lighting(
+                &Object::new_sphere(),
+                &light,
+                &position,
+                &eye_v,
+                &normal_v,
+                false
+            ),
             Color::new(1.9, 1.9, 1.9)
         );
     }
@@ -129,7 +136,14 @@ mod tests {
         let light = Light::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 0.0, -10.0));
 
         assert_eq!(
-            m.lighting(&Shape::new_sphere(), &light, &position, &eye_v, &normal_v, false),
+            m.lighting(
+                &Object::new_sphere(),
+                &light,
+                &position,
+                &eye_v,
+                &normal_v,
+                false
+            ),
             Color::new(1.0, 1.0, 1.0)
         );
     }
@@ -143,7 +157,14 @@ mod tests {
         let light = Light::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 10.0, -10.0));
 
         assert_eq!(
-            m.lighting(&Shape::new_sphere(), &light, &position, &eye_v, &normal_v, false),
+            m.lighting(
+                &Object::new_sphere(),
+                &light,
+                &position,
+                &eye_v,
+                &normal_v,
+                false
+            ),
             Color::new(0.7364, 0.7364, 0.7364)
         );
     }
@@ -157,7 +178,14 @@ mod tests {
         let light = Light::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 10.0, -10.0));
 
         assert_eq!(
-            m.lighting(&Shape::new_sphere(), &light, &position, &eye_v, &normal_v, false),
+            m.lighting(
+                &Object::new_sphere(),
+                &light,
+                &position,
+                &eye_v,
+                &normal_v,
+                false
+            ),
             Color::new(1.6364, 1.6364, 1.6364)
         );
     }
@@ -171,7 +199,14 @@ mod tests {
         let light = Light::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 0.0, 10.0));
 
         assert_eq!(
-            m.lighting(&Shape::new_sphere(), &light, &position, &eye_v, &normal_v, false),
+            m.lighting(
+                &Object::new_sphere(),
+                &light,
+                &position,
+                &eye_v,
+                &normal_v,
+                false
+            ),
             Color::new(0.1, 0.1, 0.1)
         );
     }
@@ -186,7 +221,14 @@ mod tests {
         let in_shadow = true;
 
         assert_eq!(
-            m.lighting(&Shape::new_sphere(), &light, &position, &eye_v, &normal_v, in_shadow),
+            m.lighting(
+                &Object::new_sphere(),
+                &light,
+                &position,
+                &eye_v,
+                &normal_v,
+                in_shadow
+            ),
             Color::new(0.1, 0.1, 0.1)
         );
     }
@@ -204,11 +246,25 @@ mod tests {
         let light = Light::new(Color::white(), Point::new(0.0, 0.0, -10.0));
 
         assert_eq!(
-            m.lighting(&Shape::new_sphere(), &light, &Point::new(0.9, 0.0, 0.0), &eye_v, &normal_v, false),
+            m.lighting(
+                &Object::new_sphere(),
+                &light,
+                &Point::new(0.9, 0.0, 0.0),
+                &eye_v,
+                &normal_v,
+                false
+            ),
             Color::white()
         );
         assert_eq!(
-            m.lighting(&Shape::new_sphere(), &light, &Point::new(1.1, 0.0, 0.0), &eye_v, &normal_v, false),
+            m.lighting(
+                &Object::new_sphere(),
+                &light,
+                &Point::new(1.1, 0.0, 0.0),
+                &eye_v,
+                &normal_v,
+                false
+            ),
             Color::black()
         );
     }

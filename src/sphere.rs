@@ -47,7 +47,7 @@ mod tests {
     use super::*;
 
     use crate::{
-        shape::Shape,
+        object::Object,
         transformation::{scaling, Transform},
     };
 
@@ -126,7 +126,7 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let s = Shape::new_sphere().with_transformation(scaling(2.0, 2.0, 2.0));
+        let s = Object::new_sphere().with_transformation(scaling(2.0, 2.0, 2.0));
 
         let mut xs = vec![];
         s.intersects(&r, &mut xs);
@@ -178,7 +178,7 @@ mod tests {
 
     #[test]
     fn normal_on_a_translated_sphere() {
-        let s = Shape::new_sphere().translate(0.0, 1.0, 0.0);
+        let s = Object::new_sphere().translate(0.0, 1.0, 0.0);
         assert_eq!(
             s.normal_at(&Point::new(0.0, 1.70711, -0.70711)),
             Vector::new(0.0, 0.70711, -0.70711)
@@ -187,7 +187,7 @@ mod tests {
 
     #[test]
     fn normal_on_a_transformed_sphere() {
-        let s = Shape::new_sphere()
+        let s = Object::new_sphere()
             .scale(1.0, 0.5, 1.0)
             .rotate_z(std::f64::consts::PI / 5.0);
 

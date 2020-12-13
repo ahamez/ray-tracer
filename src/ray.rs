@@ -3,8 +3,8 @@
 use crate::{
     intersection::{Intersection, Intersections},
     matrix::Matrix,
+    object::Object,
     point::Point,
-    shape::Shape,
     transformation::Transform,
     vector::Vector,
 };
@@ -24,11 +24,11 @@ impl Ray {
         self.origin + self.direction * t
     }
 
-    pub fn intersects(&self, shapes: &[Shape]) -> Intersections {
+    pub fn intersects(&self, objects: &[Object]) -> Intersections {
         let mut is = Vec::<Intersection>::with_capacity(256);
-        shapes
+        objects
             .iter()
-            .for_each(|ref shape| shape.intersects(self, &mut is));
+            .for_each(|ref object| object.intersects(self, &mut is));
 
         Intersections::new(is)
     }

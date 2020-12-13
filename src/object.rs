@@ -8,25 +8,25 @@ use crate::{
 // --------------------------------------------------------------------------------------------- //
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct Shape {
-    object: Object,
+pub struct Object {
+    shape: Shape,
     transformation: Matrix,
     material: Material,
 }
 
 // --------------------------------------------------------------------------------------------- //
 
-impl Shape {
+impl Object {
     pub fn new_sphere() -> Self {
-        Shape {
-            object: Object::Sphere(),
+        Object {
+            shape: Shape::Sphere(),
             ..Default::default()
         }
     }
 
     pub fn new_plane() -> Self {
-        Shape {
-            object: Object::Plane(),
+        Object {
+            shape: Shape::Plane(),
             ..Default::default()
         }
     }
@@ -44,10 +44,10 @@ impl Shape {
     pub fn intersects(&self, ray: &Ray, is: &mut Vec<Intersection>) {
         let ray = ray.apply_transformation(&self.transformation.invert().unwrap());
 
-        self.object.intersects(&ray).iter().for_each(|t| {
+        self.shape.intersects(&ray).iter().for_each(|t| {
             is.push(Intersection {
                 t: *t,
-                shape: self.clone(),
+                object: self.clone(),
             })
         });
     }
@@ -55,7 +55,7 @@ impl Shape {
     pub fn normal_at(&self, world_point: &Point) -> Vector {
         let transformation_inv = self.transformation.invert().unwrap();
         let object_point = transformation_inv * *world_point;
-        let object_normal = self.object.normal_at(&object_point);
+        let object_normal = self.shape.normal_at(&object_point);
         let world_normal = transformation_inv.transpose() * object_normal;
 
         world_normal.normalize()
@@ -72,10 +72,10 @@ impl Shape {
 
 // --------------------------------------------------------------------------------------------- //
 
-impl Default for Shape {
+impl Default for Object {
     fn default() -> Self {
-        Shape {
-            object: Object::Sphere(),
+        Object {
+            shape: Shape::Sphere(),
             transformation: Matrix::id(),
             material: Material::new(),
         }
@@ -84,9 +84,9 @@ impl Default for Shape {
 
 // --------------------------------------------------------------------------------------------- //
 
-impl Transform for Shape {
+impl Transform for Object {
     fn apply_transformation(&self, transformation: &Matrix) -> Self {
-        Shape {
+        Object {
             transformation: self.transformation * *transformation,
             ..self.clone()
         }
@@ -96,25 +96,25 @@ impl Transform for Shape {
 // --------------------------------------------------------------------------------------------- //
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-enum Object {
+enum Shape {
     Plane(),
     Sphere(),
 }
 
 // --------------------------------------------------------------------------------------------- //
 
-impl Object {
+impl Shape {
     pub fn intersects(&self, ray: &Ray) -> Vec<f64> {
         match self {
-            Object::Plane() => plane::Plane::intersects(&ray),
-            Object::Sphere() => sphere::Sphere::intersects(&ray),
+            Shape::Plane() => plane::Plane::intersects(&ray),
+            Shape::Sphere() => sphere::Sphere::intersects(&ray),
         }
     }
 
     pub fn normal_at(&self, object_point: &Point) -> Vector {
         match self {
-            Object::Plane() => plane::Plane::normal_at(&object_point),
-            Object::Sphere() => sphere::Sphere::normal_at(&object_point),
+            Shape::Plane() => plane::Plane::normal_at(&object_point),
+            Shape::Sphere() => sphere::Sphere::normal_at(&object_point),
         }
     }
 }
@@ -126,8 +126,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn a_shape_default_transformation_is_id() {
-        let s = Shape::new_sphere();
+    fn an_object_default_transformation_is_id() {
+        let s = Object::new_sphere();
         assert_eq!(s.transformation, Matrix::id());
     }
 }
