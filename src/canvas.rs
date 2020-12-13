@@ -4,7 +4,7 @@ use crate::color::Color;
 
 // --------------------------------------------------------------------------------------------- //
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Canvas {
     width: usize,
     height: usize,

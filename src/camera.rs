@@ -195,6 +195,22 @@ mod tests {
 
         assert_eq!(image[5][5], Color::new(0.38066, 0.47583, 0.2855));
     }
+
+    #[test]
+    fn parallel_rendering_a_world_with_a_camera() {
+        let w = World {
+            ..Default::default()
+        };
+        let from = Point::new(0.0, 0.0, -5.0);
+        let to = Point::new(0.0, 0.0, 0.0);
+        let up = Vector::new(0.0, 1.0, 0.0);
+        let c = Camera::new(100, 100, PI / 2.0).with_transformation(&view_transform(&from, &to, &up));
+
+        let image = c.render(&w);
+        let par_image = c.par_render(&w);
+
+        assert_eq!(image, par_image);
+    }
 }
 
 // --------------------------------------------------------------------------------------------- //
