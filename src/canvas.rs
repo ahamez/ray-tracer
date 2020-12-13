@@ -37,6 +37,10 @@ impl Canvas {
 
         img.save(path)
     }
+
+    pub fn pixels(&mut self) -> &mut Vec<Color> {
+        &mut self.pixels
+    }
 }
 
 // --------------------------------------------------------------------------------------------- //

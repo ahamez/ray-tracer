@@ -7,6 +7,7 @@ edition = "2018"
 [dependencies]
 float-cmp = "0.8.0"
 image = "0.23.12"
+rayon = "1.5"
 
 [profile.release]
 debug = true

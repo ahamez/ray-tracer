@@ -1,5 +1,7 @@
 // --------------------------------------------------------------------------------------------- //
 
+use rayon::prelude::*;
+
 use crate::{
     canvas::Canvas, matrix::Matrix, point::Point, ray::Ray, transformation::Transform,
     tuple::Tuple, world::World,
@@ -82,6 +84,28 @@ impl Camera {
                 image[row][col] = color;
             }
         }
+
+        image
+    }
+
+    pub fn par_render(&self, world: &World) -> Canvas {
+        const BAND_SIZE: usize = 10;
+        let mut image = Canvas::new(self.h_size, self.v_size);
+
+        image
+            .pixels()
+            .par_chunks_mut(self.h_size * BAND_SIZE)
+            .enumerate()
+            .for_each(|(i, band)| {
+                for row in 0..BAND_SIZE {
+                    for col in 0..self.h_size {
+                        let ray = self.ray_for_pixel(col, row + i * BAND_SIZE);
+                        let color = world.color_at(&ray);
+
+                        band[row * self.h_size + col] = color;
+                    }
+                }
+            });
 
         image
     }
