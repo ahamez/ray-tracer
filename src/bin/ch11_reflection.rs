@@ -38,7 +38,16 @@ fn main() {
                 .with_specular(0.3)
                 .with_reflective(1.0),
         )
-        .translate(0.0, 2.5, -4.0);
+        .translate(-1.3, 1.5, -4.0);
+
+    let transparent_sphere = Object::new_sphere()
+        .with_material(
+            Material::new()
+                .with_diffuse(0.7)
+                .with_specular(0.3)
+                .with_transparency(0.5)
+        )
+        .translate(0.0, 2.0, -6.0);
 
     let light = Light {
         intensity: Color::white(),
@@ -46,18 +55,18 @@ fn main() {
     };
 
     let world = World {
-        objects: vec![floor, sphere],
+        objects: vec![floor, sphere, transparent_sphere],
         lights: vec![light],
-        recursion_limit: 10,
+        recursion_limit: 5,
     };
 
     let from = Point::new(-1.0, 2.0, -9.0);
     let to = Point::new(0.0, 1.0, 0.0);
     let up = Vector::new(0.0, 1.0, 0.0);
 
-    let factor = 100;
+    let factor = 50;
 
-    let camera = Camera::new(100 * factor, 50 * factor, PI / 1.5)
+    let camera = Camera::new(100 * factor, 50 * factor, PI / 1.6)
         .with_transformation(&view_transform(&from, &to, &up));
 
     let canvas = camera.par_render(&world);

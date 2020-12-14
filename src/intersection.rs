@@ -66,6 +66,14 @@ impl Intersections {
     pub fn hit(&self) -> Option<&Intersection> {
         self.0.iter().find(|i| i.t >= 0.0)
     }
+
+    pub fn hit_index(&self) -> Option<usize> {
+        self.0.iter().position(|i| i.t >= 0.0)
+    }
+
+    pub fn iter(&self) -> std::slice::Iter<Intersection> {
+        self.0.iter()
+    }
 }
 
 // --------------------------------------------------------------------------------------------- //
@@ -83,20 +91,61 @@ impl std::ops::Index<usize> for Intersections {
 
 #[derive(Debug)]
 pub struct IntersectionState {
-    t: f64,
-    object: Object,
-    point: Point,
-    over_point: Point,
     eye_v: Vector,
-    normal_v: Vector,
-    reflect_v: Vector,
     inside: bool,
+    n1: f64,
+    n2: f64,
+    normal_v: Vector,
+    object: Object,
+    over_point: Point,
+    point: Point,
+    reflect_v: Vector,
+    t: f64,
+    under_point: Point,
 }
 
 // --------------------------------------------------------------------------------------------- //
 
 impl IntersectionState {
-    pub fn new(intersection: &Intersection, ray: &Ray) -> Self {
+    pub fn new(intersections: &Intersections, intersection_index: usize, ray: &Ray) -> Self {
+        let intersection = &intersections[intersection_index];
+
+        let mut containers = Vec::<&Object>::with_capacity(intersections.len());
+
+        let mut n1 = None;
+        let mut n2 = None;
+
+        for (index, i) in intersections.iter().enumerate() {
+            let is_intersection = index == intersection_index;
+
+            if is_intersection {
+                n1 = containers
+                    .last()
+                    .map(|object| object.material().refractive_index);
+            }
+
+            match containers
+                .iter()
+                // TODO. Avoid this deep comparison. We should compare using unique ids (with Arc ???)
+                .position(|&object| *object == i.object)
+            {
+                Some(pos) => {
+                    containers.remove(pos);
+                }
+                None => {
+                    containers.push(&i.object);
+                }
+            }
+
+            if is_intersection {
+                n2 = containers
+                    .last()
+                    .map(|object| object.material().refractive_index);
+
+                break;
+            }
+        }
+
         let point = ray.position(intersection.t);
 
         let eye_v = -ray.direction;
@@ -108,41 +157,53 @@ impl IntersectionState {
         };
         let reflect_v = ray.direction.reflect(&normal_v);
         let over_point = point + normal_v * EPSILON;
+        let under_point = point - normal_v * EPSILON;
 
         IntersectionState {
-            t: intersection.t,
-            object: intersection.object.clone(),
-            point,
-            over_point,
             eye_v,
-            normal_v,
-            reflect_v,
             inside,
+            n1: n1.unwrap_or(1.0),
+            n2: n2.unwrap_or(1.0),
+            normal_v,
+            object: intersection.object.clone(),
+            over_point,
+            point,
+            reflect_v,
+            t: intersection.t,
+            under_point,
         }
-    }
-
-    pub fn object(&self) -> &Object {
-        &self.object
-    }
-
-    pub fn point(&self) -> Point {
-        self.point
-    }
-
-    pub fn over_point(&self) -> Point {
-        self.over_point
     }
 
     pub fn eye_v(&self) -> Vector {
         self.eye_v
     }
 
+    pub fn n(&self) -> (f64, f64) {
+        (self.n1, self.n2)
+    }
+
     pub fn normal_v(&self) -> Vector {
         self.normal_v
     }
 
+    pub fn object(&self) -> &Object {
+        &self.object
+    }
+
+    pub fn over_point(&self) -> Point {
+        self.over_point
+    }
+
+    pub fn point(&self) -> Point {
+        self.point
+    }
+
     pub fn reflect_v(&self) -> Vector {
         self.reflect_v
+    }
+
+    pub fn under_point(&self) -> Point {
+        self.under_point
     }
 }
 
@@ -271,7 +332,7 @@ mod tests {
             t: 4.0,
             object: Object::new_sphere(),
         };
-        let comps = IntersectionState::new(&i, &r);
+        let comps = IntersectionState::new(&Intersections::new(vec![i.clone()]), 0, &r);
 
         assert_eq!(comps.t, i.t);
         assert_eq!(comps.object, i.object);
@@ -291,7 +352,7 @@ mod tests {
             t: 1.0,
             object: Object::new_sphere(),
         };
-        let comps = IntersectionState::new(&i, &r);
+        let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &r);
 
         assert_eq!(comps.point, Point::new(0.0, 0.0, 1.0));
         assert_eq!(comps.eye_v, Vector::new(0.0, 0.0, -1.0));
@@ -310,7 +371,7 @@ mod tests {
 
         let i = Intersection { t: 5.0, object };
 
-        let comps = IntersectionState::new(&i, &r);
+        let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &r);
 
         assert!(comps.over_point.z() < EPSILON / 2.0);
         assert!(comps.point.z() > comps.over_point.z());
@@ -328,9 +389,26 @@ mod tests {
         let object = Object::new_plane();
         let i = Intersection { t: sqrt2, object };
 
-        let comps = IntersectionState::new(&i, &ray);
+        let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
 
         assert_eq!(comps.reflect_v, Vector::new(0.0, half_sqrt2, half_sqrt2));
+    }
+
+    #[test]
+    fn the_under_point_is_offset_below_the_surface() {
+        let ray = Ray {
+            origin: Point::new(0.0, 0.0, -5.0),
+            direction: Vector::new(0.0, 0.0, 1.0),
+        };
+
+        let object = crate::sphere::tests::glassy_sphere().translate(0.0, 0.0, 1.0);
+
+        let i = Intersection { t: 5.0, object };
+
+        let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
+
+        assert!(comps.under_point.z() > EPSILON / 2.0);
+        assert!(comps.point.z() < comps.under_point.z());
     }
 }
 

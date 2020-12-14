@@ -12,8 +12,10 @@ pub struct Material {
     pub pattern: Pattern,
     pub diffuse: f64,
     pub reflective: f64,
+    pub refractive_index: f64,
     pub shininess: f64,
     pub specular: f64,
+    pub transparency: f64,
 }
 
 // --------------------------------------------------------------------------------------------- //
@@ -48,8 +50,18 @@ impl Material {
         self
     }
 
+    pub fn with_refractive_index(mut self, index: f64) -> Material {
+        self.refractive_index = index;
+        self
+    }
+
     pub fn with_specular(mut self, specular: f64) -> Material {
         self.specular = specular;
+        self
+    }
+
+    pub fn with_transparency(mut self, transparency: f64) -> Material {
+        self.transparency = transparency;
         self
     }
 
@@ -100,8 +112,10 @@ impl Default for Material {
             pattern: Pattern::new_plain(Color::white()),
             diffuse: 0.9,
             reflective: 0.0,
+            refractive_index: 1.0,
             shininess: 200.0,
             specular: 0.9,
+            transparency: 0.0,
         }
     }
 }

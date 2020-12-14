@@ -45,15 +45,25 @@ impl Sphere {
 // --------------------------------------------------------------------------------------------- //
 
 #[cfg(test)]
-mod tests {
+pub mod tests {
     use std::vec;
 
     use super::*;
 
     use crate::{
+        intersection::{Intersection, IntersectionState, Intersections},
+        material::Material,
         object::Object,
         transformation::{scaling, Transform},
     };
+
+    pub fn glassy_sphere() -> Object {
+        Object::new_sphere().with_material(
+            Material::new()
+                .with_transparency(1.0)
+                .with_refractive_index(1.5),
+        )
+    }
 
     #[test]
     fn a_ray_intersects_a_sphere_at_two_points() {
@@ -208,6 +218,62 @@ mod tests {
             )),
             Vector::new(0.0, 0.97014, -0.24254)
         );
+    }
+
+    #[test]
+    fn finding_n1_and_n2_at_various_intersections() {
+        let a = glassy_sphere().scale(2.0, 2.0, 2.0);
+        let b = glassy_sphere().translate(0.0, 0.0, -0.25).with_material(
+            glassy_sphere()
+                .material()
+                .clone()
+                .with_refractive_index(2.0),
+        );
+        let c = glassy_sphere().translate(0.0, 0.0, 0.25).with_material(
+            glassy_sphere()
+                .material()
+                .clone()
+                .with_refractive_index(2.5),
+        );
+
+        let ray = Ray {
+            origin: Point::new(0.0, 0.0, -4.0),
+            direction: Vector::new(0.0, 0.0, 1.0),
+        };
+
+        let xs = Intersections::new(vec![
+            Intersection {
+                t: 2.0,
+                object: a.clone(),
+            },
+            Intersection {
+                t: 2.75,
+                object: b.clone(),
+            },
+            Intersection {
+                t: 3.25,
+                object: c.clone(),
+            },
+            Intersection {
+                t: 4.75,
+                object: b.clone(),
+            },
+            Intersection {
+                t: 5.25,
+                object: c.clone(),
+            },
+            Intersection {
+                t: 6.0,
+                object: a.clone(),
+            },
+        ]);
+
+        assert_eq!(IntersectionState::new(&xs, 0, &ray).n(), (1.0, 1.5));
+        assert_eq!(IntersectionState::new(&xs, 1, &ray).n(), (1.5, 2.0));
+        assert_eq!(IntersectionState::new(&xs, 2, &ray).n(), (2.0, 2.5));
+        assert_eq!(IntersectionState::new(&xs, 3, &ray).n(), (2.5, 2.5));
+        assert_eq!(IntersectionState::new(&xs, 4, &ray).n(), (2.5, 1.5));
+        assert_eq!(IntersectionState::new(&xs, 5, &ray).n(), (1.5, 1.0));
     }
 }
 
