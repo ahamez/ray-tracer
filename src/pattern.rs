@@ -38,16 +38,22 @@ impl Pattern {
         }
     }
 
+    pub fn new_ring(colors: Vec<Color>) -> Self {
+        Pattern {
+            pattern: Patterns::Ring(RingPattern { colors }),
+            ..Default::default()
+        }
+    }
+
     pub fn new_stripe(colors: Vec<Color>) -> Self {
         Pattern {
             pattern: Patterns::Stripe(StripePattern { colors }),
             ..Default::default()
         }
     }
-
-    pub fn new_ring(colors: Vec<Color>) -> Self {
+    pub fn new_test() -> Self {
         Pattern {
-            pattern: Patterns::Ring(RingPattern { colors }),
+            pattern: Patterns::Test(TestPattern {}),
             ..Default::default()
         }
     }
@@ -59,6 +65,7 @@ impl Pattern {
             Patterns::Plain(p) => p.pattern_at(point),
             Patterns::Ring(p) => p.pattern_at(point),
             Patterns::Stripe(p) => p.pattern_at(point),
+            Patterns::Test(p) => p.pattern_at(point),
         }
     }
 
@@ -109,6 +116,7 @@ enum Patterns {
     Plain(PlainPattern),
     Ring(RingPattern),
     Stripe(StripePattern),
+    Test(TestPattern),
 }
 
 // --------------------------------------------------------------------------------------------- //
@@ -190,6 +198,17 @@ impl StripePattern {
         let index = (scaled_x.floor().abs() as usize) % self.colors.len();
 
         self.colors[index]
+    }
+}
+
+// --------------------------------------------------------------------------------------------- //
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct TestPattern {}
+
+impl TestPattern {
+    fn pattern_at(&self, point: &Point) -> Color {
+        Color::new(point.x(), point.y(), point.z())
     }
 }
 
