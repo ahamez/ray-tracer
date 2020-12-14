@@ -8,11 +8,12 @@ use crate::{
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Material {
-    pub pattern: Pattern,
     pub ambient: f64,
+    pub pattern: Pattern,
     pub diffuse: f64,
-    pub specular: f64,
+    pub reflective: f64,
     pub shininess: f64,
+    pub specular: f64,
 }
 
 // --------------------------------------------------------------------------------------------- //
@@ -22,8 +23,8 @@ impl Material {
         Default::default()
     }
 
-    pub fn with_pattern(mut self, pattern: Pattern) -> Material {
-        self.pattern = pattern;
+    pub fn with_ambient(mut self, ambient: f64) -> Material {
+        self.ambient = ambient;
         self
     }
 
@@ -37,13 +38,18 @@ impl Material {
         self
     }
 
-    pub fn with_specular(mut self, specular: f64) -> Material {
-        self.specular = specular;
+    pub fn with_pattern(mut self, pattern: Pattern) -> Material {
+        self.pattern = pattern;
         self
     }
 
-    pub fn with_ambient(mut self, ambient: f64) -> Material {
-        self.ambient = ambient;
+    pub fn with_reflective(mut self, reflective: f64) -> Material {
+        self.reflective = reflective;
+        self
+    }
+
+    pub fn with_specular(mut self, specular: f64) -> Material {
+        self.specular = specular;
         self
     }
 
@@ -90,11 +96,12 @@ impl Material {
 impl Default for Material {
     fn default() -> Self {
         Material {
-            pattern: Pattern::new_plain(Color::white()),
             ambient: 0.1,
+            pattern: Pattern::new_plain(Color::white()),
             diffuse: 0.9,
-            specular: 0.9,
+            reflective: 0.0,
             shininess: 200.0,
+            specular: 0.9,
         }
     }
 }

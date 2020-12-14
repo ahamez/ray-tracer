@@ -89,6 +89,7 @@ pub struct IntersectionState {
     over_point: Point,
     eye_v: Vector,
     normal_v: Vector,
+    reflect_v: Vector,
     inside: bool,
 }
 
@@ -105,7 +106,7 @@ impl IntersectionState {
         } else {
             (false, normal_v)
         };
-
+        let reflect_v = ray.direction.reflect(&normal_v);
         let over_point = point + normal_v * EPSILON;
 
         IntersectionState {
@@ -115,6 +116,7 @@ impl IntersectionState {
             over_point,
             eye_v,
             normal_v,
+            reflect_v,
             inside,
         }
     }
@@ -137,6 +139,10 @@ impl IntersectionState {
 
     pub fn normal_v(&self) -> Vector {
         self.normal_v
+    }
+
+    pub fn reflect_v(&self) -> Vector {
+        self.reflect_v
     }
 }
 
@@ -308,6 +314,23 @@ mod tests {
 
         assert!(comps.over_point.z() < EPSILON / 2.0);
         assert!(comps.point.z() > comps.over_point.z());
+    }
+
+    #[test]
+    fn precomputing_the_reflection_vector() {
+        let sqrt2 = f64::sqrt(2.0);
+        let half_sqrt2 = sqrt2 / 2.0;
+
+        let ray = Ray {
+            origin: Point::new(0.0, 1.0, -1.0),
+            direction: Vector::new(0.0, -half_sqrt2, half_sqrt2),
+        };
+        let object = Object::new_plane();
+        let i = Intersection { t: sqrt2, object };
+
+        let comps = IntersectionState::new(&i, &ray);
+
+        assert_eq!(comps.reflect_v, Vector::new(0.0, half_sqrt2, half_sqrt2));
     }
 }
 

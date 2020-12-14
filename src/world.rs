@@ -34,13 +34,13 @@ impl World {
         self.color_at_impl(ray, recursion_limit)
     }
 
-    pub fn color_at(&self, ray: &Ray) -> Color {
+    fn color_at_impl(&self, ray: &Ray, recursion_limit: u8) -> Color {
         let intersections = self.intersects(ray);
 
         match intersections.hit() {
             Some(hit) => {
                 let comps = IntersectionState::new(&hit, &ray);
-                self.shade_hit(&comps)
+                self.shade_hit(&comps, recursion_limit)
             }
             None => Color::black(),
         }
@@ -50,11 +50,11 @@ impl World {
         ray.intersects(&self.objects)
     }
 
-    fn shade_hit(&self, comps: &IntersectionState) -> Color {
+    fn shade_hit(&self, comps: &IntersectionState, recursion_limit: u8) -> Color {
         self.lights.iter().fold(Color::black(), |acc, &light| {
             let is_shadowed = self.is_shadowed(&comps.over_point());
 
-            let color = comps.object().material().lighting(
+            let surface_color = comps.object().material().lighting(
                 &comps.object(),
                 &light,
                 &comps.over_point(),
@@ -63,7 +63,7 @@ impl World {
                 is_shadowed,
             );
 
-            acc + color
+            acc + surface_color + self.reflected_color(comps, recursion_limit)
         })
     }
 
@@ -87,6 +87,21 @@ impl World {
         }
 
         false
+    }
+
+    fn reflected_color(&self, comps: &IntersectionState, recursion_limit: u8) -> Color {
+        if recursion_limit == 0 || comps.object().material().reflective == 0.0 {
+            Color::black()
+        } else {
+            let reflect_ray = Ray {
+                origin: comps.over_point(),
+                direction: comps.reflect_v(),
+            };
+
+            let color = self.color_at_impl(&reflect_ray, recursion_limit - 1);
+
+            color * comps.object().material().reflective
+        }
     }
 }
 
@@ -159,7 +174,7 @@ pub mod tests {
         let i = Intersection { t: 4.0, object };
 
         let comps = IntersectionState::new(&i, &ray);
-        let color = w.shade_hit(&comps);
+        let color = w.shade_hit(&comps, 1);
 
         assert_eq!(color, Color::new(0.38066, 0.47583, 0.2855));
     }
@@ -184,7 +199,10 @@ pub mod tests {
 
         let comps = IntersectionState::new(&i, &ray);
 
-        assert_eq!(w.shade_hit(&comps), Color::new(0.90498, 0.90498, 0.90498));
+        assert_eq!(
+            w.shade_hit(&comps, 1),
+            Color::new(0.90498, 0.90498, 0.90498)
+        );
     }
 
     #[test]
@@ -210,7 +228,7 @@ pub mod tests {
 
         let comps = IntersectionState::new(&i, &ray);
 
-        assert_eq!(w.shade_hit(&comps), Color::new(0.1, 0.1, 0.1));
+        assert_eq!(w.shade_hit(&comps, 1), Color::new(0.1, 0.1, 0.1));
     }
 
     #[test]
@@ -287,11 +305,107 @@ pub mod tests {
 
     #[test]
     fn there_is_no_shadow_when_an_object_is_behind_the_point() {
+        let w = default_world();
+
+        assert_eq!(w.is_shadowed(&Point::new(-2.0, 2.0, -2.0)), false);
+    }
+
+    #[test]
+    fn the_reflected_color_for_a_nonreflective_material() {
+        let w = default_world();
+
+        let mut object = w.objects[1].clone();
+        object.material_mut().ambient = 1.0;
+
+        let ray = Ray {
+            origin: Point::new(0.0, 0.0, 0.0),
+            direction: Vector::new(0.0, 0.0, 1.0),
+        };
+
+        let i = Intersection { t: 1.0, object };
+
+        let comps = IntersectionState::new(&i, &ray);
+
+        assert_eq!(w.reflected_color(&comps, 1), Color::black());
+    }
+
+    #[test]
+    fn the_reflected_color_for_a_reflective_material() {
+        let sqrt2 = f64::sqrt(2.0);
+
+        let mut w = default_world();
+
+        let object = Object::new_plane()
+            .with_material(Material::new().with_reflective(0.5))
+            .translate(0.0, -1.0, 0.0);
+
+        w.objects.push(object.clone());
+
+        let ray = Ray {
+            origin: Point::new(0.0, 0.0, -3.0),
+            direction: Vector::new(0.0, -sqrt2 / 2.0, sqrt2 / 2.0),
+        };
+
+        let i = Intersection { t: sqrt2, object };
+
+        let comps = IntersectionState::new(&i, &ray);
+
+        assert_eq!(
+            w.reflected_color(&comps, 1),
+            Color::new(0.19032, 0.2379, 0.14274)
+        );
+    }
+
+    #[test]
+    fn shade_hit_with_a_reflective_material() {
+        let sqrt2 = f64::sqrt(2.0);
+
+        let mut w = default_world();
+
+        let object = Object::new_plane()
+            .with_material(Material::new().with_reflective(0.5))
+            .translate(0.0, -1.0, 0.0);
+
+        w.objects.push(object.clone());
+
+        let ray = Ray {
+            origin: Point::new(0.0, 0.0, -3.0),
+            direction: Vector::new(0.0, -sqrt2 / 2.0, sqrt2 / 2.0),
+        };
+
+        let i = Intersection { t: sqrt2, object };
+
+        let comps = IntersectionState::new(&i, &ray);
+
+        assert_eq!(
+            w.shade_hit(&comps, 1),
+            Color::new(0.87677, 0.92436, 0.82918)
+        );
+    }
+
+    #[test]
+    fn color_at_with_mutually_reflexive_surfaces() {
         let w = World {
+            lights: vec![Light::new(Color::white(), Point::new(0.0, 0.0, 0.0))],
+            objects: vec![
+                Object::new_plane()
+                    .with_material(Material::new().with_reflective(1.0))
+                    .translate(0.0, -1.0, 0.0),
+                Object::new_plane()
+                    .with_material(Material::new().with_reflective(1.0))
+                    .translate(0.0, 1.0, 0.0),
+            ],
             ..Default::default()
         };
 
-        assert_eq!(w.is_shadowed(&Point::new(-2.0, 2.0, -2.0)), false);
+        let ray = Ray {
+            origin: Point::new(0.0, 0.0, 0.0),
+            direction: Vector::new(0.0, 1.0, 0.0),
+        };
+
+        // The color doesn't really matter here, what we want is to make sure that
+        // the call doesn't end in an infinite recursion.
+        w.color_at(&ray);
     }
 }
 
