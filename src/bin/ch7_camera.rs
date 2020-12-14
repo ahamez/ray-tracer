@@ -99,6 +99,7 @@ fn main() {
     let world = World {
         objects: vec![floor, left_wall, right_wall, left, middle, middle2, right],
         lights: vec![light1, light3],
+        ..Default::default()
     };
 
     let from = Point::new(0.0, 1.5, -5.0);

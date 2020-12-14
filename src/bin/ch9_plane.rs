@@ -91,6 +91,7 @@ fn main() {
             left, middle, middle2, right,
         ],
         lights: vec![light1],
+        ..Default::default()
     };
 
     let from = Point::new(0.0, 1.5, -5.0);

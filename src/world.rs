@@ -6,13 +6,9 @@ use crate::{
     color::Color,
     intersection::{IntersectionState, Intersections},
     light::Light,
-    material::Material,
     object::Object,
-    pattern::Pattern,
     point::Point,
     ray::Ray,
-    transformation::Transform,
-    tuple::Tuple,
 };
 
 // --------------------------------------------------------------------------------------------- //
@@ -22,16 +18,20 @@ use crate::{
 pub struct World {
     pub objects: Vec<Object>,
     pub lights: Vec<Light>,
+    pub recursion_limit: u8,
 }
 
 // --------------------------------------------------------------------------------------------- //
 
 impl World {
-    pub fn new() -> World {
-        World {
-            objects: vec![],
-            lights: vec![],
-        }
+    pub fn color_at(&self, ray: &Ray) -> Color {
+        let recursion_limit = if self.recursion_limit == 0 {
+            1
+        } else {
+            self.recursion_limit
+        };
+
+        self.color_at_impl(ray, recursion_limit)
     }
 
     pub fn color_at(&self, ray: &Ray) -> Color {
@@ -95,6 +95,25 @@ impl World {
 impl Default for World {
     fn default() -> Self {
         World {
+            objects: vec![],
+            lights: vec![],
+            recursion_limit: 4,
+        }
+    }
+}
+
+// --------------------------------------------------------------------------------------------- //
+
+#[cfg(test)]
+pub mod tests {
+    use super::*;
+    use crate::{
+        intersection::Intersection, material::Material, pattern::Pattern,
+        transformation::Transform, tuple::Tuple, vector::Vector,
+    };
+
+    pub fn default_world() -> World {
+        World {
             objects: vec![
                 Object::new_sphere().with_material(
                     Material::new()
@@ -105,22 +124,13 @@ impl Default for World {
                 Object::new_sphere().scale(0.5, 0.5, 0.5),
             ],
             lights: vec![Light::new(Color::white(), Point::new(-10.0, 10.0, -10.0))],
+            ..Default::default()
         }
     }
-}
-
-// --------------------------------------------------------------------------------------------- //
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::{intersection::Intersection, object::Object, vector::Vector};
 
     #[test]
     fn intersects_a_world_with_a_ray() {
-        let w = World {
-            ..Default::default()
-        };
+        let w = default_world();
 
         let ray = Ray {
             origin: Point::new(0.0, 0.0, -5.0),
@@ -138,9 +148,7 @@ mod tests {
 
     #[test]
     fn shading_an_intersection() {
-        let w = World {
-            ..Default::default()
-        };
+        let w = default_world();
 
         let ray = Ray {
             origin: Point::new(0.0, 0.0, -5.0),
@@ -163,7 +171,7 @@ mod tests {
                 intensity: Color::white(),
                 position: Point::new(0.0, 0.25, 0.0),
             }],
-            ..Default::default()
+            ..default_world()
         };
 
         let ray = Ray {
@@ -190,6 +198,7 @@ mod tests {
                 position: Point::new(0.0, 0.0, -10.0),
             }],
             objects: vec![s1],
+            ..Default::default()
         };
 
         let ray = Ray {
@@ -206,9 +215,7 @@ mod tests {
 
     #[test]
     fn the_color_when_a_ray_misses() {
-        let w = World {
-            ..Default::default()
-        };
+        let w = default_world();
 
         let ray = Ray {
             origin: Point::new(0.0, 0.0, -5.0),
@@ -220,9 +227,7 @@ mod tests {
 
     #[test]
     fn the_color_when_a_ray_hits() {
-        let w = World {
-            ..Default::default()
-        };
+        let w = default_world();
 
         let ray = Ray {
             origin: Point::new(0.0, 0.0, -5.0),
@@ -248,7 +253,7 @@ mod tests {
 
         let w = World {
             objects: vec![outer, inner],
-            ..Default::default()
+            ..default_world()
         };
 
         let ray = Ray {
@@ -261,27 +266,21 @@ mod tests {
 
     #[test]
     fn there_is_no_shadow_when_nothing_is_collinear_with_point_and_light() {
-        let w = World {
-            ..Default::default()
-        };
+        let w = default_world();
 
         assert_eq!(w.is_shadowed(&Point::new(0.0, 10.0, 0.0)), false);
     }
 
     #[test]
     fn shadow_when_an_object_is_between_the_point_and_the_light() {
-        let w = World {
-            ..Default::default()
-        };
+        let w = default_world();
 
         assert_eq!(w.is_shadowed(&Point::new(10.0, -10.0, 10.0)), true);
     }
 
     #[test]
     fn there_is_no_shadow_when_an_object_is_behind_the_light() {
-        let w = World {
-            ..Default::default()
-        };
+        let w = default_world();
 
         assert_eq!(w.is_shadowed(&Point::new(-20.0, 20.0, -20.0)), false);
     }
