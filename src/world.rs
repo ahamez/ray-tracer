@@ -116,7 +116,7 @@ impl World {
             let intersections = self.intersects(&ray);
 
             if let Some(hit) = intersections.hit() {
-                if hit.t < distance {
+                if hit.object.has_shadow() && hit.t < distance {
                     return true;
                 }
             }

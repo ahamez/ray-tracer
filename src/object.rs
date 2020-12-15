@@ -9,10 +9,11 @@ use crate::{
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Object {
+    has_shadow: bool,
+    material: Material,
     shape: Shape,
     transformation: Matrix,
     transformation_inverse: Matrix,
-    material: Material,
 }
 
 // --------------------------------------------------------------------------------------------- //
@@ -32,14 +33,19 @@ impl Object {
         }
     }
 
-    pub fn with_transformation(mut self, transformation: Matrix) -> Self {
-        self.transformation = transformation;
-        self.transformation_inverse = transformation.invert().unwrap();
+    pub fn with_shadow(mut self, has_shadow: bool) -> Self {
+        self.has_shadow = has_shadow;
         self
     }
 
     pub fn with_material(mut self, material: Material) -> Self {
         self.material = material;
+        self
+    }
+
+    pub fn with_transformation(mut self, transformation: Matrix) -> Self {
+        self.transformation = transformation;
+        self.transformation_inverse = transformation.invert().unwrap();
         self
     }
 
@@ -58,6 +64,10 @@ impl Object {
         let world_normal = self.transformation_inverse.transpose() * object_normal;
 
         world_normal.normalize()
+    }
+
+    pub fn has_shadow(&self) -> bool {
+        self.has_shadow
     }
 
     pub fn material(&self) -> &Material {
@@ -82,10 +92,11 @@ impl Object {
 impl Default for Object {
     fn default() -> Self {
         Object {
+            has_shadow: true,
+            material: Material::new(),
             shape: Shape::Sphere(),
             transformation: Matrix::id(),
             transformation_inverse: Matrix::id(),
-            material: Material::new(),
         }
     }
 }

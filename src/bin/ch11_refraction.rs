@@ -61,7 +61,8 @@ fn main() {
                 .with_transparency(1.0)
                 .with_refractive_index(1.5),
         )
-        .translate(0.0, 1.0, 0.0);
+        .with_shadow(false)
+        .translate(0.0, 1.5, 0.0);
 
     let blue_ball = Object::new_sphere()
         .with_material(
