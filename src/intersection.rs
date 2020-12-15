@@ -91,6 +91,7 @@ impl std::ops::Index<usize> for Intersections {
 
 #[derive(Debug)]
 pub struct IntersectionState {
+    cos_i: f64,
     eye_v: Vector,
     inside: bool,
     n1: f64,
@@ -150,7 +151,7 @@ impl IntersectionState {
 
         let eye_v = -ray.direction;
         let normal_v = intersection.object.normal_at(&point);
-        let (inside, normal_v) = if (normal_v ^ eye_v) < 0.0 {
+        let (inside, normal_v) = if normal_v ^ eye_v < 0.0 {
             (true, -normal_v)
         } else {
             (false, normal_v)
@@ -160,6 +161,7 @@ impl IntersectionState {
         let under_point = point - normal_v * EPSILON;
 
         IntersectionState {
+            cos_i: normal_v ^ eye_v,
             eye_v,
             inside,
             n1: n1.unwrap_or(1.0),
@@ -172,6 +174,10 @@ impl IntersectionState {
             t: intersection.t,
             under_point,
         }
+    }
+
+    pub fn cos_i(&self) -> f64 {
+        self.cos_i
     }
 
     pub fn eye_v(&self) -> Vector {

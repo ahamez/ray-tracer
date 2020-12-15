@@ -135,7 +135,7 @@ impl World {
         } else {
             let (n1, n2) = comps.n();
             let n_ratio = n1 / n2;
-            let cos_i = comps.eye_v() ^ comps.normal_v();
+            let cos_i = comps.cos_i();
             let sin2_t = n_ratio * n_ratio * (1.0 - cos_i * cos_i);
 
             if sin2_t > 1.0 {
