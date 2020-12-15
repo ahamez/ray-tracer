@@ -86,9 +86,20 @@ impl World {
                 is_shadowed,
             );
 
-            acc + surface_color
-                + self.reflected_color(comps, remaining_recursions)
-                + self.refracted_color(comps, remaining_recursions)
+            let reflected_color = self.reflected_color(comps, remaining_recursions);
+            let refracted_color = self.refracted_color(comps, remaining_recursions);
+
+            if comps.object().material().reflective > 0.0
+                && comps.object().material().transparency > 0.0
+            {
+                let reflectance = comps.schlick();
+
+                acc + surface_color
+                    + reflected_color * reflectance
+                    + refracted_color * (1.0 - reflectance)
+            } else {
+                acc + surface_color + reflected_color + refracted_color
+            }
         })
     }
 
@@ -600,6 +611,7 @@ pub mod tests {
                     .with_refractive_index(1.5),
             )
             .translate(0.0, -1.0, 0.0);
+        w.objects.push(floor.clone());
 
         let ball = Object::new_sphere()
             .with_material(
@@ -608,8 +620,7 @@ pub mod tests {
                     .with_ambient(0.5),
             )
             .translate(0.0, -3.5, -0.5);
-
-        w.objects = vec![floor.clone(), ball];
+        w.objects.push(ball.clone());
 
         let ray = Ray {
             origin: Point::new(0.0, 0.0, -3.0),
@@ -626,6 +637,47 @@ pub mod tests {
         assert_eq!(
             w.shade_hit(&comps, 5),
             Color::new(0.93642, 0.68642, 0.68642)
+        );
+    }
+
+    #[test]
+    fn shade_hit_with_a_reflective_transparent_material() {
+        let mut w = default_world();
+
+        let floor = Object::new_plane()
+            .with_material(
+                Material::new()
+                    .with_transparency(0.5)
+                    .with_refractive_index(1.5)
+                    .with_reflective(0.5),
+            )
+            .translate(0.0, -1.0, 0.0);
+        w.objects.push(floor.clone());
+
+        let ball = Object::new_sphere()
+            .with_material(
+                Material::new()
+                    .with_color(Color::new(1.0, 0.0, 0.0))
+                    .with_ambient(0.5),
+            )
+            .translate(0.0, -3.5, -0.5);
+        w.objects.push(ball.clone());
+
+        let ray = Ray {
+            origin: Point::new(0.0, 0.0, -3.0),
+            direction: Vector::new(0.0, -f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0),
+        };
+
+        let xs = Intersections::new(vec![Intersection {
+            t: f64::sqrt(2.0),
+            object: floor,
+        }]);
+
+        let comps = IntersectionState::new(&xs, 0, &ray);
+
+        assert_eq!(
+            w.shade_hit(&comps, 5),
+            Color::new(0.93391, 0.69643, 0.69243)
         );
     }
 }

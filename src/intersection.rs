@@ -176,6 +176,25 @@ impl IntersectionState {
         }
     }
 
+    pub fn schlick(&self) -> f64 {
+        let mut cos = self.cos_i;
+
+        if self.n1 > self.n2 {
+            let n = self.n1 / self.n2;
+            let sin2_t = n.powi(2) * (1.0 - cos.powi(2));
+
+            if sin2_t > 1.0 {
+                return 1.0;
+            }
+
+            cos = (1.0 - sin2_t).sqrt();
+        }
+
+        let r0 = ((self.n1 - self.n2) / (self.n1 + self.n2)).powi(2);
+
+        r0 + (1.0 - r0) * (1.0 - cos).powi(5)
+    }
+
     pub fn cos_i(&self) -> f64 {
         self.cos_i
     }
@@ -219,8 +238,7 @@ impl IntersectionState {
 mod tests {
 
     use super::*;
-
-    use crate::{object::Object, transformation::Transform, tuple::Tuple};
+    use crate::{approx_eq::ApproxEq, object::Object, transformation::Transform, tuple::Tuple};
 
     #[test]
     fn an_intersection_encapsulates_t_and_object() {
@@ -415,6 +433,72 @@ mod tests {
 
         assert!(comps.under_point.z() > EPSILON / 2.0);
         assert!(comps.point.z() < comps.under_point.z());
+    }
+
+    #[test]
+    fn the_schlick_apporimixation_under_toal_internal_reflection() {
+        let object = crate::sphere::tests::glassy_sphere();
+        let ray = Ray {
+            origin: Point::new(0.0, 0.0, f64::sqrt(2.0) / 2.0),
+            direction: Vector::new(0.0, 1.0, 0.0),
+        };
+
+        let xs = Intersections::new(vec![
+            Intersection {
+                t: -f64::sqrt(2.0) / 2.0,
+                object: object.clone(),
+            },
+            Intersection {
+                t: f64::sqrt(2.0) / 2.0,
+                object: object.clone(),
+            },
+        ]);
+
+        let comps = IntersectionState::new(&xs, 1, &ray);
+
+        assert!(comps.schlick().approx_eq(1.0));
+    }
+
+    #[test]
+    fn the_schlick_approximation_with_a_perpendicular_viewing_angle() {
+        let object = crate::sphere::tests::glassy_sphere();
+        let ray = Ray {
+            origin: Point::new(0.0, 0.0, 0.0),
+            direction: Vector::new(0.0, 1.0, 0.0),
+        };
+
+        let xs = Intersections::new(vec![
+            Intersection {
+                t: -1.0,
+                object: object.clone(),
+            },
+            Intersection {
+                t: 1.0,
+                object: object.clone(),
+            },
+        ]);
+
+        let comps = IntersectionState::new(&xs, 1, &ray);
+
+        assert!(comps.schlick().approx_eq(0.04));
+    }
+
+    #[test]
+    fn the_schlick_approximation_with_small_angle_and_n2_greater_than_n1() {
+        let object = crate::sphere::tests::glassy_sphere();
+        let ray = Ray {
+            origin: Point::new(0.0, 0.99, -2.0),
+            direction: Vector::new(0.0, 0.0, 1.0),
+        };
+
+        let xs = Intersections::new(vec![Intersection {
+            t: 1.8589,
+            object: object.clone(),
+        }]);
+
+        let comps = IntersectionState::new(&xs, 0, &ray);
+
+        assert!(comps.schlick().approx_eq(0.48873));
     }
 }
 
