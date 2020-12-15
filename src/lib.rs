@@ -1,3 +1,4 @@
+mod approx_eq;
 pub mod camera;
 pub mod canvas;
 pub mod color;

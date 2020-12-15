@@ -1,8 +1,6 @@
 // --------------------------------------------------------------------------------------------- //
 
-use float_cmp::approx_eq;
-
-use crate::epsilon::EPSILON;
+use crate::approx_eq::ApproxEq;
 
 // --------------------------------------------------------------------------------------------- //
 
@@ -65,9 +63,7 @@ impl Color {
 
 impl PartialEq for Color {
     fn eq(&self, other: &Color) -> bool {
-        approx_eq!(f64, self.r, other.r, epsilon = EPSILON)
-            && approx_eq!(f64, self.g, other.g, epsilon = EPSILON)
-            && approx_eq!(f64, self.b, other.b, epsilon = EPSILON)
+        self.r.approx_eq(other.r) && self.g.approx_eq(other.g) && self.b.approx_eq(other.b)
     }
 }
 

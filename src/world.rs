@@ -1,6 +1,7 @@
 // --------------------------------------------------------------------------------------------- //
 
 use crate::{
+    approx_eq::ApproxEq,
     color::Color,
     intersection::{IntersectionState, Intersections},
     light::Light,
@@ -90,7 +91,7 @@ impl World {
     }
 
     fn reflected_color(&self, comps: &IntersectionState, remaining_recursions: u8) -> Color {
-        if remaining_recursions == 0 || comps.object().material().reflective == 0.0 {
+        if remaining_recursions == 0 || comps.object().material().reflective.approx_eq(0.0) {
             Color::black()
         } else {
             let reflect_ray = Ray {
@@ -105,7 +106,7 @@ impl World {
     }
 
     fn refracted_color(&self, comps: &IntersectionState, remaining_recursions: u8) -> Color {
-        if remaining_recursions == 0 || comps.object().material().transparency == 0.0 {
+        if remaining_recursions == 0 || comps.object().material().transparency.approx_eq(0.0) {
             Color::black()
         } else {
             let (n1, n2) = comps.n();

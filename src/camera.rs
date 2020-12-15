@@ -128,25 +128,24 @@ impl Transform for Camera {
 
 #[cfg(test)]
 mod tests {
-    use float_cmp::approx_eq;
     use std::f64::consts::PI;
 
     use super::*;
     use crate::{
-        color::Color, epsilon::EPSILON, point::Point, transformation::view_transform, tuple::Tuple,
-        vector::Vector,
+        approx_eq::ApproxEq, color::Color, point::Point, transformation::view_transform,
+        tuple::Tuple, vector::Vector,
     };
 
     #[test]
     fn pixel_size_for_a_horizontal_canvas() {
         let c = Camera::new(200, 125, PI / 2.0);
-        assert!(approx_eq!(f64, c.pixel_size, 0.01, epsilon = EPSILON));
+        assert!(c.pixel_size.approx_eq(0.01));
     }
 
     #[test]
     fn pixel_size_for_a_vertical_canvas() {
         let c = Camera::new(125, 200, PI / 2.0);
-        assert!(approx_eq!(f64, c.pixel_size, 0.01, epsilon = EPSILON));
+        assert!(c.pixel_size.approx_eq(0.01));
     }
 
     #[test]

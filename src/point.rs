@@ -1,8 +1,6 @@
 // --------------------------------------------------------------------------------------------- //
 
-use float_cmp::approx_eq;
-
-use crate::{epsilon::EPSILON, tuple::Tuple, vector::Vector};
+use crate::{approx_eq::ApproxEq, tuple::Tuple, vector::Vector};
 
 // --------------------------------------------------------------------------------------------- //
 
@@ -49,9 +47,7 @@ impl Tuple for Point {
 
 impl PartialEq for Point {
     fn eq(&self, other: &Point) -> bool {
-        approx_eq!(f64, self.x, other.x, epsilon = EPSILON)
-            && approx_eq!(f64, self.y, other.y, epsilon = EPSILON)
-            && approx_eq!(f64, self.z, other.z, epsilon = EPSILON)
+        self.x.approx_eq(other.x) && self.y.approx_eq(other.y) && self.z.approx_eq(other.z)
     }
 }
 

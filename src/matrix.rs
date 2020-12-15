@@ -1,8 +1,6 @@
 // --------------------------------------------------------------------------------------------- //
 
-use float_cmp::approx_eq;
-
-use crate::{epsilon::EPSILON, tuple::Tuple};
+use crate::{approx_eq::ApproxEq, tuple::Tuple};
 
 // --------------------------------------------------------------------------------------------- //
 
@@ -49,7 +47,7 @@ impl Matrix {
     pub fn invert(&self) -> Option<Matrix> {
         let determinant = self.determinant();
 
-        if approx_eq!(f64, determinant, 0.0, epsilon = 0.001) {
+        if determinant.approx_eq(0.0) {
             None
         } else {
             let mut res = Matrix::new(self.size);
@@ -127,7 +125,7 @@ impl PartialEq for Matrix {
 
         for i in 0..self.size {
             for j in 0..self.size {
-                if !approx_eq!(f64, self[i][j], other[i][j], epsilon = EPSILON) {
+                if !self[i][j].approx_eq(other[i][j]) {
                     return false;
                 }
             }

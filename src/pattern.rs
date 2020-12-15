@@ -1,8 +1,8 @@
 // --------------------------------------------------------------------------------------------- //
 
 use crate::{
-    color::Color, matrix::Matrix, object::Object, point::Point, transformation::Transform,
-    tuple::Tuple,
+    approx_eq::ApproxEq, color::Color, matrix::Matrix, object::Object, point::Point,
+    transformation::Transform, tuple::Tuple,
 };
 
 // --------------------------------------------------------------------------------------------- //
@@ -130,7 +130,7 @@ pub struct CheckerPattern {
 impl CheckerPattern {
     fn pattern_at(&self, point: &Point) -> Color {
         let sum = point.x().floor() + point.y().floor() + point.z().floor();
-        if sum % 2.0 == 0.0 {
+        if (sum % 2.0).approx_eq(0.0) {
             self.c1
         } else {
             self.c2
