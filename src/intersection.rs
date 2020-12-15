@@ -51,7 +51,7 @@ pub struct Intersections(Vec<Intersection>);
 
 impl Intersections {
     pub fn new(mut is: Vec<Intersection>) -> Self {
-        is.sort();
+        is.sort_unstable();
         Intersections(is)
     }
 
