@@ -566,7 +566,7 @@ pub mod tests {
     }
 
     #[test]
-    fn shade_hot_with_a_transparent_material() {
+    fn shade_hit_with_a_transparent_material() {
         let mut w = default_world();
 
         let floor = Object::new_plane()
