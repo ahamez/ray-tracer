@@ -95,11 +95,9 @@ fn main() {
         position: Point::new(-10.0, 10.0, -10.0),
     };
 
-    let world = World {
-        objects: vec![floor, wall, sphere, sphere2, sphere3],
-        lights: vec![light],
-        ..Default::default()
-    };
+    let world = World::new()
+        .with_objects(vec![floor, wall, sphere, sphere2, sphere3])
+        .with_lights(vec![light]);
 
     let from = Point::new(-1.0, 2.0, -9.0);
     let to = Point::new(0.0, 1.0, 0.0);

@@ -45,7 +45,7 @@ fn main() {
             Material::new()
                 .with_diffuse(0.7)
                 .with_specular(0.3)
-                .with_transparency(0.5)
+                .with_transparency(0.5),
         )
         .translate(0.0, 2.0, -6.0);
 
@@ -54,11 +54,10 @@ fn main() {
         position: Point::new(-10.0, 10.0, -10.0),
     };
 
-    let world = World {
-        objects: vec![floor, sphere, transparent_sphere],
-        lights: vec![light],
-        recursion_limit: 5,
-    };
+    let world = World::new()
+        .with_objects(vec![floor, sphere, transparent_sphere])
+        .with_lights(vec![light])
+        .with_recursion_limit(5);
 
     let from = Point::new(-1.0, 2.0, -9.0);
     let to = Point::new(0.0, 1.0, 0.0);

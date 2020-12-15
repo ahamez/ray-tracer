@@ -100,8 +100,8 @@ fn main() {
         position: Point::new(-5.0, 10.0, -10.0),
     };
 
-    let world = World {
-        objects: vec![
+    let world = World::new()
+        .with_objects(vec![
             floor,
             wall_left,
             wall_right,
@@ -109,10 +109,9 @@ fn main() {
             blue_ball,
             red_ball,
             green_ball,
-        ],
-        lights: vec![light],
-        recursion_limit: 5,
-    };
+        ])
+        .with_lights(vec![light])
+        .with_recursion_limit(5);
 
     let from = Point::new(5.0, 1.5, -5.5);
     let to = Point::new(0.0, 0.7, 0.0);

@@ -15,22 +15,46 @@ use crate::{
 #[derive(Debug)]
 
 pub struct World {
-    pub objects: Vec<Object>,
-    pub lights: Vec<Light>,
-    pub recursion_limit: u8,
+    objects: Vec<Object>,
+    lights: Vec<Light>,
+    recursion_limit: u8,
 }
 
 // --------------------------------------------------------------------------------------------- //
 
 impl World {
-    pub fn color_at(&self, ray: &Ray) -> Color {
-        let recursion_limit = if self.recursion_limit == 0 {
-            1
-        } else {
-            self.recursion_limit
-        };
+    pub fn new() -> Self {
+        Self {
+            ..Default::default()
+        }
+    }
 
-        self.color_at_impl(ray, recursion_limit)
+    pub fn with_recursion_limit(mut self, limit: u8) -> Self {
+        self.recursion_limit = if limit == 0 { 1 } else { limit };
+
+        self
+    }
+
+    pub fn with_objects(mut self, objects: Vec<Object>) -> Self {
+        self.objects = objects;
+        self
+    }
+
+    pub fn with_lights(mut self, lights: Vec<Light>) -> Self {
+        self.lights = lights;
+        self
+    }
+
+    pub fn objects(&self) -> &Vec<Object> {
+        &self.objects
+    }
+
+    pub fn lights(&self) -> &Vec<Light> {
+        &self.lights
+    }
+
+    pub fn color_at(&self, ray: &Ray) -> Color {
+        self.color_at_impl(ray, self.recursion_limit)
     }
 
     fn color_at_impl(&self, ray: &Ray, remaining_recursions: u8) -> Color {
