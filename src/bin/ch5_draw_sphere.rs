@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------- //
 
-use std::f64::consts::PI;
+use std::{f64::consts::PI, sync::Arc};
 
 use ray_tracer::{
     canvas::Canvas, color::Color, object::Object, point::Point, ray::Ray,
@@ -21,13 +21,15 @@ fn main() {
     let half = wall_size / 2.0;
 
     let color: Color = Color::red();
-    let shape = Object::new_sphere()
-        .shear(1.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-        .rotate_z(PI / 4.0)
-        // .rotate_y(PI / 4.0)
-        .scale(1.0, 0.5, 1.0)
-        .scale(0.7, 1.0, 1.0)
-        .translate(0.0, 0.0, 1.0);
+    let shape = Arc::new(
+        Object::new_sphere()
+            .shear(1.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+            .rotate_z(PI / 4.0)
+            // .rotate_y(PI / 4.0)
+            .scale(1.0, 0.5, 1.0)
+            .scale(0.7, 1.0, 1.0)
+            .translate(0.0, 0.0, 1.0),
+    );
 
     for y in 0..CANVAS_PIXELS {
         let target_y = half - pixel_size * y as f64;

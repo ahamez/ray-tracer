@@ -1,5 +1,7 @@
 // --------------------------------------------------------------------------------------------- //
 
+use std::sync::Arc;
+
 use ray_tracer::{
     canvas::Canvas, color::Color, light::Light, material::Material, object::Object, point::Point,
     ray::Ray, transformation::Transform, tuple::Tuple,
@@ -20,15 +22,13 @@ fn main() {
 
     let material = Material::new().with_color(Color::new(1.0, 0.2, 1.0));
 
-    let object = Object::new_sphere()
-        .with_material(material)
-        // .rotate_z(3.14 / 4.0)
-        // .rotate_y(3.14 / 2.0)
-        .shear(1.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-        .scale(1.0, 0.5, 1.0)
-        .scale(0.7, 1.0, 1.0)
-        // .translate(0.0, 0.0, 1.0)
-        ;
+    let object = Arc::new(
+        Object::new_sphere()
+            .with_material(material)
+            .shear(1.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+            .scale(1.0, 0.5, 1.0)
+            .scale(0.7, 1.0, 1.0),
+    );
 
     let light_position = Point::new(-10.0, 10.0, -10.0);
     let light_color = Color::new(1.0, 1.0, 1.0);

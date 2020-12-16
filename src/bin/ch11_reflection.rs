@@ -2,7 +2,7 @@
 
 #![allow(unused_variables)]
 
-use std::f64::consts::PI;
+use std::{f64::consts::PI, sync::Arc};
 
 use ray_tracer::{
     camera::Camera,
@@ -21,33 +21,39 @@ use ray_tracer::{
 // --------------------------------------------------------------------------------------------- //
 
 fn main() {
-    let floor = Object::new_plane().with_material(
-        Material::new()
-            .with_pattern(Pattern::new_checker(
-                Color::white(),
-                Color::new(0.5, 0.5, 0.5),
-            ))
-            .with_reflective(0.3),
+    let floor = Arc::new(
+        Object::new_plane().with_material(
+            Material::new()
+                .with_pattern(Pattern::new_checker(
+                    Color::white(),
+                    Color::new(0.5, 0.5, 0.5),
+                ))
+                .with_reflective(0.3),
+        ),
     );
 
-    let sphere = Object::new_sphere()
-        .with_material(
-            Material::new()
-                .with_pattern(Pattern::new_gradient(Color::blue(), Color::black()))
-                .with_diffuse(0.7)
-                .with_specular(0.3)
-                .with_reflective(1.0),
-        )
-        .translate(-1.3, 1.5, -4.0);
+    let sphere = Arc::new(
+        Object::new_sphere()
+            .with_material(
+                Material::new()
+                    .with_pattern(Pattern::new_gradient(Color::blue(), Color::black()))
+                    .with_diffuse(0.7)
+                    .with_specular(0.3)
+                    .with_reflective(1.0),
+            )
+            .translate(-1.3, 1.5, -4.0),
+    );
 
-    let transparent_sphere = Object::new_sphere()
-        .with_material(
-            Material::new()
-                .with_diffuse(0.7)
-                .with_specular(0.3)
-                .with_transparency(0.5),
-        )
-        .translate(0.0, 2.0, -6.0);
+    let transparent_sphere = Arc::new(
+        Object::new_sphere()
+            .with_material(
+                Material::new()
+                    .with_diffuse(0.7)
+                    .with_specular(0.3)
+                    .with_transparency(0.5),
+            )
+            .translate(0.0, 2.0, -6.0),
+    );
 
     let light = Light {
         intensity: Color::white(),

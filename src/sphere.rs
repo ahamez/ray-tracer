@@ -46,7 +46,7 @@ impl Sphere {
 
 #[cfg(test)]
 pub mod tests {
-    use std::vec;
+    use std::sync::Arc;
 
     use super::*;
 
@@ -222,18 +222,22 @@ pub mod tests {
 
     #[test]
     fn finding_n1_and_n2_at_various_intersections() {
-        let a = glassy_sphere().scale(2.0, 2.0, 2.0);
-        let b = glassy_sphere().translate(0.0, 0.0, -0.25).with_material(
-            glassy_sphere()
-                .material()
-                .clone()
-                .with_refractive_index(2.0),
+        let a = Arc::new(glassy_sphere().scale(2.0, 2.0, 2.0));
+        let b = Arc::new(
+            glassy_sphere().translate(0.0, 0.0, -0.25).with_material(
+                glassy_sphere()
+                    .material()
+                    .clone()
+                    .with_refractive_index(2.0),
+            ),
         );
-        let c = glassy_sphere().translate(0.0, 0.0, 0.25).with_material(
-            glassy_sphere()
-                .material()
-                .clone()
-                .with_refractive_index(2.5),
+        let c = Arc::new(
+            glassy_sphere().translate(0.0, 0.0, 0.25).with_material(
+                glassy_sphere()
+                    .material()
+                    .clone()
+                    .with_refractive_index(2.5),
+            ),
         );
 
         let ray = Ray {
@@ -254,18 +258,9 @@ pub mod tests {
                 t: 3.25,
                 object: c.clone(),
             },
-            Intersection {
-                t: 4.75,
-                object: b.clone(),
-            },
-            Intersection {
-                t: 5.25,
-                object: c.clone(),
-            },
-            Intersection {
-                t: 6.0,
-                object: a.clone(),
-            },
+            Intersection { t: 4.75, object: b },
+            Intersection { t: 5.25, object: c },
+            Intersection { t: 6.0, object: a },
         ]);
 
         assert_eq!(IntersectionState::new(&xs, 0, &ray).n(), (1.0, 1.5));

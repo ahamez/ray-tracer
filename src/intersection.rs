@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------- //
 
-use std::cmp::Ordering;
+use std::{cmp::Ordering, sync::Arc};
 
 use crate::{epsilon::EPSILON, object::Object, point::Point, ray::Ray, vector::Vector};
 
@@ -9,7 +9,7 @@ use crate::{epsilon::EPSILON, object::Object, point::Point, ray::Ray, vector::Ve
 #[derive(Clone, Debug, PartialEq)]
 pub struct Intersection {
     pub t: f64,
-    pub object: Object,
+    pub object: Arc<Object>,
 }
 
 // --------------------------------------------------------------------------------------------- //
@@ -97,7 +97,7 @@ pub struct IntersectionState {
     n1: f64,
     n2: f64,
     normal_v: Vector,
-    object: Object,
+    object: Arc<Object>,
     over_point: Point,
     point: Point,
     reflect_v: Vector,
@@ -128,7 +128,7 @@ impl IntersectionState {
             match containers
                 .iter()
                 // TODO. Avoid this deep comparison. We should compare using unique ids (with Arc ???)
-                .position(|&object| *object == i.object)
+                .position(|&object| *object == *i.object.as_ref())
             {
                 Some(pos) => {
                     containers.remove(pos);
@@ -242,7 +242,7 @@ mod tests {
 
     #[test]
     fn an_intersection_encapsulates_t_and_object() {
-        let object = Object::new_sphere();
+        let object = Arc::new(Object::new_sphere());
         let t = 3.5;
         let i = Intersection {
             t,
@@ -257,15 +257,15 @@ mod tests {
     fn sort_intersections() {
         let i0 = Intersection {
             t: 1.0,
-            object: Object::new_sphere(),
+            object: Arc::new(Object::new_sphere()),
         };
         let i1 = Intersection {
             t: -1.0,
-            object: Object::new_sphere(),
+            object: Arc::new(Object::new_sphere()),
         };
         let i2 = Intersection {
             t: 0.0,
-            object: Object::new_sphere(),
+            object: Arc::new(Object::new_sphere()),
         };
 
         let mut vec = vec![i0.clone(), i1.clone(), i2.clone()];
@@ -276,7 +276,7 @@ mod tests {
 
     #[test]
     fn hit_when_all_intersections_have_positive_t() {
-        let object = Object::new_sphere();
+        let object = Arc::new(Object::new_sphere());
 
         let i0 = Intersection {
             t: 1.0,
@@ -292,7 +292,7 @@ mod tests {
 
     #[test]
     fn hit_when_some_intersections_have_negative_t() {
-        let object = Object::new_sphere();
+        let object = Arc::new(Object::new_sphere());
 
         let i0 = Intersection {
             t: -1.0,
@@ -308,7 +308,7 @@ mod tests {
 
     #[test]
     fn hit_when_all_intersections_have_negative_t() {
-        let object = Object::new_sphere();
+        let object = Arc::new(Object::new_sphere());
 
         let i0 = Intersection {
             t: -1.0,
@@ -324,7 +324,7 @@ mod tests {
 
     #[test]
     fn hit_is_always_the_lowest_nonnegative_intersection() {
-        let object = Object::new_sphere();
+        let object = Arc::new(Object::new_sphere());
 
         let i0 = Intersection {
             t: 5.0,
@@ -354,7 +354,7 @@ mod tests {
         };
         let i = Intersection {
             t: 4.0,
-            object: Object::new_sphere(),
+            object: Arc::new(Object::new_sphere()),
         };
         let comps = IntersectionState::new(&Intersections::new(vec![i.clone()]), 0, &r);
 
@@ -374,7 +374,7 @@ mod tests {
         };
         let i = Intersection {
             t: 1.0,
-            object: Object::new_sphere(),
+            object: Arc::new(Object::new_sphere()),
         };
         let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &r);
 
@@ -391,7 +391,7 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let object = Object::new_sphere().translate(0.0, 0.0, 1.0);
+        let object = Arc::new(Object::new_sphere().translate(0.0, 0.0, 1.0));
 
         let i = Intersection { t: 5.0, object };
 
@@ -410,7 +410,7 @@ mod tests {
             origin: Point::new(0.0, 1.0, -1.0),
             direction: Vector::new(0.0, -half_sqrt2, half_sqrt2),
         };
-        let object = Object::new_plane();
+        let object = Arc::new(Object::new_plane());
         let i = Intersection { t: sqrt2, object };
 
         let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
@@ -425,7 +425,7 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let object = crate::sphere::tests::glassy_sphere().translate(0.0, 0.0, 1.0);
+        let object = Arc::new(crate::sphere::tests::glassy_sphere().translate(0.0, 0.0, 1.0));
 
         let i = Intersection { t: 5.0, object };
 
@@ -437,7 +437,7 @@ mod tests {
 
     #[test]
     fn the_schlick_apporimixation_under_toal_internal_reflection() {
-        let object = crate::sphere::tests::glassy_sphere();
+        let object = Arc::new(crate::sphere::tests::glassy_sphere());
         let ray = Ray {
             origin: Point::new(0.0, 0.0, f64::sqrt(2.0) / 2.0),
             direction: Vector::new(0.0, 1.0, 0.0),
@@ -450,7 +450,7 @@ mod tests {
             },
             Intersection {
                 t: f64::sqrt(2.0) / 2.0,
-                object: object.clone(),
+                object,
             },
         ]);
 
@@ -461,7 +461,7 @@ mod tests {
 
     #[test]
     fn the_schlick_approximation_with_a_perpendicular_viewing_angle() {
-        let object = crate::sphere::tests::glassy_sphere();
+        let object = Arc::new(crate::sphere::tests::glassy_sphere());
         let ray = Ray {
             origin: Point::new(0.0, 0.0, 0.0),
             direction: Vector::new(0.0, 1.0, 0.0),
@@ -472,10 +472,7 @@ mod tests {
                 t: -1.0,
                 object: object.clone(),
             },
-            Intersection {
-                t: 1.0,
-                object: object.clone(),
-            },
+            Intersection { t: 1.0, object },
         ]);
 
         let comps = IntersectionState::new(&xs, 1, &ray);
@@ -485,16 +482,13 @@ mod tests {
 
     #[test]
     fn the_schlick_approximation_with_small_angle_and_n2_greater_than_n1() {
-        let object = crate::sphere::tests::glassy_sphere();
+        let object = Arc::new(crate::sphere::tests::glassy_sphere());
         let ray = Ray {
             origin: Point::new(0.0, 0.99, -2.0),
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let xs = Intersections::new(vec![Intersection {
-            t: 1.8589,
-            object: object.clone(),
-        }]);
+        let xs = Intersections::new(vec![Intersection { t: 1.8589, object }]);
 
         let comps = IntersectionState::new(&xs, 0, &ray);
 

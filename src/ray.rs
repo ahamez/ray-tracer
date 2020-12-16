@@ -1,5 +1,7 @@
 // --------------------------------------------------------------------------------------------- //
 
+use std::sync::Arc;
+
 use crate::{
     intersection::{Intersection, Intersections},
     matrix::Matrix,
@@ -24,7 +26,7 @@ impl Ray {
         self.origin + self.direction * t
     }
 
-    pub fn intersects(&self, objects: &[Object]) -> Intersections {
+    pub fn intersects(&self, objects: &[Arc<Object>]) -> Intersections {
         let mut is = Vec::<Intersection>::with_capacity(16);
         objects.iter().for_each(|object| {
             object.intersects(self, |t: f64| {

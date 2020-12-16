@@ -2,7 +2,7 @@
 
 #![allow(unused_variables)]
 
-use std::f64::consts::PI;
+use std::{f64::consts::PI, sync::Arc};
 
 use ray_tracer::{
     camera::Camera,
@@ -21,74 +21,79 @@ use ray_tracer::{
 // --------------------------------------------------------------------------------------------- //
 
 fn main() {
-    let floor =
-        // Object::new_plane().with_material(Material::new().with_pattern(Pattern::new_stripe(vec![
-        //     Color::new(0.5, 0.5, 0.5),
-        //     Color::white(),
-        //     Color::new(0.7, 0.6, 0.7),
-        // ])));
+    let floor = Arc::new(
+        Object::new_plane().with_material(Material::new().with_pattern(Pattern::new_checker(
+            Color::white(),
+            Color::new(0.5, 0.5, 0.5),
+        ))),
+    );
 
-        Object::new_plane().with_material(Material::new().
-            with_pattern(Pattern::new_checker(Color::white(), Color::new(0.5, 0.5, 0.5))));
-
-    let wall = Object::new_plane()
-        .with_material(
-            Material::new().with_pattern(
-                Pattern::new_ring(vec![
-                    Color::new(0.5, 0.5, 0.5),
-                    Color::white(),
-                    Color::new(0.7, 0.6, 0.7),
-                ])
-                .shear(1.0, 1.0, 0.0, 0.0, 0.0, 0.0),
-            ),
-        )
-        .translate(0.0, 0.0, 5.0)
-        .rotate_x(PI / 2.0);
-
-    let sphere = Object::new_sphere()
-        .with_material(
-            Material::new()
-                .with_pattern(
+    let wall = Arc::new(
+        Object::new_plane()
+            .with_material(
+                Material::new().with_pattern(
                     Pattern::new_ring(vec![
                         Color::new(0.5, 0.5, 0.5),
                         Color::white(),
-                        Color::black(),
                         Color::new(0.7, 0.6, 0.7),
                     ])
-                    .scale(0.2, 0.2, 0.2),
-                )
-                .with_diffuse(0.7)
-                .with_specular(0.3),
-        )
-        .translate(-3.0, 1.5, -4.0)
-        .scale(1.5, 1.5, 1.5);
+                    .shear(1.0, 1.0, 0.0, 0.0, 0.0, 0.0),
+                ),
+            )
+            .translate(0.0, 0.0, 5.0)
+            .rotate_x(PI / 2.0),
+    );
 
-    let sphere2 = Object::new_sphere()
-        .with_material(
-            Material::new()
-                .with_pattern(Pattern::new_stripe(vec![
-                    Color::new(0.5, 0.5, 0.5),
-                    Color::white(),
-                    Color::new(0.7, 0.6, 0.7),
-                ]))
-                .with_diffuse(0.7)
-                .with_specular(0.3),
-        )
-        .translate(3.0, 1.5, -4.0)
-        .scale(1.5, 1.5, 1.5);
+    let sphere = Arc::new(
+        Object::new_sphere()
+            .with_material(
+                Material::new()
+                    .with_pattern(
+                        Pattern::new_ring(vec![
+                            Color::new(0.5, 0.5, 0.5),
+                            Color::white(),
+                            Color::black(),
+                            Color::new(0.7, 0.6, 0.7),
+                        ])
+                        .scale(0.2, 0.2, 0.2),
+                    )
+                    .with_diffuse(0.7)
+                    .with_specular(0.3),
+            )
+            .translate(-3.0, 1.5, -4.0)
+            .scale(1.5, 1.5, 1.5),
+    );
 
-    let sphere3 = Object::new_sphere()
-        .with_material(
-            Material::new()
-                .with_pattern(Pattern::new_gradient(
-                    Color::new(0.7, 0.6, 0.7),
-                    Color::black(),
-                ))
-                .with_diffuse(0.7)
-                .with_specular(0.3),
-        )
-        .translate(0.0, 1.0, -7.0)
-        .scale(0.33, 0.33, 0.33);
+    let sphere2 = Arc::new(
+        Object::new_sphere()
+            .with_material(
+                Material::new()
+                    .with_pattern(Pattern::new_stripe(vec![
+                        Color::new(0.5, 0.5, 0.5),
+                        Color::white(),
+                        Color::new(0.7, 0.6, 0.7),
+                    ]))
+                    .with_diffuse(0.7)
+                    .with_specular(0.3),
+            )
+            .translate(3.0, 1.5, -4.0)
+            .scale(1.5, 1.5, 1.5),
+    );
+
+    let sphere3 = Arc::new(
+        Object::new_sphere()
+            .with_material(
+                Material::new()
+                    .with_pattern(Pattern::new_gradient(
+                        Color::new(0.7, 0.6, 0.7),
+                        Color::black(),
+                    ))
+                    .with_diffuse(0.7)
+                    .with_specular(0.3),
+            )
+            .translate(0.0, 1.0, -7.0)
+            .scale(0.33, 0.33, 0.33),
+    );
 
     let light = Light {
         intensity: Color::white(),

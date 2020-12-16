@@ -2,7 +2,7 @@
 
 #![allow(unused_variables)]
 
-use std::f64::consts::PI;
+use std::{f64::consts::PI, sync::Arc};
 
 use ray_tracer::{
     camera::Camera,
@@ -24,51 +24,61 @@ fn main() {
         .with_color(Color::new(1.0, 0.9, 0.9))
         .with_specular(0.0);
 
-    let floor = Object::new_plane().with_material(material.clone());
+    let floor = Arc::new(Object::new_plane().with_material(material.clone()));
 
-    let wall = Object::new_plane()
-        .with_material(material.with_color(Color::new(0.0, 0.8, 0.8)))
-        .translate(0.0, 0.0, 5.0)
-        .rotate_x(PI / 2.0);
+    let wall = Arc::new(
+        Object::new_plane()
+            .with_material(material.with_color(Color::new(0.0, 0.8, 0.8)))
+            .translate(0.0, 0.0, 5.0)
+            .rotate_x(PI / 2.0),
+    );
 
-    let left = Object::new_sphere()
-        .with_material(
-            Material::new()
-                .with_color(Color::new(1.0, 0.8, 0.1))
-                .with_diffuse(0.7)
-                .with_specular(0.3),
-        )
-        .translate(-1.5, 0.33, -0.75)
-        .scale(0.33, 0.33, 0.33);
+    let left = Arc::new(
+        Object::new_sphere()
+            .with_material(
+                Material::new()
+                    .with_color(Color::new(1.0, 0.8, 0.1))
+                    .with_diffuse(0.7)
+                    .with_specular(0.3),
+            )
+            .translate(-1.5, 0.33, -0.75)
+            .scale(0.33, 0.33, 0.33),
+    );
 
-    let middle = Object::new_sphere()
-        .with_material(
-            Material::new()
-                .with_color(Color::new(0.1, 1.0, 0.5))
-                .with_diffuse(0.7)
-                .with_specular(0.3),
-        )
-        .translate(-0.5, 1.0, 0.5);
+    let middle = Arc::new(
+        Object::new_sphere()
+            .with_material(
+                Material::new()
+                    .with_color(Color::new(0.1, 1.0, 0.5))
+                    .with_diffuse(0.7)
+                    .with_specular(0.3),
+            )
+            .translate(-0.5, 1.0, 0.5),
+    );
 
-    let middle2 = Object::new_sphere()
-        .with_material(
-            Material::new()
-                .with_color(Color::new(0.1, 1.0, 0.5))
-                .with_diffuse(0.7)
-                .with_specular(0.3),
-        )
-        .translate(-0.5, 0.5, 0.5);
+    let middle2 = Arc::new(
+        Object::new_sphere()
+            .with_material(
+                Material::new()
+                    .with_color(Color::new(0.1, 1.0, 0.5))
+                    .with_diffuse(0.7)
+                    .with_specular(0.3),
+            )
+            .translate(-0.5, 0.5, 0.5),
+    );
 
-    let right = Object::new_sphere()
-        .with_material(
-            Material::new()
-                .with_color(Color::new(0.5, 1.0, 0.1))
-                .with_diffuse(0.7)
-                .with_specular(0.3),
-        )
-        .translate(1.5, 0.5, -0.5)
-        .scale(0.5, 0.5, 0.5)
-        .shear(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    let right = Arc::new(
+        Object::new_sphere()
+            .with_material(
+                Material::new()
+                    .with_color(Color::new(0.5, 1.0, 0.1))
+                    .with_diffuse(0.7)
+                    .with_specular(0.3),
+            )
+            .translate(1.5, 0.5, -0.5)
+            .scale(0.5, 0.5, 0.5)
+            .shear(1.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+    );
 
     let light1 = Light {
         intensity: Color::white(),
