@@ -1,16 +1,14 @@
 // --------------------------------------------------------------------------------------------- //
 
-#![allow(unused_variables)]
+use std::{f64::consts::PI, rc::Rc, sync::Arc};
 
-use std::{f64::consts::PI, sync::Arc};
-
-use ray_tracer::{
-    camera::Camera,
+use crate::{
     color::Color,
     light::Light,
     material::Material,
     object::Object,
     point::Point,
+    scene::Scene,
     transformation::{view_transform, Transform},
     tuple::Tuple,
     vector::Vector,
@@ -19,34 +17,12 @@ use ray_tracer::{
 
 // --------------------------------------------------------------------------------------------- //
 
-fn main() {
+pub fn make_scene() -> Rc<Scene> {
     let material = Material::new()
         .with_color(Color::new(1.0, 0.9, 0.9))
         .with_specular(0.0);
 
-    let floor = Arc::new(
-        Object::new_sphere()
-            .with_material(material.clone())
-            .scale(10.0, 0.01, 10.0),
-    );
-
-    let left_wall = Arc::new(
-        Object::new_sphere()
-            .with_material(material.clone())
-            .translate(0.0, 0.0, 5.0)
-            .rotate_y(-PI / 4.0)
-            .rotate_x(PI / 2.0)
-            .scale(10.0, 0.01, 10.0),
-    );
-
-    let right_wall = Arc::new(
-        Object::new_sphere()
-            .with_material(material)
-            .translate(0.0, 0.0, 5.0)
-            .rotate_y(PI / 4.0)
-            .rotate_x(PI / 2.0)
-            .scale(10.0, 0.01, 10.0),
-    );
+    let floor = Arc::new(Object::new_plane().with_material(material));
 
     let left = Arc::new(
         Object::new_sphere()
@@ -91,6 +67,7 @@ fn main() {
                     .with_specular(0.3),
             )
             .translate(1.5, 0.5, -0.5)
+            .rotate_y(PI / 4.0)
             .scale(0.5, 0.5, 0.5)
             .shear(1.0, 0.0, 0.0, 0.0, 0.0, 0.0),
     );
@@ -101,31 +78,26 @@ fn main() {
     };
 
     let light2 = Light {
-        intensity: Color::red(),
+        intensity: Color::new(0.1, 0.1, 0.1),
         position: Point::new(-50.0, 10.0, -50.0),
     };
 
     let light3 = Light {
-        intensity: Color::blue(),
+        intensity: Color::new(0.1, 0.1, 0.1),
         position: Point::new(30.0, 10.0, -30.0),
     };
 
     let world = World::new()
-        .with_objects(vec![
-            floor, left_wall, right_wall, left, middle, middle2, right,
-        ])
-        .with_lights(vec![light1, light3]);
+        .with_objects(vec![floor, left, middle, middle2, right])
+        .with_lights(vec![light1, light2, light3]);
 
     let from = Point::new(0.0, 1.5, -5.0);
     let to = Point::new(0.0, 1.0, 0.0);
     let up = Vector::new(0.0, 1.0, 0.0);
 
-    let factor = 5;
-
-    let camera = Camera::new(100 * factor, 50 * factor, PI / 3.0)
-        .with_transformation(&view_transform(&from, &to, &up));
-
-    let canvas = camera.render(&world);
-
-    canvas.export("./camera.png").unwrap();
+    Rc::new(Scene {
+        world,
+        view_transform: view_transform(&from, &to, &up),
+        fov: PI / 2.0,
+    })
 }

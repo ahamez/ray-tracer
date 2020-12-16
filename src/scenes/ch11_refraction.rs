@@ -1,17 +1,15 @@
 // --------------------------------------------------------------------------------------------- //
 
-#![allow(unused_variables)]
+use std::{f64::consts::PI, rc::Rc, sync::Arc};
 
-use std::{f64::consts::PI, sync::Arc};
-
-use ray_tracer::{
-    camera::Camera,
+use crate::{
     color::Color,
     light::Light,
     material::Material,
     object::Object,
     pattern::Pattern,
     point::Point,
+    scene::Scene,
     transformation::{view_transform, Transform},
     tuple::Tuple,
     vector::Vector,
@@ -20,7 +18,7 @@ use ray_tracer::{
 
 // --------------------------------------------------------------------------------------------- //
 
-fn main() {
+pub fn make_scene() -> Rc<Scene> {
     let floor = Arc::new(
         Object::new_plane().with_material(
             Material::new()
@@ -132,12 +130,9 @@ fn main() {
     let to = Point::new(0.0, 0.7, 0.0);
     let up = Vector::new(0.0, 1.0, 0.0);
 
-    let factor = 100;
-
-    let camera = Camera::new(100 * factor, 50 * factor, PI / 3.0)
-        .with_transformation(&view_transform(&from, &to, &up));
-
-    let canvas = camera.par_render(&world);
-
-    canvas.export("./refraction.png").unwrap();
+    Rc::new(Scene {
+        world,
+        view_transform: view_transform(&from, &to, &up),
+        fov: PI / 3.0,
+    })
 }

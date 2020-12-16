@@ -218,10 +218,6 @@ impl IntersectionState {
         self.over_point
     }
 
-    pub fn point(&self) -> Point {
-        self.point
-    }
-
     pub fn reflect_v(&self) -> Vector {
         self.reflect_v
     }

@@ -1,6 +1,6 @@
 # Ray Tracer Challenge
 
-![Plane](/samples/ch9_plane.png?raw=true "Plane")
+![Plane](/samples/ch09_plane.png?raw=true "Plane")
 
 ![Pattern](/samples/ch10_pattern.png?raw=true "Pattern")
 
