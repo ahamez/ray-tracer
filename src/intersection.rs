@@ -111,7 +111,7 @@ impl IntersectionState {
     pub fn new(intersections: &Intersections, intersection_index: usize, ray: &Ray) -> Self {
         let intersection = &intersections[intersection_index];
 
-        let mut containers = Vec::<&Object>::with_capacity(intersections.len());
+        let mut containers = Vec::<&Arc<Object>>::with_capacity(intersections.len());
 
         let mut n1 = None;
         let mut n2 = None;
@@ -127,8 +127,7 @@ impl IntersectionState {
 
             match containers
                 .iter()
-                // TODO. Avoid this deep comparison. We should compare using unique ids (with Arc ???)
-                .position(|&object| *object == *i.object.as_ref())
+                .position(|object| Arc::ptr_eq(object, &i.object))
             {
                 Some(pos) => {
                     containers.remove(pos);

@@ -575,34 +575,36 @@ pub mod tests {
         let mut a = (*w.objects[0]).clone();
         a.material_mut().ambient = 1.0;
         a.material_mut().pattern = Pattern::new_test();
+        let a = Arc::new(a);
 
         let mut b = (*w.objects[1]).clone();
         b.material_mut().transparency = 1.0;
         b.material_mut().refractive_index = 1.5;
+        let b = Arc::new(b);
 
         let ray = Ray {
             origin: Point::new(0.0, 0.0, 0.1),
             direction: Vector::new(0.0, 1.0, 0.0),
         };
 
-        w.objects = vec![Arc::new(a.clone()), Arc::new(b.clone())];
+        w.objects = vec![a.clone(), b.clone()];
 
         let xs = Intersections::new(vec![
             Intersection {
                 t: -0.9899,
-                object: Arc::new(a.clone()),
+                object: a.clone(),
             },
             Intersection {
                 t: -0.4899,
-                object: Arc::new(b.clone()),
+                object: b.clone(),
             },
             Intersection {
                 t: 0.4899,
-                object: Arc::new(b),
+                object: b,
             },
             Intersection {
                 t: 0.9899,
-                object: Arc::new(a),
+                object: a,
             },
         ]);
 
