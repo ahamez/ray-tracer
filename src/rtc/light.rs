@@ -1,20 +1,23 @@
 // --------------------------------------------------------------------------------------------- //
 
-use float_cmp::approx_eq;
-
-use crate::epsilon::EPSILON;
+use crate::{primitive::Point, rtc::Color};
 
 // --------------------------------------------------------------------------------------------- //
 
-pub trait ApproxEq<Rhs = Self> {
-    fn approx_eq(self, other: Rhs) -> bool;
+#[derive(Clone, Copy, Debug)]
+pub struct Light {
+    pub intensity: Color,
+    pub position: Point,
 }
 
 // --------------------------------------------------------------------------------------------- //
 
-impl ApproxEq for f64 {
-    fn approx_eq(self, other: Self) -> bool {
-        approx_eq!(f64, self, other, epsilon = EPSILON)
+impl Light {
+    pub fn new(intensity: Color, position: Point) -> Self {
+        Light {
+            intensity,
+            position,
+        }
     }
 }
 

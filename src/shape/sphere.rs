@@ -1,6 +1,9 @@
 // --------------------------------------------------------------------------------------------- //
 
-use crate::{point::Point, ray::Ray, tuple::Tuple, vector::Vector};
+use crate::{
+    primitive::{Point, Tuple, Vector},
+    rtc::Ray,
+};
 
 // --------------------------------------------------------------------------------------------- //
 
@@ -50,14 +53,11 @@ pub mod tests {
 
     use super::*;
 
-    use crate::{
-        intersection::{Intersection, IntersectionState, Intersections},
-        material::Material,
-        object::Object,
-        transformation::{scaling, Transform},
+    use crate::rtc::{
+        scaling, Intersection, IntersectionState, Intersections, Material, Object, Transform,
     };
 
-    pub fn glassy_sphere() -> Object {
+    fn glassy_sphere() -> Object {
         Object::new_sphere().with_material(
             Material::new()
                 .with_transparency(1.0)

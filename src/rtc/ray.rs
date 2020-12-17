@@ -3,12 +3,8 @@
 use std::sync::Arc;
 
 use crate::{
-    intersection::{Intersection, Intersections},
-    matrix::Matrix,
-    object::Object,
-    point::Point,
-    transformation::Transform,
-    vector::Vector,
+    primitive::{Matrix, Point, Vector},
+    rtc::{Intersection, Intersections, Object, Transform},
 };
 
 // --------------------------------------------------------------------------------------------- //
@@ -57,7 +53,7 @@ impl Transform for Ray {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tuple::Tuple;
+    use crate::primitive::Tuple;
 
     #[test]
     fn position() {

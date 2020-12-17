@@ -1,7 +1,8 @@
 // --------------------------------------------------------------------------------------------- //
 
 use crate::{
-    color::Color, light::Light, object::Object, pattern::Pattern, point::Point, vector::Vector,
+    primitive::{Point, Vector},
+    rtc::{Color, Light, Object, Pattern},
 };
 
 // --------------------------------------------------------------------------------------------- //
@@ -125,7 +126,7 @@ impl Default for Material {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tuple::Tuple;
+    use crate::primitive::Tuple;
 
     #[test]
     fn lighting_with_the_eye_between_light_and_surface() {

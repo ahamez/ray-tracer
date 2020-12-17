@@ -1,22 +1,6 @@
-pub mod camera;
-pub mod scenes;
+pub mod scene;
 
-mod approx_eq;
-mod canvas;
-mod color;
-mod epsilon;
-mod intersection;
-mod light;
-mod material;
-mod matrix;
-mod object;
-mod pattern;
-mod plane;
-mod point;
-mod ray;
-mod scene;
-mod sphere;
-mod transformation;
-mod tuple;
-mod vector;
-mod world;
+mod float;
+mod primitive;
+mod rtc;
+mod shape;

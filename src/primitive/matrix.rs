@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------- //
 
-use crate::{approx_eq::ApproxEq, tuple::Tuple};
+use crate::{float::ApproxEq, primitive::tuple::Tuple};
 
 // --------------------------------------------------------------------------------------------- //
 
@@ -225,8 +225,7 @@ impl std::fmt::Debug for Matrix {
 
 #[cfg(test)]
 mod tests {
-    use crate::point::Point;
-    use crate::vector::Vector;
+    use crate::primitive::{point::Point, vector::Vector};
 
     use super::*;
 

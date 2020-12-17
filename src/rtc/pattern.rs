@@ -1,8 +1,9 @@
 // --------------------------------------------------------------------------------------------- //
 
 use crate::{
-    approx_eq::ApproxEq, color::Color, matrix::Matrix, object::Object, point::Point,
-    transformation::Transform, tuple::Tuple,
+    float::ApproxEq,
+    primitive::{Matrix, Point, Tuple},
+    rtc::{Color, Object, Transform},
 };
 
 // --------------------------------------------------------------------------------------------- //

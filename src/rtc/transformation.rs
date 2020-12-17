@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------- //
 
-use crate::{matrix::Matrix, point::Point, tuple::Tuple, vector::Vector};
+use crate::primitive::{Matrix, Point, Tuple, Vector};
 
 // --------------------------------------------------------------------------------------------- //
 
@@ -167,9 +167,7 @@ mod tests {
     use std::f64::consts::PI;
 
     use super::*;
-    use crate::point::Point;
-    use crate::tuple::Tuple;
-    use crate::vector::Vector;
+    use crate::primitive::{Point, Tuple, Vector};
 
     #[test]
     fn translate_point() {

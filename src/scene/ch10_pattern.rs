@@ -3,17 +3,9 @@
 use std::{f64::consts::PI, rc::Rc, sync::Arc};
 
 use crate::{
-    color::Color,
-    light::Light,
-    material::Material,
-    object::Object,
-    pattern::Pattern,
-    point::Point,
+    primitive::{Point, Tuple, Vector},
+    rtc::{view_transform, Color, Light, Material, Object, Pattern, Transform, World},
     scene::Scene,
-    transformation::{view_transform, Transform},
-    tuple::Tuple,
-    vector::Vector,
-    world::World,
 };
 
 // --------------------------------------------------------------------------------------------- //

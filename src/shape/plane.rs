@@ -1,6 +1,10 @@
 // --------------------------------------------------------------------------------------------- //
 
-use crate::{epsilon::EPSILON, point::Point, ray::Ray, tuple::Tuple, vector::Vector};
+use crate::{
+    float::EPSILON,
+    primitive::{Point, Tuple, Vector},
+    rtc::Ray,
+};
 
 // --------------------------------------------------------------------------------------------- //
 
@@ -29,7 +33,7 @@ impl Plane {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{object::Object, vector::Vector};
+    use crate::{primitive::Vector, rtc::Object};
 
     #[test]
     fn the_normal_of_a_plane_is_constant_everywhere() {

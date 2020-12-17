@@ -3,8 +3,9 @@
 use rayon::prelude::*;
 
 use crate::{
-    canvas::Canvas, matrix::Matrix, point::Point, ray::Ray, transformation::Transform,
-    tuple::Tuple, world::World,
+    primitive::{Matrix, Point, Tuple},
+    rtc::{Ray, Transform, World},
+    scene::canvas::Canvas,
 };
 
 // --------------------------------------------------------------------------------------------- //
@@ -132,8 +133,9 @@ mod tests {
 
     use super::*;
     use crate::{
-        approx_eq::ApproxEq, color::Color, point::Point, transformation::view_transform,
-        tuple::Tuple, vector::Vector,
+        float::ApproxEq,
+        primitive::{Point, Tuple, Vector},
+        rtc::{view_transform, Color},
     };
 
     #[test]
@@ -182,7 +184,7 @@ mod tests {
 
     #[test]
     fn rendering_a_world_with_a_camera() {
-        let w = crate::world::tests::default_world();
+        let w = crate::rtc::world::tests::default_world();
         let from = Point::new(0.0, 0.0, -5.0);
         let to = Point::new(0.0, 0.0, 0.0);
         let up = Vector::new(0.0, 1.0, 0.0);
@@ -195,7 +197,7 @@ mod tests {
 
     #[test]
     fn parallel_rendering_a_world_with_a_camera() {
-        let w = crate::world::tests::default_world();
+        let w = crate::rtc::world::tests::default_world();
         let from = Point::new(0.0, 0.0, -5.0);
         let to = Point::new(0.0, 0.0, 0.0);
         let up = Vector::new(0.0, 1.0, 0.0);

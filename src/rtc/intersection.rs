@@ -4,9 +4,8 @@ use std::{cmp::Ordering, sync::Arc};
 
 use crate::{
     float::EPSILON,
-    object::Object,
-    primitive::{point::Point, vector::Vector},
-    ray::Ray,
+    primitive::{Point, Vector},
+    rtc::{Object, Ray},
 };
 
 // --------------------------------------------------------------------------------------------- //
@@ -239,8 +238,9 @@ mod tests {
 
     use super::*;
     use crate::{
-        float::ApproxEq, material::Material, object::Object, primitive::tuple::Tuple,
-        transformation::Transform,
+        float::ApproxEq,
+        primitive::Tuple,
+        rtc::{Material, Object, Transform},
     };
 
     fn glassy_sphere() -> Object {

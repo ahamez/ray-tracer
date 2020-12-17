@@ -3,8 +3,8 @@
 use std::{collections::HashMap, rc::Rc};
 
 use crate::{
-    scene::Scene, scenes::ch09_plane, scenes::ch10_pattern, scenes::ch11_reflection,
-    scenes::ch11_refraction,
+    scene::ch09_plane, scene::ch10_pattern, scene::ch11_reflection, scene::ch11_refraction,
+    scene::Scene,
 };
 
 // --------------------------------------------------------------------------------------------- //

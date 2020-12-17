@@ -3,13 +3,9 @@
 use std::sync::Arc;
 
 use crate::{
-    approx_eq::ApproxEq,
-    color::Color,
-    intersection::{IntersectionState, Intersections},
-    light::Light,
-    object::Object,
-    point::Point,
-    ray::Ray,
+    float::ApproxEq,
+    primitive::Point,
+    rtc::{Color, IntersectionState, Intersections, Light, Object, Ray},
 };
 
 // --------------------------------------------------------------------------------------------- //
@@ -189,8 +185,8 @@ impl Default for World {
 pub mod tests {
     use super::*;
     use crate::{
-        intersection::Intersection, material::Material, pattern::Pattern,
-        transformation::Transform, tuple::Tuple, vector::Vector,
+        primitive::{Tuple, Vector},
+        rtc::{Intersection, Material, Pattern, Transform},
     };
 
     pub fn default_world() -> World {
