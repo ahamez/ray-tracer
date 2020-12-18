@@ -22,8 +22,12 @@ impl Cube {
         let (ytmin, ytmax) = Cube::check_axis(ray.origin.y(), ray.direction.y());
         let (ztmin, ztmax) = Cube::check_axis(ray.origin.z(), ray.direction.z());
 
-        let tmin = xtmin.max(ytmin.max(ztmin));
         let tmax = xtmax.min(ytmax.min(ztmax));
+        if tmax < 0.0 {
+            return;
+        }
+
+        let tmin = xtmin.max(ytmin.max(ztmin));
 
         if tmin <= tmax {
             push(tmin);
@@ -176,6 +180,7 @@ pub mod tests {
         test(Point::new(2.0, 0.0, 2.0), Vector::new(0.0, 0.0, -1.0));
         test(Point::new(0.0, 2.0, 2.0), Vector::new(0.0, -1.0, 0.0));
         test(Point::new(2.0, 2.0, 0.0), Vector::new(-1.0, 0.0, 0.0));
+        test(Point::new(0.0, 0.0, 2.0), Vector::new(0.0, 0.0, 1.0));
     }
 
     #[test]
