@@ -1,9 +1,10 @@
 // --------------------------------------------------------------------------------------------- //
 
-pub use approx_eq::ApproxEq;
-pub use epsilon::EPSILON;
-
-mod approx_eq;
-mod epsilon;
+#[derive(Debug)]
+pub struct Scene {
+    pub world: crate::rtc::World,
+    pub view_transform: crate::primitive::Matrix,
+    pub fov: f64,
+}
 
 // --------------------------------------------------------------------------------------------- //

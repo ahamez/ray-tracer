@@ -2,8 +2,7 @@
 
 use crate::{
     primitive::{Matrix, Point, Vector},
-    rtc::{Material, Ray, Transform},
-    shape::Shape,
+    rtc::{Material, Ray, Shape, Transform},
 };
 
 // --------------------------------------------------------------------------------------------- //

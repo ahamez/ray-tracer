@@ -4,8 +4,7 @@ use rayon::prelude::*;
 
 use crate::{
     primitive::{Matrix, Point, Tuple},
-    rtc::{Ray, Transform, World},
-    scene::canvas::Canvas,
+    rtc::{Canvas, Ray, Transform, World},
 };
 
 // --------------------------------------------------------------------------------------------- //

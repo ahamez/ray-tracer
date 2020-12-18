@@ -4,8 +4,7 @@ use std::{f64::consts::PI, rc::Rc, sync::Arc};
 
 use crate::{
     primitive::{Point, Tuple, Vector},
-    rtc::{view_transform, Color, Light, Material, Object, Pattern, Transform, World},
-    scene::Scene,
+    rtc::{view_transform, Color, Light, Material, Object, Pattern, Scene, Transform, World},
 };
 
 // --------------------------------------------------------------------------------------------- //
