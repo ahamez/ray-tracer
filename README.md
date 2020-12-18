@@ -6,4 +6,8 @@
 
 ![Reflection](/samples/ch11_reflection.png?raw=true "Reflection")
 
-![Reflection](/samples/ch11_refraction.png?raw=true "Refraction")
+![Refraction](/samples/ch11_refraction.png?raw=true "Refraction")
+
+![Cube](/samples/ch12_cube.png?raw=true "Cube")
+
+![Cylinder](/samples/ch13_cylinder.png?raw=true "Cylinder")

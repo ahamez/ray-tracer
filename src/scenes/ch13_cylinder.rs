@@ -10,17 +10,6 @@ use crate::{
 // --------------------------------------------------------------------------------------------- //
 
 pub fn make_scene() -> Rc<Scene> {
-    let floor = Arc::new(
-        Object::new_plane().with_material(
-            Material::new()
-                .with_pattern(Pattern::new_checker(
-                    Color::white(),
-                    Color::new(0.5, 0.5, 0.5),
-                ))
-                .with_reflective(0.0),
-        ),
-    );
-
     let wall_left = Arc::new(
         Object::new_plane()
             .with_material(
@@ -49,43 +38,42 @@ pub fn make_scene() -> Rc<Scene> {
             .rotate_x(PI / 2.0),
     );
 
-    let blue_cube = Arc::new(
-        Object::new_cube()
+    let cylinder_x = Arc::new(
+        Object::new_cylinder()
             .with_material(
                 Material::new()
-                    .with_pattern(Pattern::new_gradient(Color::blue(), Color::black()))
+                    .with_color(Color::red())
                     .with_diffuse(0.7)
-                    .with_specular(0.3)
-                    .with_reflective(0.05),
+                    .with_specular(0.5)
+                    .with_reflective(0.1),
             )
-            .translate(0.0, 2.0, 0.0)
-            .scale(2.0, 2.0, 2.0),
+            .translate(0.0, 0.0, 0.0)
+            .rotate_z(PI / 2.0),
     );
 
-    let red_cube = Arc::new(
-        Object::new_cube()
+    let cylinder_y = Arc::new(
+        Object::new_cylinder()
             .with_material(
                 Material::new()
-                    .with_pattern(Pattern::new_gradient(Color::red(), Color::black()))
+                    .with_color(Color::blue())
                     .with_diffuse(0.7)
-                    .with_specular(0.3)
-                    .with_reflective(0.05),
+                    .with_specular(0.5)
+                    .with_reflective(0.1),
             )
-            .translate(0.0, 5.0, 0.0)
-            .scale(1.0, 1.0, 1.0),
+            .translate(0.0, 0.0, 0.0),
     );
 
-    let green_cube = Arc::new(
-        Object::new_cube()
+    let cylinder_z = Arc::new(
+        Object::new_cylinder()
             .with_material(
                 Material::new()
-                    .with_pattern(Pattern::new_gradient(Color::green(), Color::black()))
+                    .with_color(Color::green())
                     .with_diffuse(0.7)
-                    .with_specular(0.3)
-                    .with_reflective(0.05),
+                    .with_specular(0.5)
+                    .with_reflective(0.1),
             )
-            .translate(0.0, 6.5, 0.0)
-            .scale(0.5, 0.5, 0.5),
+            .translate(0.0, 0.0, 0.0)
+            .rotate_x(PI / 2.0),
     );
 
     let light = Light {
@@ -95,18 +83,18 @@ pub fn make_scene() -> Rc<Scene> {
 
     let world = World::new()
         .with_objects(vec![
-            floor, wall_left, wall_right, blue_cube, red_cube, green_cube,
+            wall_left, wall_right, cylinder_x, cylinder_y, cylinder_z,
         ])
         .with_lights(vec![light])
         .with_recursion_limit(5);
 
-    let from = Point::new(5.0, 2.5, -7.5);
+    let from = Point::new(5.0, 2.5, -10.5);
     let to = Point::new(1.5, 3.0, 0.0);
     let up = Vector::new(0.0, 1.0, 0.0);
 
     Rc::new(Scene {
         world,
         view_transform: view_transform(&from, &to, &up),
-        fov: PI / 1.9,
+        fov: PI / 1.5,
     })
 }

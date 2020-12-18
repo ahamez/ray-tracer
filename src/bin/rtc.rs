@@ -5,7 +5,7 @@ use ray_tracer::{rtc::Camera, scenes::default_scenes};
 // --------------------------------------------------------------------------------------------- //
 
 fn main() {
-    let scene_name = "ch12_cube";
+    let scene_name = "ch13_cylinder";
     let scenes = default_scenes();
     let scene = scenes.get(scene_name).unwrap();
 

@@ -26,6 +26,13 @@ impl Object {
         }
     }
 
+    pub fn new_cylinder() -> Self {
+        Object {
+            shape: Shape::Cylinder(),
+            ..Default::default()
+        }
+    }
+
     pub fn new_plane() -> Self {
         Object {
             shape: Shape::Plane(),

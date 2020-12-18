@@ -49,10 +49,12 @@ pub mod rtc {
 
     mod shapes {
         pub use cube::Cube;
+        pub use cylinder::Cylinder;
         pub use plane::Plane;
         pub use sphere::Sphere;
 
         mod cube;
+        mod cylinder;
         mod plane;
         mod sphere;
     }
@@ -66,5 +68,6 @@ pub mod scenes {
     mod ch11_reflection;
     mod ch11_refraction;
     mod ch12_cube;
+    mod ch13_cylinder;
     mod default;
 }

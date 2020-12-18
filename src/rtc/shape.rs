@@ -3,7 +3,7 @@
 use crate::{
     primitive::{Point, Vector},
     rtc::{
-        shapes::{Cube, Plane, Sphere},
+        shapes::{Cube, Cylinder, Plane, Sphere},
         Ray,
     },
 };
@@ -13,6 +13,7 @@ use crate::{
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Shape {
     Cube(),
+    Cylinder(),
     Plane(),
     Sphere(),
 }
@@ -26,6 +27,7 @@ impl Shape {
     {
         match self {
             Shape::Cube() => Cube::intersects(&ray, push),
+            Shape::Cylinder() => Cylinder::intersects(&ray, push),
             Shape::Plane() => Plane::intersects(&ray, push),
             Shape::Sphere() => Sphere::intersects(&ray, push),
         }
@@ -34,6 +36,7 @@ impl Shape {
     pub fn normal_at(&self, object_point: &Point) -> Vector {
         match self {
             Shape::Cube() => Cube::normal_at(&object_point),
+            Shape::Cylinder() => Cylinder::normal_at(&object_point),
             Shape::Plane() => Plane::normal_at(&object_point),
             Shape::Sphere() => Sphere::normal_at(&object_point),
         }
