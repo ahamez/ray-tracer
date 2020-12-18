@@ -20,9 +20,9 @@ pub struct Object {
 // --------------------------------------------------------------------------------------------- //
 
 impl Object {
-    pub fn new_sphere() -> Self {
+    pub fn new_cube() -> Self {
         Object {
-            shape: Shape::Sphere(),
+            shape: Shape::Cube(),
             ..Default::default()
         }
     }
@@ -30,6 +30,13 @@ impl Object {
     pub fn new_plane() -> Self {
         Object {
             shape: Shape::Plane(),
+            ..Default::default()
+        }
+    }
+
+    pub fn new_sphere() -> Self {
+        Object {
+            shape: Shape::Sphere(),
             ..Default::default()
         }
     }
