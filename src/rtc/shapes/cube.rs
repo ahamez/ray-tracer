@@ -108,8 +108,8 @@ pub mod tests {
             let mut xs = vec![];
             Cube::intersects(&ray, |t| xs.push(t));
             assert_eq!(xs.len(), 2);
-            assert_eq!(xs[0], t1);
-            assert_eq!(xs[1], t2);
+            assert!(xs[0].approx_eq(t1));
+            assert!(xs[1].approx_eq(t2));
         }
 
         test(
