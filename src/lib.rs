@@ -28,8 +28,8 @@ pub mod rtc {
     pub use object::Object;
     pub use pattern::Pattern;
     pub use ray::Ray;
-    pub use shape::Shape;
     pub use scene::Scene;
+    pub use shape::Shape;
     pub use transformation::*;
     pub use world::World;
 

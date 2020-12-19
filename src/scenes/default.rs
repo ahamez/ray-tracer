@@ -4,7 +4,9 @@ use std::{collections::HashMap, rc::Rc};
 
 use crate::{
     rtc::Scene,
-    scenes::{ch09_plane, ch10_pattern, ch11_reflection, ch11_refraction, ch12_cube, ch13_cylinder},
+    scenes::{
+        ch09_plane, ch10_pattern, ch11_reflection, ch11_refraction, ch12_cube, ch13_cylinder,
+    },
 };
 
 // --------------------------------------------------------------------------------------------- //
