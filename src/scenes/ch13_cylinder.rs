@@ -77,16 +77,44 @@ pub fn make_scene() -> Rc<Scene> {
     );
 
     let shallow_cylinder = Arc::new(
-        Object::new_truncated_cylinder(-1.0, 1.0)
+        Object::new_cylinder_truncated(-2.0, 2.0, false)
             .with_material(
                 Material::new()
                     .with_pattern(Pattern::new_checker(Color::white(), Color::red()))
-                    .with_diffuse(0.7)
-                    .with_specular(0.5)
-                    .with_reflective(0.1),
+                    .with_diffuse(0.3)
+                    .with_specular(0.2)
+                    .with_reflective(0.00),
             )
             .translate(-3.0, 3.0, -4.0)
             .rotate_x(PI / 2.0),
+    );
+
+    let cylinder = Arc::new(
+        Object::new_cylinder_truncated(-2.0, 2.0, true)
+            .with_material(
+                Material::new()
+                    .with_pattern(Pattern::new_checker(Color::white(), Color::red()))
+                    .with_diffuse(0.3)
+                    .with_specular(0.2)
+                    .with_reflective(0.00),
+            )
+            .translate(-3.0, 6.0, -4.0)
+            .rotate_z(PI / 2.0),
+    );
+
+    let refractive_cylinder = Arc::new(
+        Object::new_cylinder_truncated(-2.0, 2.0, true)
+            .with_material(
+                Material::new()
+                    .with_color(Color::new(0.1, 0.1, 0.1))
+                    .with_diffuse(0.3)
+                    .with_specular(0.2)
+                    .with_reflective(0.00)
+                    .with_transparency(1.0)
+                    .with_refractive_index(1.5),
+            )
+            .translate(5.0, 2.0, -4.0)
+            .rotate_z(PI / 2.0),
     );
 
     let light = Light {
@@ -102,6 +130,8 @@ pub fn make_scene() -> Rc<Scene> {
             cylinder_y,
             cylinder_z,
             shallow_cylinder,
+            cylinder,
+            refractive_cylinder,
         ])
         .with_lights(vec![light])
         .with_recursion_limit(5);

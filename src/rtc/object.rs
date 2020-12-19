@@ -33,9 +33,9 @@ impl Object {
         }
     }
 
-    pub fn new_truncated_cylinder(min: f64, max: f64) -> Self {
+    pub fn new_cylinder_truncated(min: f64, max: f64, closed: bool) -> Self {
         Object {
-            shape: Shape::Cylinder(Cylinder::new_truncated(min, max)),
+            shape: Shape::Cylinder(Cylinder::new_truncated(min, max, closed)),
             ..Default::default()
         }
     }
