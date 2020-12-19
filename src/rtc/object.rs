@@ -2,7 +2,7 @@
 
 use crate::{
     primitive::{Matrix, Point, Vector},
-    rtc::{Material, Ray, Shape, Transform},
+    rtc::{shapes::Cylinder, Material, Ray, Shape, Transform},
 };
 
 // --------------------------------------------------------------------------------------------- //
@@ -28,7 +28,14 @@ impl Object {
 
     pub fn new_cylinder() -> Self {
         Object {
-            shape: Shape::Cylinder(),
+            shape: Shape::Cylinder(Cylinder::new()),
+            ..Default::default()
+        }
+    }
+
+    pub fn new_truncated_cylinder(min: f64, max: f64) -> Self {
+        Object {
+            shape: Shape::Cylinder(Cylinder::new_truncated(min, max)),
             ..Default::default()
         }
     }

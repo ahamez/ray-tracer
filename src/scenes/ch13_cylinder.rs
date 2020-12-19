@@ -76,6 +76,19 @@ pub fn make_scene() -> Rc<Scene> {
             .rotate_x(PI / 2.0),
     );
 
+    let shallow_cylinder = Arc::new(
+        Object::new_truncated_cylinder(-1.0, 1.0)
+            .with_material(
+                Material::new()
+                    .with_pattern(Pattern::new_checker(Color::white(), Color::red()))
+                    .with_diffuse(0.7)
+                    .with_specular(0.5)
+                    .with_reflective(0.1),
+            )
+            .translate(-3.0, 3.0, -4.0)
+            .rotate_x(PI / 2.0),
+    );
+
     let light = Light {
         intensity: Color::white(),
         position: Point::new(-5.0, 10.0, -10.0),
@@ -83,7 +96,12 @@ pub fn make_scene() -> Rc<Scene> {
 
     let world = World::new()
         .with_objects(vec![
-            wall_left, wall_right, cylinder_x, cylinder_y, cylinder_z,
+            wall_left,
+            wall_right,
+            cylinder_x,
+            cylinder_y,
+            cylinder_z,
+            shallow_cylinder,
         ])
         .with_lights(vec![light])
         .with_recursion_limit(5);
