@@ -2,7 +2,10 @@
 
 use crate::{
     primitive::{Matrix, Point, Vector},
-    rtc::{shapes::Cylinder, Material, Ray, Shape, Transform},
+    rtc::{
+        shapes::{Cone, Cylinder},
+        Material, Ray, Shape, Transform,
+    },
 };
 
 // --------------------------------------------------------------------------------------------- //
@@ -19,6 +22,20 @@ pub struct Object {
 // --------------------------------------------------------------------------------------------- //
 
 impl Object {
+    pub fn new_cone() -> Self {
+        Object {
+            shape: Shape::Cone(Cone::new()),
+            ..Default::default()
+        }
+    }
+
+    pub fn new_cone_truncated(min: f64, max: f64, closed: bool) -> Self {
+        Object {
+            shape: Shape::Cone(Cone::new_truncated(min, max, closed)),
+            ..Default::default()
+        }
+    }
+
     pub fn new_cube() -> Self {
         Object {
             shape: Shape::Cube(),

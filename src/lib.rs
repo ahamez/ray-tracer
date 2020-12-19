@@ -48,11 +48,13 @@ pub mod rtc {
     pub mod world;
 
     mod shapes {
+        pub use cone::Cone;
         pub use cube::Cube;
         pub use cylinder::Cylinder;
         pub use plane::Plane;
         pub use sphere::Sphere;
 
+        mod cone;
         mod cube;
         mod cylinder;
         mod plane;
@@ -68,6 +70,7 @@ pub mod scenes {
     mod ch11_reflection;
     mod ch11_refraction;
     mod ch12_cube;
+    mod ch13_cone;
     mod ch13_cylinder;
     mod default;
 }
