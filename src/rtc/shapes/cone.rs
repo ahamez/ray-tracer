@@ -57,8 +57,6 @@ impl Cone {
             let t0 = (-b - discriminant.sqrt()) / double_a;
             let t1 = (-b + discriminant.sqrt()) / double_a;
 
-            let (t0, t1) = if t0 < t1 { (t0, t1) } else { (t1, t0) };
-
             let y0 = ray.origin.y() + t0 * ray.direction.y();
             if self.min < y0 && y0 < self.max {
                 push(t0);
