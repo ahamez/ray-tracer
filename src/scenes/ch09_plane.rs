@@ -70,12 +70,12 @@ pub fn make_scene() -> Rc<Scene> {
     };
 
     let light2 = Light {
-        intensity: Color::new(0.1, 0.1, 0.1),
+        intensity: Color::new(0.2, 0.2, 0.2),
         position: Point::new(-50.0, 10.0, -50.0),
     };
 
     let light3 = Light {
-        intensity: Color::new(0.1, 0.1, 0.1),
+        intensity: Color::new(0.2, 0.2, 0.2),
         position: Point::new(30.0, 10.0, -30.0),
     };
 
