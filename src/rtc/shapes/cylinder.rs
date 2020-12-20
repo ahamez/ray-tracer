@@ -145,8 +145,8 @@ pub mod tests {
             Cylinder::new().intersects(&ray, |t| xs.push(t));
 
             assert_eq!(xs.len(), 2);
-            assert!(xs[0].approx_eq(t0));
-            assert!(xs[1].approx_eq(t1));
+            assert!(xs[0].approx_eq_low_precision(t0));
+            assert!(xs[1].approx_eq_low_precision(t1));
         }
 
         test(

@@ -125,7 +125,7 @@ impl PartialEq for Matrix {
 
         for i in 0..self.size {
             for j in 0..self.size {
-                if !self[i][j].approx_eq(other[i][j]) {
+                if !self[i][j].approx_eq_low_precision(other[i][j]) {
                     return false;
                 }
             }

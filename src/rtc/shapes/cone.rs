@@ -147,7 +147,7 @@ pub mod tests {
         let mut xs = vec![];
         c.intersects(&ray, |t| xs.push(t));
         assert_eq!(xs.len(), 1);
-        assert!(xs[0].approx_eq(0.35355));
+        assert!(xs[0].approx_eq_low_precision(0.35355));
     }
 
     #[test]
@@ -184,8 +184,8 @@ pub mod tests {
                 |t| xs.push(t),
             );
             assert_eq!(xs.len(), 2);
-            assert!(xs[0].approx_eq(t0));
-            assert!(xs[1].approx_eq(t1));
+            assert!(xs[0].approx_eq_low_precision(t0));
+            assert!(xs[1].approx_eq_low_precision(t1));
         }
     }
 

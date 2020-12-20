@@ -63,7 +63,9 @@ impl Tuple for Vector {
 
 impl PartialEq for Vector {
     fn eq(&self, other: &Vector) -> bool {
-        self.x.approx_eq(other.x) && self.y.approx_eq(other.y) && self.z.approx_eq(other.z)
+        self.x.approx_eq_low_precision(other.x)
+            && self.y.approx_eq_low_precision(other.y)
+            && self.z.approx_eq_low_precision(other.z)
     }
 }
 

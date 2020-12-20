@@ -467,7 +467,7 @@ mod tests {
 
         let comps = IntersectionState::new(&xs, 1, &ray);
 
-        assert!(comps.schlick().approx_eq(1.0));
+        assert!(comps.schlick().approx_eq_low_precision(1.0));
     }
 
     #[test]
@@ -488,7 +488,7 @@ mod tests {
 
         let comps = IntersectionState::new(&xs, 1, &ray);
 
-        assert!(comps.schlick().approx_eq(0.04));
+        assert!(comps.schlick().approx_eq_low_precision(0.04));
     }
 
     #[test]
@@ -503,7 +503,7 @@ mod tests {
 
         let comps = IntersectionState::new(&xs, 0, &ray);
 
-        assert!(comps.schlick().approx_eq(0.48873));
+        assert!(comps.schlick().approx_eq_low_precision(0.48873));
     }
 }
 

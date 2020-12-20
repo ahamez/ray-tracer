@@ -608,8 +608,7 @@ pub mod tests {
 
         assert_eq!(
             w.refracted_color(&comps, 5),
-            // The book gives the following values: (0.0, 0.99888, 0.04725)
-            Color::new(0.0, 0.99787, 0.04747)
+            Color::new(0.0, 0.99888, 0.04725)
         );
     }
 
