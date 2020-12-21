@@ -1,6 +1,7 @@
 // --------------------------------------------------------------------------------------------- //
 
 use crate::{
+    float::ApproxEq,
     primitive::{Point, Vector},
     rtc::{Color, Light, Object, Pattern},
 };
@@ -73,19 +74,19 @@ impl Material {
         position: &Point,
         eye_v: &Vector,
         normal_v: &Vector,
-        in_shadow: bool,
+        light_intensity: f64,
     ) -> Color {
         let color = self.pattern.pattern_at_object(&object, &position);
-        let effective_color = color * light.intensity;
+        let effective_color = color * light.intensity();
         let ambient = effective_color * self.ambient;
 
-        if in_shadow {
+        if light_intensity.approx_eq(0.0) {
             ambient
         } else {
             let mut diffuse = Color::black();
             let mut specular = Color::black();
 
-            let light_v = (light.position - *position).normalize();
+            let light_v = (light.position() - *position).normalize();
             let light_dot_normal = light_v ^ *normal_v;
 
             if light_dot_normal >= 0.0 {
@@ -95,11 +96,11 @@ impl Material {
 
                 if reflect_dot_eye > 0.0 {
                     let factor = f64::powf(reflect_dot_eye, self.shininess);
-                    specular = light.intensity * self.specular * factor
+                    specular = light.intensity() * self.specular * factor
                 }
             }
 
-            ambient + diffuse + specular
+            ambient + diffuse * light_intensity + specular * light_intensity
         }
     }
 }
@@ -126,7 +127,8 @@ impl Default for Material {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::primitive::Tuple;
+    use crate::{primitive::Tuple, rtc::World};
+    use std::sync::Arc;
 
     #[test]
     fn lighting_with_the_eye_between_light_and_surface() {
@@ -134,7 +136,7 @@ mod tests {
         let position = Point::zero();
         let eye_v = Vector::new(0.0, 0.0, -1.0);
         let normal_v = Vector::new(0.0, 0.0, -1.0);
-        let light = Light::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 0.0, -10.0));
+        let light = Light::new_point_light(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 0.0, -10.0));
 
         assert_eq!(
             m.lighting(
@@ -143,7 +145,7 @@ mod tests {
                 &position,
                 &eye_v,
                 &normal_v,
-                false
+                1.0
             ),
             Color::new(1.9, 1.9, 1.9)
         );
@@ -155,7 +157,7 @@ mod tests {
         let position = Point::zero();
         let eye_v = Vector::new(0.0, f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0);
         let normal_v = Vector::new(0.0, 0.0, -1.0);
-        let light = Light::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 0.0, -10.0));
+        let light = Light::new_point_light(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 0.0, -10.0));
 
         assert_eq!(
             m.lighting(
@@ -164,7 +166,7 @@ mod tests {
                 &position,
                 &eye_v,
                 &normal_v,
-                false
+                1.0
             ),
             Color::new(1.0, 1.0, 1.0)
         );
@@ -176,7 +178,7 @@ mod tests {
         let position = Point::zero();
         let eye_v = Vector::new(0.0, 0.0, -1.0);
         let normal_v = Vector::new(0.0, 0.0, -1.0);
-        let light = Light::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 10.0, -10.0));
+        let light = Light::new_point_light(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 10.0, -10.0));
 
         assert_eq!(
             m.lighting(
@@ -185,7 +187,7 @@ mod tests {
                 &position,
                 &eye_v,
                 &normal_v,
-                false
+                1.0
             ),
             Color::new(0.7364, 0.7364, 0.7364)
         );
@@ -197,7 +199,7 @@ mod tests {
         let position = Point::zero();
         let eye_v = Vector::new(0.0, -f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0);
         let normal_v = Vector::new(0.0, 0.0, -1.0);
-        let light = Light::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 10.0, -10.0));
+        let light = Light::new_point_light(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 10.0, -10.0));
 
         assert_eq!(
             m.lighting(
@@ -206,7 +208,7 @@ mod tests {
                 &position,
                 &eye_v,
                 &normal_v,
-                false
+                1.0
             ),
             Color::new(1.6364, 1.6364, 1.6364)
         );
@@ -218,7 +220,7 @@ mod tests {
         let position = Point::zero();
         let eye_v = Vector::new(0.0, 0.0, -1.0);
         let normal_v = Vector::new(0.0, 0.0, -1.0);
-        let light = Light::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 0.0, 10.0));
+        let light = Light::new_point_light(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 0.0, 10.0));
 
         assert_eq!(
             m.lighting(
@@ -227,7 +229,7 @@ mod tests {
                 &position,
                 &eye_v,
                 &normal_v,
-                false
+                1.0
             ),
             Color::new(0.1, 0.1, 0.1)
         );
@@ -239,8 +241,7 @@ mod tests {
         let position = Point::zero();
         let eye_v = Vector::new(0.0, 0.0, -1.0);
         let normal_v = Vector::new(0.0, 0.0, -1.0);
-        let light = Light::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 0.0, -10.0));
-        let in_shadow = true;
+        let light = Light::new_point_light(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 0.0, -10.0));
 
         assert_eq!(
             m.lighting(
@@ -249,7 +250,7 @@ mod tests {
                 &position,
                 &eye_v,
                 &normal_v,
-                in_shadow
+                0.0
             ),
             Color::new(0.1, 0.1, 0.1)
         );
@@ -265,7 +266,7 @@ mod tests {
 
         let eye_v = Vector::new(0.0, 0.0, -1.0);
         let normal_v = Vector::new(0.0, 0.0, -1.0);
-        let light = Light::new(Color::white(), Point::new(0.0, 0.0, -10.0));
+        let light = Light::new_point_light(Color::white(), Point::new(0.0, 0.0, -10.0));
 
         assert_eq!(
             m.lighting(
@@ -274,7 +275,7 @@ mod tests {
                 &Point::new(0.9, 0.0, 0.0),
                 &eye_v,
                 &normal_v,
-                false
+                1.0
             ),
             Color::black()
         );
@@ -285,10 +286,48 @@ mod tests {
                 &Point::new(1.1, 0.0, 0.0),
                 &eye_v,
                 &normal_v,
-                false
+                1.0
             ),
             Color::white()
         );
+    }
+
+    #[test]
+    fn lighting_uses_light_intensity_to_attenuate_color() {
+        let mut objects = crate::rtc::world::tests::default_world().objects().clone();
+        let mut object = (*objects[0]).clone();
+        object.material_mut().ambient = 0.1;
+        object.material_mut().diffuse = 0.9;
+        object.material_mut().specular = 0.0;
+        object.material_mut().pattern = Pattern::new_plain(Color::white());
+        objects[0] = Arc::new(object.clone());
+
+        let w = World::new()
+            .with_objects(objects)
+            .with_lights(vec![Light::new_point_light(
+                Color::white(),
+                Point::new(0.0, 0.0, -10.0),
+            )]);
+        let light = &w.lights()[0];
+
+        let point = Point::new(0.0, 0.0, -1.0);
+        let eye_v = Vector::new(0.0, 0.0, -1.0);
+        let normal_v = Vector::new(0.0, 0.0, -1.0);
+
+        let tests = vec![
+            (1.0, Color::white()),
+            (0.5, Color::new(0.55, 0.55, 0.55)),
+            (0.0, Color::new(0.1, 0.1, 0.1)),
+        ];
+
+        for (intensity, result) in tests.into_iter() {
+            assert_eq!(
+                object
+                    .material()
+                    .lighting(&object, &light, &point, &eye_v, &normal_v, intensity),
+                result
+            );
+        }
     }
 }
 

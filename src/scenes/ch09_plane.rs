@@ -64,20 +64,30 @@ pub fn make_scene() -> Rc<Scene> {
             .shear(1.0, 0.0, 0.0, 0.0, 0.0, 0.0),
     );
 
-    let light1 = Light {
-        intensity: Color::white(),
-        position: Point::new(-10.0, 10.0, -10.0),
-    };
-
-    let light2 = Light {
-        intensity: Color::new(0.2, 0.2, 0.2),
-        position: Point::new(-50.0, 10.0, -50.0),
-    };
-
-    let light3 = Light {
-        intensity: Color::new(0.2, 0.2, 0.2),
-        position: Point::new(30.0, 10.0, -30.0),
-    };
+    let light1 = Light::new_area_light(
+        Color::white(),
+        Point::new(-10.0, 10.0, -10.0),
+        Vector::new(4.0, 0.0, 0.0),
+        16,
+        Vector::new(4.0, 0.0, 0.0),
+        16,
+    );
+    let light2 = Light::new_area_light(
+        Color::new(0.2, 0.2, 0.2),
+        Point::new(-50.0, 10.0, -50.0),
+        Vector::new(4.0, 0.0, 0.0),
+        16,
+        Vector::new(4.0, 0.0, 0.0),
+        16,
+    );
+    let light3 = Light::new_area_light(
+        Color::new(0.2, 0.2, 0.2),
+        Point::new(30.0, 10.0, -30.0),
+        Vector::new(4.0, 0.0, 0.0),
+        16,
+        Vector::new(4.0, 0.0, 0.0),
+        16,
+    );
 
     let world = World::new()
         .with_objects(vec![floor, left, middle, middle2, right])

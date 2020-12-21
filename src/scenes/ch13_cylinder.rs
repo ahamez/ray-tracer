@@ -117,10 +117,7 @@ pub fn make_scene() -> Rc<Scene> {
             .rotate_z(PI / 2.0),
     );
 
-    let light = Light {
-        intensity: Color::white(),
-        position: Point::new(-5.0, 10.0, -10.0),
-    };
+    let light = Light::new_point_light(Color::white(), Point::new(-5.0, 10.0, -10.0));
 
     let world = World::new()
         .with_objects(vec![

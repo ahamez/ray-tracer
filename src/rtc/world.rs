@@ -72,8 +72,8 @@ impl World {
     }
 
     fn shade_hit(&self, comps: &IntersectionState, remaining_recursions: u8) -> Color {
-        self.lights.iter().fold(Color::black(), |acc, &light| {
-            let is_shadowed = self.is_shadowed(&light.position, &comps.over_point());
+        self.lights.iter().fold(Color::black(), |acc, light| {
+            let light_intensity = light.intensity_at(&self, &comps.over_point());
 
             let surface_color = comps.object().material().lighting(
                 &comps.object(),
@@ -81,7 +81,7 @@ impl World {
                 &comps.over_point(),
                 &comps.eye_v(),
                 &comps.normal_v(),
-                is_shadowed,
+                light_intensity,
             );
 
             let reflected_color = self.reflected_color(comps, remaining_recursions);
@@ -101,7 +101,7 @@ impl World {
         })
     }
 
-    fn is_shadowed(&self, light_position: &Point, point: &Point) -> bool {
+    pub fn is_shadowed(&self, light_position: &Point, point: &Point) -> bool {
         let v = *light_position - *point;
         let distance = v.magnitude();
         let direction = v.normalize();
@@ -200,7 +200,10 @@ pub mod tests {
                 ),
                 Arc::new(Object::new_sphere().scale(0.5, 0.5, 0.5)),
             ],
-            lights: vec![Light::new(Color::white(), Point::new(-10.0, 10.0, -10.0))],
+            lights: vec![Light::new_point_light(
+                Color::white(),
+                Point::new(-10.0, 10.0, -10.0),
+            )],
             ..Default::default()
         }
     }
@@ -244,10 +247,10 @@ pub mod tests {
     #[test]
     fn shading_an_intersection_from_the_inside() {
         let w = World {
-            lights: vec![Light {
-                intensity: Color::white(),
-                position: Point::new(0.0, 0.25, 0.0),
-            }],
+            lights: vec![Light::new_point_light(
+                Color::white(),
+                Point::new(0.0, 0.25, 0.0),
+            )],
             ..default_world()
         };
 
@@ -273,10 +276,10 @@ pub mod tests {
         let s2 = Arc::new(Object::new_sphere().translate(0.0, 0.0, 10.0));
 
         let w = World {
-            lights: vec![Light {
-                intensity: Color::white(),
-                position: Point::new(0.0, 0.0, -10.0),
-            }],
+            lights: vec![Light::new_point_light(
+                Color::white(),
+                Point::new(0.0, 0.0, -10.0),
+            )],
             objects: vec![s1],
             ..Default::default()
         };
@@ -349,47 +352,20 @@ pub mod tests {
     }
 
     #[test]
-    fn there_is_no_shadow_when_nothing_is_collinear_with_point_and_light() {
+    fn is_shadowed_tests_for_occlusion_between_two_points() {
         let w = default_world();
-        let light = w.lights[0];
+        let light_position = Point::new(-10.0, -10.0, -10.0);
 
-        assert_eq!(
-            w.is_shadowed(&light.position, &Point::new(0.0, 10.0, 0.0)),
-            false
-        );
-    }
+        let tests = vec![
+            (Point::new(-10.0, -10.0, -10.0), false),
+            (Point::new(10.0, 10.0, 10.0), true),
+            (Point::new(-20.0, -20.0, -20.0), false),
+            (Point::new(-5.0, -5.0, -5.0), false),
+        ];
 
-    #[test]
-    fn shadow_when_an_object_is_between_the_point_and_the_light() {
-        let w = default_world();
-        let light = w.lights[0];
-
-        assert_eq!(
-            w.is_shadowed(&light.position, &Point::new(10.0, -10.0, 10.0)),
-            true
-        );
-    }
-
-    #[test]
-    fn there_is_no_shadow_when_an_object_is_behind_the_light() {
-        let w = default_world();
-        let light = w.lights[0];
-
-        assert_eq!(
-            w.is_shadowed(&light.position, &Point::new(-20.0, 20.0, -20.0)),
-            false
-        );
-    }
-
-    #[test]
-    fn there_is_no_shadow_when_an_object_is_behind_the_point() {
-        let w = default_world();
-        let light = w.lights[0];
-
-        assert_eq!(
-            w.is_shadowed(&light.position, &Point::new(-2.0, 2.0, -2.0)),
-            false
-        );
+        for (point, is_shadowed) in tests.into_iter() {
+            assert_eq!(w.is_shadowed(&light_position, &point), is_shadowed);
+        }
     }
 
     #[test]
@@ -474,7 +450,10 @@ pub mod tests {
     #[test]
     fn color_at_with_mutually_reflexive_surfaces() {
         let w = World {
-            lights: vec![Light::new(Color::white(), Point::new(0.0, 0.0, 0.0))],
+            lights: vec![Light::new_point_light(
+                Color::white(),
+                Point::new(0.0, 0.0, 0.0),
+            )],
             objects: vec![
                 Arc::new(
                     Object::new_plane()

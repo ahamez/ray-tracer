@@ -47,6 +47,14 @@ pub mod rtc {
     mod transformation;
     pub mod world;
 
+    mod lights {
+        pub use area_light::AreaLight;
+        pub use point_light::PointLight;
+
+        mod area_light;
+        mod point_light;
+    }
+
     mod shapes {
         pub use cone::Cone;
         pub use cube::Cube;
