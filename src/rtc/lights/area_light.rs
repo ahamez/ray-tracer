@@ -4,22 +4,22 @@ use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
 
 use crate::{
-    primitive::{Point, Tuple, Vector},
+    primitive::{Point, Vector},
     rtc::{Color, World},
 };
 
 // --------------------------------------------------------------------------------------------- //
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct AreaLight {
     intensity: Color,
-    position: Point,
     corner: Point,
     uvec: Vector,
     usteps: u32,
     vvec: Vector,
     vsteps: u32,
     samples: u32,
+    positions: Vec<Point>,
 }
 
 // --------------------------------------------------------------------------------------------- //
@@ -33,21 +33,34 @@ impl AreaLight {
         vvec: Vector,
         vsteps: u32,
     ) -> Self {
+        let uvec = uvec / usteps as f64;
+        let vvec = vvec / vsteps as f64;
+        let samples = usteps * vsteps;
+
+        let positions = {
+            let mut res = Vec::<Point>::with_capacity(samples as usize);
+
+            for v in 0..vsteps {
+                for u in 0..usteps {
+                    res.push(corner + uvec * (u as f64 + 0.5) + vvec * (v as f64 + 0.5));
+                }
+            }
+
+            res
+        };
+
         AreaLight {
             intensity,
-            position: Point::new(
-                corner.x() + uvec.x() / 2.0,
-                corner.y() + vvec.y() / 2.0,
-                corner.z() + vvec.z() / 2.0,
-            ),
             corner,
-            uvec: uvec / usteps as f64,
+            uvec,
             usteps,
-            vvec: vvec / vsteps as f64,
+            vvec,
             vsteps,
-            samples: usteps * vsteps,
+            samples,
+            positions,
         }
     }
+
     pub fn intensity(&self) -> Color {
         self.intensity
     }
@@ -57,8 +70,8 @@ impl AreaLight {
         self.intensity_at_impl(world, point, || rng.gen())
     }
 
-    pub fn position(&self) -> Point {
-        self.position
+    pub fn positions(&self) -> &[Point] {
+        &self.positions
     }
 
     fn point_on_light<T>(&self, u: u32, v: u32, mut random: T) -> Point
@@ -93,6 +106,7 @@ impl AreaLight {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::primitive::Tuple;
 
     #[test]
     fn creating_an_area_light() {
@@ -107,7 +121,6 @@ mod tests {
         assert_eq!(light.vvec, Vector::new(0.0, 0.0, 0.5));
         assert_eq!(light.vsteps, 2);
         assert_eq!(light.samples, 8);
-        assert_eq!(light.position, Point::new(1.0, 0.0, 0.5));
     }
 
     #[test]

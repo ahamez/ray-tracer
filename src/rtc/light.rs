@@ -48,21 +48,21 @@ impl Light {
     }
 
     pub fn intensity(&self) -> Color {
-        match self.light {
+        match &self.light {
             LightType::AreaLight(l) => l.intensity(),
             LightType::PointLight(l) => l.intensity(),
         }
     }
 
-    pub fn position(&self) -> Point {
-        match self.light {
-            LightType::AreaLight(l) => l.position(),
-            LightType::PointLight(l) => l.position(),
+    pub fn positions(&self) -> &[Point] {
+        match &self.light {
+            LightType::AreaLight(l) => l.positions(),
+            LightType::PointLight(l) => l.positions(),
         }
     }
 
     pub fn intensity_at(&self, world: &World, point: &Point) -> f64 {
-        match self.light {
+        match &self.light {
             LightType::AreaLight(l) => l.intensity_at(world, point),
             LightType::PointLight(l) => l.intensity_at(world, point),
         }

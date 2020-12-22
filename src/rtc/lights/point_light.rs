@@ -10,7 +10,7 @@ use crate::{
 #[derive(Clone, Copy, Debug)]
 pub struct PointLight {
     intensity: Color,
-    position: Point,
+    position: [Point; 1],
 }
 
 // --------------------------------------------------------------------------------------------- //
@@ -19,7 +19,7 @@ impl PointLight {
     pub fn new(intensity: Color, position: Point) -> Self {
         PointLight {
             intensity,
-            position,
+            position: [position],
         }
     }
 
@@ -28,15 +28,15 @@ impl PointLight {
     }
 
     pub fn intensity_at(&self, world: &World, point: &Point) -> f64 {
-        if world.is_shadowed(&self.position, point) {
+        if world.is_shadowed(&self.position[0], point) {
             0.0
         } else {
             1.0
         }
     }
 
-    pub fn position(&self) -> Point {
-        self.position
+    pub fn positions(&self) -> &[Point] {
+        &self.position
     }
 }
 

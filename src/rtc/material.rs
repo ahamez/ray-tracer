@@ -74,33 +74,39 @@ impl Material {
         position: &Point,
         eye_v: &Vector,
         normal_v: &Vector,
-        light_intensity: f64,
+        intensity: f64,
     ) -> Color {
         let color = self.pattern.pattern_at_object(&object, &position);
         let effective_color = color * light.intensity();
         let ambient = effective_color * self.ambient;
 
-        if light_intensity.approx_eq(0.0) {
+        if intensity.approx_eq(0.0) {
             ambient
         } else {
-            let mut diffuse = Color::black();
-            let mut specular = Color::black();
+            let mut sum = Color::black();
+            let nb_samples = light.positions().len() as f64;
 
-            let light_v = (light.position() - *position).normalize();
-            let light_dot_normal = light_v ^ *normal_v;
+            for light_position in light.positions().iter() {
+                let light_v = (*light_position - *position).normalize();
+                let light_dot_normal = light_v ^ *normal_v;
 
-            if light_dot_normal >= 0.0 {
-                diffuse = effective_color * self.diffuse * light_dot_normal;
-                let reflect_v = (-light_v).reflect(normal_v);
-                let reflect_dot_eye = reflect_v ^ *eye_v;
+                if light_dot_normal >= 0.0 {
+                    let diffuse = effective_color * self.diffuse * light_dot_normal;
+                    sum = sum + diffuse;
 
-                if reflect_dot_eye > 0.0 {
-                    let factor = f64::powf(reflect_dot_eye, self.shininess);
-                    specular = light.intensity() * self.specular * factor
+                    let reflect_v = (-light_v).reflect(normal_v);
+                    let reflect_dot_eye = reflect_v ^ *eye_v;
+
+                    if reflect_dot_eye > 0.0 {
+                        let factor = f64::powf(reflect_dot_eye, self.shininess);
+                        let specular = light.intensity() * self.specular * factor;
+
+                        sum = sum + specular;
+                    }
                 }
             }
 
-            ambient + diffuse * light_intensity + specular * light_intensity
+            ambient + (sum / nb_samples) * intensity
         }
     }
 }
@@ -325,6 +331,47 @@ mod tests {
                 object
                     .material()
                     .lighting(&object, &light, &point, &eye_v, &normal_v, intensity),
+                result
+            );
+        }
+    }
+
+    #[test]
+    fn lighting_samples_the_area_light() {
+        let corner = Point::new(-0.5, -0.5, -5.0);
+        let v1 = Vector::new(1.0, 0.0, 0.0);
+        let v2 = Vector::new(0.0, 1.0, 0.0);
+        let light = Light::new_area_light(Color::white(), corner, v1, 2, v2, 2);
+
+        let object = Object::new_sphere().with_material(
+            Material::new()
+                .with_ambient(0.1)
+                .with_diffuse(0.9)
+                .with_specular(0.0)
+                .with_color(Color::white()),
+        );
+
+        let eye = Point::new(0.0, 0.0, -5.0);
+
+        let tests = vec![
+            (
+                Point::new(0.0, 0.0, -1.0),
+                Color::new(0.9965, 0.9965, 0.9965),
+            ),
+            (
+                Point::new(0.0, 0.7071, -0.7071),
+                Color::new(0.6232, 0.6232, 0.6232),
+            ),
+        ];
+
+        for (point, result) in tests.into_iter() {
+            let eye_v = (eye - point).normalize();
+            let normal_v = Vector::new(point.x(), point.y(), point.z());
+
+            assert_eq!(
+                object
+                    .material()
+                    .lighting(&object, &light, &point, &eye_v, &normal_v, 1.0),
                 result
             );
         }
