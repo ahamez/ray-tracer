@@ -138,6 +138,20 @@ impl std::ops::Mul for Color {
 
 // --------------------------------------------------------------------------------------------- //
 
+impl std::ops::Div<f64> for Color {
+    type Output = Color;
+
+    fn div(self, rhs: f64) -> Self::Output {
+        Color {
+            r: self.r / rhs,
+            g: self.g / rhs,
+            b: self.b / rhs,
+        }
+    }
+}
+
+// --------------------------------------------------------------------------------------------- //
+
 #[cfg(test)]
 mod tests {
     use super::*;
