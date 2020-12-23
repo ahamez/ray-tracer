@@ -1,0 +1,79 @@
+- add: camera
+  width: 100
+  height: 50
+  field-of-view: 2.0943951024 # PI / 1.5
+  from: [-1, 2, -9]
+  to: [0, 1, 0]
+  up: [0, 1, 0]
+
+- add: light
+  intensity: [1.0, 1.0, 1.0]
+  at: [-7.0, 10.0, -10.0]
+
+# floor
+- add: plane
+  material:
+      pattern:
+        type: checkers
+        colors:
+          - [1.0, 1.0, 1.0]
+          - [0.5, 0.5, 0.5]
+
+# wall
+- add: plane
+  material:
+    pattern:
+      type: ring
+      colors:
+        - [ 0.5, 0.5, 0.5 ]
+        - [ 1.0, 1.0, 1.0 ]
+        - [ 0.7, 0.6, 0.7 ]
+    transform:
+      - [ shear, 1, 1, 0, 0, 0, 0]
+  transform:
+      - [ rotate-x, 1.571]
+      - [ translate, 0, 0, 5]
+
+
+- add: sphere
+  material:
+    pattern:
+        type: ring
+        colors:
+          - [1.0, 1.0, 1.0]
+          - [0.7, 0.6, 0.7]
+    transform:
+        - [ scale, 0.2, 0.2, 0.2]
+    diffuse: 0.7
+    specular: 0.3
+  transform:
+    - [ scale, 1.5, 1.5, 1.5 ]
+    - [ rotate-x, 1.5]
+    - [ translate, -3.0, 1.5, -4.0 ]
+
+- add: sphere
+  material:
+    pattern:
+        type: stripes
+        colors:
+          - [0.5, 0.5, 0.5]
+          - [1.0, 1.0, 1.0]
+          - [0.7, 0.6, 0.7]
+    diffuse: 0.7
+    specular: 0.3
+  transform:
+    - [ scale, 1.5, 1.5, 1.5 ]
+    - [ translate, 3.0, 1.5, -4.0 ]
+
+- add: sphere
+  material:
+    pattern:
+        type: gradient
+        colors:
+          - [0.7, 0.6, 0.7]
+          - [0.0, 0.0, 0.0]
+    diffuse: 0.7
+    specular: 0.3
+  transform:
+    - [ scale, 0.33, 0.33, 0.33 ]
+    - [ translate, 0.0, 1.0, -7.0 ]
