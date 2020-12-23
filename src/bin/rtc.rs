@@ -153,6 +153,43 @@ fn mk_pattern(hash: &yaml_rust::yaml::Hash) -> Option<Pattern> {
                     mk_color(&colors[1]),
                 ))
             }
+
+            "gradient" => {
+                let colors = pattern_hash
+                    .get(&Yaml::from_str(&"colors"))
+                    .unwrap()
+                    .as_vec()
+                    .unwrap();
+
+                Some(Pattern::new_gradient(
+                    mk_color(&colors[0]),
+                    mk_color(&colors[1]),
+                ))
+            }
+
+            "ring" => {
+                let colors = pattern_hash
+                    .get(&Yaml::from_str(&"colors"))
+                    .unwrap()
+                    .as_vec()
+                    .unwrap();
+
+                let v: Vec<_> = colors.iter().map(|c| mk_color(&c)).collect();
+
+                Some(Pattern::new_ring(v))
+            }
+
+            "stripes" => {
+                let colors = pattern_hash
+                    .get(&Yaml::from_str(&"colors"))
+                    .unwrap()
+                    .as_vec()
+                    .unwrap();
+
+                let v: Vec<_> = colors.iter().map(|c| mk_color(&c)).collect();
+
+                Some(Pattern::new_stripe(v))
+            }
             _ => unimplemented!(),
         }
     } else {
@@ -168,6 +205,8 @@ fn mk_material(hash: &yaml_rust::yaml::Hash) -> Material {
     match hash.get(&Yaml::from_str(&"material")) {
         Some(material_hash) => {
             let material_hash = material_hash.clone().into_hash().unwrap();
+
+            let pattern = mk_pattern(&material_hash).unwrap_or(default.pattern);
 
             Material::new()
                 .with_ambient(mk_f64_from_key(&material_hash, "ambient").unwrap_or(default.ambient))
@@ -188,7 +227,7 @@ fn mk_material(hash: &yaml_rust::yaml::Hash) -> Material {
                 .with_transparency(
                     mk_f64_from_key(&material_hash, "transparency").unwrap_or(default.transparency),
                 )
-                .with_pattern(mk_pattern(&material_hash).unwrap_or(default.pattern))
+                .with_pattern(transform(pattern, &material_hash))
         }
         None => default,
     }
@@ -196,7 +235,10 @@ fn mk_material(hash: &yaml_rust::yaml::Hash) -> Material {
 
 // --------------------------------------------------------------------------------------------- //
 
-fn transform(mut object: Object, hash: &yaml_rust::yaml::Hash) -> Object {
+fn transform<T>(mut x: T, hash: &yaml_rust::yaml::Hash) -> T
+where
+    T: Transform,
+{
     if let Some(transform_array) = hash.get(&Yaml::from_str(&"transform")) {
         let transform_array = transform_array.clone().into_vec().unwrap();
         for transform in transform_array {
@@ -226,11 +268,11 @@ fn transform(mut object: Object, hash: &yaml_rust::yaml::Hash) -> Object {
                 ),
                 _ => unimplemented!(),
             };
-            object = object.apply_transformation(&transformation);
+            x = x.apply_transformation(&transformation);
         }
     }
 
-    object
+    x
 }
 
 // --------------------------------------------------------------------------------------------- //
@@ -317,7 +359,7 @@ fn output_path(path: &std::path::Path) -> String {
 // --------------------------------------------------------------------------------------------- //
 
 fn main() {
-    let factor = 2;
+    let factor = 10;
 
     let path_str = std::env::args().nth(1).expect("no path given");
     let path = std::path::Path::new(&path_str);
@@ -350,6 +392,7 @@ fn main() {
             }
         }
     }
+
     let world = World::new().with_objects(objects).with_lights(lights);
     let canvas = camera.unwrap().par_render(&world);
 
