@@ -57,6 +57,11 @@ impl Material {
         self
     }
 
+    pub fn with_shininess(mut self, index: f64) -> Material {
+        self.shininess = index;
+        self
+    }
+
     pub fn with_specular(mut self, specular: f64) -> Material {
         self.specular = specular;
         self
