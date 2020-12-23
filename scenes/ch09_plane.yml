@@ -1,0 +1,72 @@
+- add: camera
+  width: 200
+  height: 100
+  field-of-view: 1.57
+  from: [0, 1.5, -5.0]
+  to: [0, 1, 0]
+  up: [0, 1, 0]
+
+- add: light
+  intensity: [1, 1, 1]
+  corner: [-10, 10, -10]
+  uvec: [4, 0, 0]
+  usteps: 16
+  vvec: [4, 0, 0]
+  vsteps: 16
+
+- add: light
+  intensity: [0.2, 0.2, 0.2]
+  corner: [-50, 10, -50]
+  uvec: [4, 0, 0]
+  usteps: 16
+  vvec: [4, 0, 0]
+  vsteps: 16
+
+- add: light
+  intensity: [0.2, 0.2, 0.2]
+  corner: [30, 10, -30]
+  uvec: [4, 0, 0]
+  usteps: 16
+  vvec: [4, 0, 0]
+  vsteps: 16
+
+- add: plane
+  material:
+    color: [1.0, 0.9, 0.9]
+    specular: 0
+
+- add: sphere
+  material:
+    color: [1, 0.8, 0.1]
+    diffuse: 0.7
+    specular: 0.3
+  transform:
+    - [ scale, 0.33, 0.33, 0.33 ]
+    - [ translate, -1.5, 0.33, -0.75 ]
+
+- add: sphere
+  material:
+    color: [0.1, 1.0, 0.5]
+    diffuse: 0.7
+    specular: 0.3
+  transform:
+    - [ translate, -0.5, 1.0, 0.5 ]
+
+- add: sphere
+  material:
+    color: [0.1, 1.0, 0.5]
+    diffuse: 0.7
+    specular: 0.3
+  transform:
+    - [ translate, -0.5, 0.5, 0.5 ]
+
+- add: sphere
+  material:
+    color: [0.1, 1.0, 0.5]
+    diffuse: 0.7
+    specular: 0.3
+  transform:
+    - [ shear, 1, 0, 0, 0, 0, 0]
+    - [ scale, 0.5, 0.5, 0.5 ]
+    - [ rotate-y, 0,7853981634 ]
+    - [ translate, 1.5, 0.5, -0.5 ]

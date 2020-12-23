@@ -10,6 +10,8 @@ My main objective is to be fluent in Rust 🗣🦀. So, if some seasoned rustace
 
 ## Some samples
 
+![Shadow Glamour Shot](/samples/shadow-glamour-shot.png?raw=true "Shadow Glamour Shot")
+
 ![Plane](/samples/ch09_plane.png?raw=true "Plane")
 
 ![Pattern](/samples/ch10_pattern.png?raw=true "Pattern")
@@ -23,3 +25,5 @@ My main objective is to be fluent in Rust 🗣🦀. So, if some seasoned rustace
 ![Cylinder](/samples/ch13_cylinder.png?raw=true "Cylinder")
 
 ![Cone](/samples/ch13_cone.png?raw=true "Cone")
+
+![Fresnel](/samples/fresnel.png?raw=true "Fresnel")

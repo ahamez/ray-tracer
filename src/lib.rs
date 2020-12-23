@@ -6,7 +6,7 @@ mod float {
     mod epsilon;
 }
 
-mod primitive {
+pub mod primitive {
     pub use matrix::Matrix;
     pub use point::Point;
     pub use tuple::Tuple;
@@ -68,17 +68,4 @@ pub mod rtc {
         mod plane;
         mod sphere;
     }
-}
-
-pub mod scenes {
-    pub use self::default::default_scenes;
-
-    mod ch09_plane;
-    mod ch10_pattern;
-    mod ch11_reflection;
-    mod ch11_refraction;
-    mod ch12_cube;
-    mod ch13_cone;
-    mod ch13_cylinder;
-    mod default;
 }

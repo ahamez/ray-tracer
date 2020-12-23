@@ -1,0 +1,58 @@
+# Scene description for image on page 159 of
+# "The Ray Tracer Challenge", depicting two nested
+# glass spheres against a checkered background.
+#
+# author: Jamis Buck <jamis@jamisbuck.org>
+
+- add: camera
+  width: 600
+  height: 600
+  field-of-view: 0.45
+  from: [ 0, 0, -5 ]
+  to: [ 0, 0, 0 ]
+  up: [ 0, 1, 0 ]
+
+- add: light
+  intensity: [ 0.9, 0.9, 0.9 ]
+  at: [ 2, 10, -5 ]
+
+# wall
+- add: plane
+  transform:
+    - [ rotate-x, 1.5708 ]
+    - [ translate, 0, 0, 10 ]
+  material:
+    pattern:
+      type: checkers
+      colors:
+        - [ 0.15, 0.15, 0.15 ]
+        - [ 0.85, 0.85, 0.85 ]
+    ambient: 0.8
+    diffuse: 0.2
+    specular: 0
+
+# glass ball
+- add: sphere
+  material:
+    color: [ 1, 1, 1 ]
+    ambient: 0
+    diffuse: 0
+    specular: 0.9
+    shininess: 300
+    reflective: 0.9
+    transparency: 0.9
+    refractive-index: 1.5
+
+# hollow center
+- add: sphere
+  transform:
+    - [ scale, 0.5, 0.5, 0.5 ]
+  material:
+    color: [ 1, 1, 1 ]
+    ambient: 0
+    diffuse: 0
+    specular: 0.9
+    shininess: 300
+    reflective: 0.9
+    transparency: 0.9
+    refractive-index: 1.0000034

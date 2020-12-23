@@ -9,6 +9,7 @@ float-cmp = "0.8.0"
 image = "0.23.12"
 rand = {version="0.8", features = ["small_rng"]}
 rayon = "1.5"
+yaml-rust = "0.4"
 
 [profile.release]
 debug = true
