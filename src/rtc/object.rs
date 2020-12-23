@@ -143,7 +143,7 @@ impl Default for Object {
 
 impl Transform for Object {
     fn apply_transformation(&self, transformation: &Matrix) -> Self {
-        let new_transformation = self.transformation * *transformation;
+        let new_transformation = *transformation * self.transformation;
         Object {
             transformation: new_transformation,
             transformation_inverse: new_transformation.invert().unwrap(),

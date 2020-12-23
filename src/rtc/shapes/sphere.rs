@@ -207,8 +207,8 @@ pub mod tests {
     #[test]
     fn normal_on_a_transformed_sphere() {
         let s = Object::new_sphere()
-            .scale(1.0, 0.5, 1.0)
-            .rotate_z(std::f64::consts::PI / 5.0);
+            .rotate_z(std::f64::consts::PI / 5.0)
+            .scale(1.0, 0.5, 1.0);
 
         assert_eq!(
             s.normal_at(&Point::new(
