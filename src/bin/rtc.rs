@@ -6,6 +6,10 @@
 
 use std::sync::Arc;
 
+#[macro_use]
+extern crate clap;
+
+use clap::{App, Arg};
 use yaml_rust::{Yaml, YamlLoader};
 
 use ray_tracer::{
@@ -359,9 +363,29 @@ fn output_path(path: &std::path::Path) -> String {
 // --------------------------------------------------------------------------------------------- //
 
 fn main() {
-    let factor = 10;
+    let matches = App::new("Ray Tracer")
+        .arg(
+            Arg::with_name("factor")
+                .short("f")
+                .long("factor")
+                .value_name("FACTOR")
+                .help("Sets a factor to apply on width/height")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("INPUT")
+                .help("Sets the input YAML file to use")
+                .required(true)
+                .index(1),
+        )
+        .get_matches();
 
-    let path_str = std::env::args().nth(1).expect("no path given");
+    let factor = clap::value_t!(matches.value_of("factor"), usize).unwrap_or(1);
+    let path_str = matches.value_of("INPUT").unwrap();
+
+    println!("Using factor: {}", factor);
+    println!("Using input file: {}", path_str);
+
     let path = std::path::Path::new(&path_str);
 
     let yaml = std::fs::read_to_string(path).unwrap();

@@ -5,6 +5,7 @@ authors = ["Alexandre Hamez <alexandre.hamez@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+clap = "2.33"
 float-cmp = "0.8.0"
 image = "0.23.12"
 rand = {version="0.8", features = ["small_rng"]}
