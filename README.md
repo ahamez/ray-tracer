@@ -4,9 +4,11 @@ This is an implementation in Rust of the book [The Ray Tracer Challenge](http://
 
 My main objective is to be fluent in Rust 🗣🦀. So, if some seasoned rustacean comes across this, don't hesitate to pinpoint the problems 😉!
 
-## Differences from the book
+## Differences from the book and other points of interest
 * Parallelization with [rayon](https://github.com/rayon-rs/rayon) (I can't believe how easy it was!)
 * Matrices inversion are cached (which provides a significant speedup!)
+* Don't explicitly store the w component for tuples. Instead, it's up to the implementation of the Tuple trait to return the correct value (1.0 or 0.0)
+* Use f64 everywhere
 
 ## Some samples
 
