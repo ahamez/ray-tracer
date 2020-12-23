@@ -78,8 +78,7 @@ impl AreaLight {
     where
         T: FnMut() -> f64,
     {
-        let random = random();
-        self.corner + self.uvec * (u as f64 + random) + self.vvec * (v as f64 + random)
+        self.corner + self.uvec * (u as f64 + random()) + self.vvec * (v as f64 + random())
     }
 
     fn intensity_at_impl<T>(&self, world: &World, point: &Point, mut random: T) -> f64
