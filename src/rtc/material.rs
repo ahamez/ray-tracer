@@ -306,11 +306,17 @@ mod tests {
     #[test]
     fn lighting_uses_light_intensity_to_attenuate_color() {
         let mut objects = crate::rtc::world::tests::default_world().objects().clone();
-        let mut object = (*objects[0]).clone();
-        object.material_mut().ambient = 0.1;
-        object.material_mut().diffuse = 0.9;
-        object.material_mut().specular = 0.0;
-        object.material_mut().pattern = Pattern::new_plain(Color::white());
+
+        let obj0 = (*objects[0]).clone();
+        let obj0_material = obj0.material().clone();
+        let object = obj0.clone().with_material(
+            obj0_material
+                .with_ambient(0.1)
+                .with_diffuse(0.9)
+                .with_specular(0.0)
+                .with_pattern(Pattern::new_plain(Color::white())),
+        );
+
         objects[0] = Arc::new(object.clone());
 
         let w = World::new()

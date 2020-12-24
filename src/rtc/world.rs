@@ -372,8 +372,9 @@ pub mod tests {
     fn the_reflected_color_for_a_nonreflective_material() {
         let w = default_world();
 
-        let mut object = (*w.objects[1]).clone();
-        object.material_mut().ambient = 1.0;
+        let obj1 = (*w.objects[1]).clone();
+        let obj1_material = obj1.material().clone();
+        let object = obj1.clone().with_material(obj1_material.with_ambient(1.0));
 
         let ray = Ray {
             origin: Point::new(0.0, 0.0, 0.0),
@@ -504,9 +505,14 @@ pub mod tests {
     #[test]
     fn the_refracted_color_at_the_maximum_recursive_depth() {
         let w = default_world();
-        let mut object = (*w.objects[0]).clone();
-        object.material_mut().transparency = 1.0;
-        object.material_mut().refractive_index = 1.5;
+
+        let obj0 = (*w.objects[0]).clone();
+        let obj0_material = obj0.material().clone();
+        let object = obj0.clone().with_material(
+            obj0_material
+                .with_transparency(1.0)
+                .with_refractive_index(1.5),
+        );
 
         let ray = Ray {
             origin: Point::new(0.0, 0.0, -5.0),
@@ -532,9 +538,14 @@ pub mod tests {
     #[test]
     fn the_refracted_color_under_total_internal_reflection() {
         let w = default_world();
-        let mut object = (*w.objects[0]).clone();
-        object.material_mut().transparency = 1.0;
-        object.material_mut().refractive_index = 1.5;
+
+        let obj0 = (*w.objects[0]).clone();
+        let obj0_material = obj0.material().clone();
+        let object = obj0.clone().with_material(
+            obj0_material
+                .with_transparency(1.0)
+                .with_refractive_index(1.5),
+        );
 
         let ray = Ray {
             origin: Point::new(0.0, 0.0, f64::sqrt(2.0) / 2.0),
@@ -561,14 +572,22 @@ pub mod tests {
     fn the_refracted_color_with_a_refracted_ray() {
         let mut w = default_world();
 
-        let mut a = (*w.objects[0]).clone();
-        a.material_mut().ambient = 1.0;
-        a.material_mut().pattern = Pattern::new_test();
+        let obj0 = (*w.objects[0]).clone();
+        let obj0_material = obj0.material().clone();
+        let a = obj0.clone().with_material(
+            obj0_material
+                .with_ambient(1.0)
+                .with_pattern(Pattern::new_test()),
+        );
         let a = Arc::new(a);
 
-        let mut b = (*w.objects[1]).clone();
-        b.material_mut().transparency = 1.0;
-        b.material_mut().refractive_index = 1.5;
+        let obj1 = (*w.objects[1]).clone();
+        let obj1_material = obj1.material().clone();
+        let b = obj1.clone().with_material(
+            obj1_material
+                .with_transparency(1.0)
+                .with_refractive_index(1.5),
+        );
         let b = Arc::new(b);
 
         let ray = Ray {
