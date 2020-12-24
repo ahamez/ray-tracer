@@ -1,0 +1,99 @@
+- add: camera
+  width: 100
+  height: 50
+  field-of-view: 1.65347 # PI / 1.9
+  from: [5.0, 2.5, -7.5]
+  to: [1.5, 3.0, 0.0]
+  up: [0.0, 1.0, 0.0]
+
+# - add: light
+#   intensity: [1.0, 1.0, 1.0]
+#   at: [-5.0, 10.0, -10.0]
+- add: light
+  intensity: [1, 1, 1]
+  corner: [-5, 10, -10]
+  uvec: [4, 0, 0]
+  usteps: 10
+  vvec: [4, 0, 0]
+  vsteps: 10
+
+# floor
+- add: plane
+  material:
+      pattern:
+        type: checkers
+        colors:
+          - [1.0, 1.0, 1.0]
+          - [0.5, 0.5, 0.5]
+      reflective: 0
+
+# left wall
+- add: plane
+  material:
+      pattern:
+        type: checkers
+        colors:
+          - [1.0, 1.0, 1.0]
+          - [0.5, 0.5, 0.5]
+      reflective: 0
+  transform:
+    - [ rotate-z,  1.570795 ]
+    - [ translate, -15, 0, 0]
+
+# right wall
+- add: plane
+  material:
+      pattern:
+        type: checkers
+        colors:
+          - [1.0, 1.0, 1.0]
+          - [0.5, 0.5, 0.5]
+      reflective: 0
+  transform:
+    - [ rotate-x,  1.570795 ]
+    - [ translate, 0, 0, 15]
+
+# blue cube
+- add: cube
+  material:
+    pattern:
+        type: gradient
+        colors:
+          - [0.0, 0.0, 1.0]
+          - [0.0, 0.0, 0.0]
+    diffuse: 0.7
+    specular: 0.3
+    reflective: 0.05
+  transform:
+    - [ scale, 2.0, 2.0, 2.0 ]
+    - [ translate, 0.0, 2.0, 0.0 ]
+
+# red cube
+- add: cube
+  material:
+    pattern:
+        type: gradient
+        colors:
+          - [1.0, 0.0, 0.0]
+          - [0.0, 0.0, 0.0]
+    diffuse: 0.7
+    specular: 0.3
+    reflective: 0.05
+  transform:
+    - [ scale, 1.0, 1.0, 1.0 ]
+    - [ translate, 0.0, 5.0, 0.0 ]
+
+# green cube
+- add: cube
+  material:
+    pattern:
+        type: gradient
+        colors:
+          - [0.0, 1.0, 0.0]
+          - [0.0, 0.0, 0.0]
+    diffuse: 0.7
+    specular: 0.3
+    reflective: 0.05
+  transform:
+    - [ scale, 0.5, 0.5, 0.5 ]
+    - [ translate, 0.0, 6.5, 0.0 ]
