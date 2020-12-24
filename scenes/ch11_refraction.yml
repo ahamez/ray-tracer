@@ -1,0 +1,109 @@
+- add: camera
+  width: 100
+  height: 50
+  field-of-view: 1.0471966 # PI / 3.0
+  from: [5.0, 1.5, -5.5]
+  to: [0.0, 0.7, 0.0]
+  up: [0.0, 1.0, 0.0]
+
+# - add: light
+#   intensity: [1.0, 1.0, 1.0]
+#   at: [-5.0, 10.0, -10.0]
+- add: light
+  intensity: [1, 1, 1]
+  corner: [-5, 10, -10]
+  uvec: [4, 0, 0]
+  usteps: 4
+  vvec: [4, 0, 0]
+  vsteps: 4
+
+
+# floor
+- add: plane
+  material:
+      pattern:
+        type: checkers
+        colors:
+          - [1.0, 1.0, 1.0]
+          - [0.5, 0.5, 0.5]
+      reflective: 0
+
+# left wall
+- add: plane
+  material:
+      pattern:
+        type: checkers
+        colors:
+          - [1.0, 1.0, 1.0]
+          - [0.5, 0.5, 0.5]
+      reflective: 0
+  transform:
+    - [ rotate-z,  1.570795 ]
+    - [ translate, -15, 0, 0]
+
+# right wall
+- add: plane
+  material:
+      pattern:
+        type: checkers
+        colors:
+          - [1.0, 1.0, 1.0]
+          - [0.5, 0.5, 0.5]
+      reflective: 0
+  transform:
+    - [ rotate-x,  1.570795 ]
+    - [ translate, 0, 0, 15]
+
+# refractive sphere
+- add: sphere
+  material:
+    color: [0.1, 0.1, 0.1]
+    transparency: 1
+    refractive-index: 1.5
+  shadow: false
+  transform:
+    - [ translate, 0.0, 1.5, 0.0 ]
+
+# blue sphere
+- add: sphere
+  material:
+    pattern:
+        type: gradient
+        colors:
+          - [0.0, 0.0, 1.0]
+          - [0.0, 0.0, 0.0]
+    diffuse: 0.7
+    specular: 0.3
+    reflective: 0.2
+  transform:
+    - [ translate, -8.0, 1.0, 5.0 ]
+
+# red sphere
+- add: sphere
+  material:
+    pattern:
+        type: gradient
+        colors:
+          - [1.0, 0.0, 0.0]
+          - [0.0, 0.0, 0.0]
+    diffuse: 0.7
+    specular: 0.3
+    reflective: 0.2
+  transform:
+    - [ scale, 0.5, 0.5, 0.5 ]
+    - [ translate, -1.0, 0.5, 5.0 ]
+
+# green sphere
+- add: sphere
+  material:
+    pattern:
+        type: gradient
+        colors:
+          - [0.0, 1.0, 0.0]
+          - [0.0, 0.0, 0.0]
+    diffuse: 0.7
+    specular: 0.3
+    reflective: 0.2
+  transform:
+    - [ scale, 0.5, 0.5, 0.5 ]
+    - [ translate, -2.3, 0.5, 0.77 ]
