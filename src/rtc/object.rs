@@ -17,6 +17,7 @@ pub struct Object {
     shape: Shape,
     transformation: Matrix,
     transformation_inverse: Matrix,
+    transformation_inverse_transpose: Matrix,
 }
 
 // --------------------------------------------------------------------------------------------- //
@@ -99,7 +100,7 @@ impl Object {
     pub fn normal_at(&self, world_point: &Point) -> Vector {
         let object_point = self.transformation_inverse * *world_point;
         let object_normal = self.shape.normal_at(&object_point);
-        let world_normal = self.transformation_inverse.transpose() * object_normal;
+        let world_normal = self.transformation_inverse_transpose * object_normal;
 
         world_normal.normalize()
     }
@@ -135,6 +136,7 @@ impl Default for Object {
             shape: Shape::Sphere(),
             transformation: Matrix::id(),
             transformation_inverse: Matrix::id(),
+            transformation_inverse_transpose: Matrix::id(),
         }
     }
 }
@@ -143,10 +145,14 @@ impl Default for Object {
 
 impl Transform for Object {
     fn apply_transformation(&self, transformation: &Matrix) -> Self {
-        let new_transformation = *transformation * self.transformation;
+        let transformation = *transformation * self.transformation;
+        let transformation_inverse = transformation.invert().unwrap();
+        let transformation_inverse_transpose = transformation_inverse.transpose();
+
         Object {
-            transformation: new_transformation,
-            transformation_inverse: new_transformation.invert().unwrap(),
+            transformation,
+            transformation_inverse,
+            transformation_inverse_transpose,
             ..self.clone()
         }
     }
