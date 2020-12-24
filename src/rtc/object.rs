@@ -117,10 +117,6 @@ impl Object {
         &mut self.material
     }
 
-    pub fn transformation(&self) -> &Matrix {
-        &self.transformation
-    }
-
     pub fn transformation_inverse(&self) -> &Matrix {
         &self.transformation_inverse
     }
