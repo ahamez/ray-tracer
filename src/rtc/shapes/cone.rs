@@ -40,14 +40,13 @@ impl Cone {
             * (ray.origin.x() * ray.direction.x() - ray.origin.y() * ray.direction.y()
                 + ray.origin.z() * ray.direction.z());
 
-        // Delayed evaluation.
-        let c = || ray.origin.x().powi(2) - ray.origin.y().powi(2) + ray.origin.z().powi(2);
+        let c = ray.origin.x().powi(2) - ray.origin.y().powi(2) + ray.origin.z().powi(2);
 
         if a.approx_eq(0.0) && !b.approx_eq(0.0) {
-            let t = c() / (-2.0 * b);
+            let t = c / (-2.0 * b);
             push(t);
         } else {
-            let discriminant = b.powi(2) - 4.0 * a * c();
+            let discriminant = b.powi(2) - 4.0 * a * c;
 
             if discriminant < 0.0 {
                 return;
