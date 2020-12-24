@@ -115,9 +115,9 @@ impl Camera {
 
 impl Transform for Camera {
     fn apply_transformation(&self, transformation: &Matrix) -> Self {
-        let new_transformation = self.transformation * *transformation;
+        let new_transformation = *transformation * self.transformation;
         Camera {
-            transformation: self.transformation * *transformation,
+            transformation: new_transformation,
             transformation_inverse: new_transformation.invert().unwrap(),
             ..*self
         }
@@ -170,8 +170,8 @@ mod tests {
     #[test]
     fn constructing_a_ray_when_the_camera_is_transformed() {
         let c = Camera::new(201, 101, PI / 2.0)
-            .rotate_y(PI / 4.0)
-            .translate(0.0, -2.0, 5.0);
+            .translate(0.0, -2.0, 5.0)
+            .rotate_y(PI / 4.0);
         let r = c.ray_for_pixel(100, 50);
 
         assert_eq!(r.origin, Point::new(0.0, 2.0, -5.0));
