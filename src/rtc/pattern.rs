@@ -191,10 +191,6 @@ pub struct StripePattern {
 
 impl StripePattern {
     fn pattern_at(&self, point: &Point) -> Color {
-        // As spheres are units, -1.0 <= x <= +1.0, we multiply by the number of
-        // colors in the pattern to make sure all colors are covered (otherwise index
-        // would always be 0 or 1)
-        // TODO, find a better way, we should to it only for unit spheres
         let scaled_x = point.x() * self.colors.len() as f64;
         let index = (scaled_x.floor().abs() as usize) % self.colors.len();
 
