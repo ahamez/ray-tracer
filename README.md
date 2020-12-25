@@ -14,6 +14,8 @@ My main objective is to be fluent in Rust 🗣🦀. So, if some seasoned rustace
 
 ![Shadow Glamour Shot](/samples/shadow-glamour-shot.png?raw=true "Shadow Glamour Shot")
 
+![Reflect-Refract](/samples/reflect-refract.png?raw=true "Reflect Refract")
+
 ![Plane](/samples/ch09_plane.png?raw=true "Plane")
 
 ![Pattern](/samples/ch10_pattern.png?raw=true "Pattern")

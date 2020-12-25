@@ -144,7 +144,7 @@ fn mk_pattern(hash: &yaml_rust::yaml::Hash) -> Option<Pattern> {
             .as_str()
             .unwrap();
 
-        match ty {
+        let pattern = match ty {
             "checkers" => {
                 let colors = pattern_hash
                     .get(&Yaml::from_str(&"colors"))
@@ -152,10 +152,7 @@ fn mk_pattern(hash: &yaml_rust::yaml::Hash) -> Option<Pattern> {
                     .as_vec()
                     .unwrap();
 
-                Some(Pattern::new_checker(
-                    mk_color(&colors[0]),
-                    mk_color(&colors[1]),
-                ))
+                Pattern::new_checker(mk_color(&colors[0]), mk_color(&colors[1]))
             }
 
             "gradient" => {
@@ -165,10 +162,7 @@ fn mk_pattern(hash: &yaml_rust::yaml::Hash) -> Option<Pattern> {
                     .as_vec()
                     .unwrap();
 
-                Some(Pattern::new_gradient(
-                    mk_color(&colors[0]),
-                    mk_color(&colors[1]),
-                ))
+                Pattern::new_gradient(mk_color(&colors[0]), mk_color(&colors[1]))
             }
 
             "ring" => {
@@ -180,7 +174,7 @@ fn mk_pattern(hash: &yaml_rust::yaml::Hash) -> Option<Pattern> {
 
                 let v: Vec<_> = colors.iter().map(|c| mk_color(&c)).collect();
 
-                Some(Pattern::new_ring(v))
+                Pattern::new_ring(v)
             }
 
             "stripes" => {
@@ -192,10 +186,12 @@ fn mk_pattern(hash: &yaml_rust::yaml::Hash) -> Option<Pattern> {
 
                 let v: Vec<_> = colors.iter().map(|c| mk_color(&c)).collect();
 
-                Some(Pattern::new_stripe(v))
+                Pattern::new_stripe(v)
             }
             _ => unimplemented!(),
-        }
+        };
+
+        Some(transform(pattern, &pattern_hash))
     } else {
         None
     }
@@ -207,8 +203,8 @@ fn mk_material(hash: &yaml_rust::yaml::Hash) -> Material {
     let default = Material::new();
 
     match hash.get(&Yaml::from_str(&"material")) {
-        Some(material_hash) => {
-            let material_hash = material_hash.clone().into_hash().unwrap();
+        Some(material_yaml) => {
+            let material_hash = material_yaml.clone().into_hash().unwrap();
 
             let pattern = mk_pattern(&material_hash).unwrap_or(default.pattern);
 
@@ -231,7 +227,7 @@ fn mk_material(hash: &yaml_rust::yaml::Hash) -> Material {
                 .with_transparency(
                     mk_f64_from_key(&material_hash, "transparency").unwrap_or(default.transparency),
                 )
-                .with_pattern(transform(pattern, &material_hash))
+                .with_pattern(pattern)
         }
         None => default,
     }

@@ -1,0 +1,213 @@
+# ======================================================
+# reflect-refract.yml
+#
+# This file describes the scene illustrated at the start
+# of chapter 11, "Reflection and Refraction", in "The
+# Ray Tracer Challenge"
+#
+# by Jamis Buck <jamis@jamisbuck.org>
+# ======================================================
+
+# ======================================================
+# the camera
+# ======================================================
+
+- add: camera
+  width: 400
+  height: 200
+  field-of-view: 1.152
+  from: [-2.6, 1.5, -3.9]
+  to: [-0.6, 1, -0.8]
+  up: [0, 1, 0]
+
+# ======================================================
+# light sources
+# ======================================================
+
+- add: light
+  at: [-4.9, 4.9, -1]
+  intensity: [1, 1, 1]
+
+# ======================================================
+# describe the elements of the scene
+# ======================================================
+
+# the checkered floor
+- add: plane
+  transform:
+    - [ rotate-y, 0.31415 ]
+  material:
+    pattern:
+      type: checkers
+      colors:
+        - [0.35, 0.35, 0.35]
+        - [0.65, 0.65, 0.65]
+    specular: 0
+    reflective: 0.4
+
+# the ceiling
+- add: plane
+  transform:
+    - [ translate, 0, 5, 0 ]
+  material:
+    color: [0.8, 0.8, 0.8]
+    ambient: 0.3
+    specular: 0
+
+# west wall
+- add: plane
+  transform:
+    - [ rotate-y, 1.5708 ] # orient texture
+    - [ rotate-z, 1.5708 ] # rotate to vertical
+    - [ translate, -5, 0, 0 ]
+  # material: wall-material
+  material:
+    pattern:
+      type: stripes
+      colors:
+        - [0.45, 0.45, 0.45]
+        - [0.55, 0.55, 0.55]
+      transform:
+        - [ scale, 0.25, 0.25, 0.25 ]
+        - [ rotate-y, 1.5708 ]
+    ambient: 0
+    diffuse: 0.4
+    specular: 0
+    reflective: 0.3
+
+# east wall
+- add: plane
+  transform:
+    - [ rotate-y, 1.5708 ] # orient texture
+    - [ rotate-z, 1.5708 ] # rotate to vertical
+    - [ translate, 5, 0, 0 ]
+  material:
+    pattern:
+      type: stripes
+      colors:
+        - [0.45, 0.45, 0.45]
+        - [0.55, 0.55, 0.55]
+      transform:
+        - [ scale, 0.25, 0.25, 0.25 ]
+        - [ rotate-y, 1.5708 ]
+    ambient: 0
+    diffuse: 0.4
+    specular: 0
+    reflective: 0.3
+
+# north wall
+- add: plane
+  transform:
+    - [ rotate-x, 1.5708 ] # rotate to vertical
+    - [ translate, 0, 0, 5 ]
+  material:
+    pattern:
+      type: stripes
+      colors:
+        - [0.45, 0.45, 0.45]
+        - [0.55, 0.55, 0.55]
+      transform:
+        - [ scale, 0.25, 0.25, 0.25 ]
+        - [ rotate-y, 1.5708 ]
+    ambient: 0
+    diffuse: 0.4
+    specular: 0
+    reflective: 0.3
+
+# south wall
+- add: plane
+  transform:
+    - [ rotate-x, 1.5708 ] # rotate to vertical
+    - [ translate, 0, 0, -5 ]
+  material:
+    pattern:
+      type: stripes
+      colors:
+        - [0.45, 0.45, 0.45]
+        - [0.55, 0.55, 0.55]
+      transform:
+        - [ scale, 0.25, 0.25, 0.25 ]
+        - [ rotate-y, 1.5708 ]
+    ambient: 0
+    diffuse: 0.4
+    specular: 0
+    reflective: 0.3
+
+# ----------------------
+# background balls
+# ----------------------
+
+- add: sphere
+  transform:
+    - [ scale, 0.4, 0.4, 0.4 ]
+    - [ translate, 4.6, 0.4, 1 ]
+  material:
+    color: [0.8, 0.5, 0.3]
+    shininess: 50
+
+- add: sphere
+  transform:
+    - [ scale, 0.3, 0.3, 0.3 ]
+    - [ translate, 4.7, 0.3, 0.4 ]
+  material:
+    color: [0.9, 0.4, 0.5]
+    shininess: 50
+
+- add: sphere
+  transform:
+    - [ scale, 0.5, 0.5, 0.5 ]
+    - [ translate, -1, 0.5, 4.5 ]
+  material:
+    color: [0.4, 0.9, 0.6]
+    shininess: 50
+
+- add: sphere
+  transform:
+    - [ scale, 0.3, 0.3, 0.3 ]
+    - [ translate, -1.7, 0.3, 4.7 ]
+  material:
+    color: [0.4, 0.6, 0.9]
+    shininess: 50
+
+# ----------------------
+# foreground balls
+# ----------------------
+
+# red sphere
+- add: sphere
+  transform:
+    - [ translate, -0.6, 1, 0.6 ]
+  material:
+    color: [1, 0.3, 0.2]
+    specular: 0.4
+    shininess: 5
+
+# blue glass sphere
+- add: sphere
+  transform:
+    - [ scale, 0.7, 0.7, 0.7 ]
+    - [ translate, 0.6, 0.7, -0.6 ]
+  material:
+    color: [0, 0, 0.2]
+    ambient: 0
+    diffuse: 0.4
+    specular: 0.9
+    shininess: 300
+    reflective: 0.9
+    transparency: 0.9
+    refractive-index: 1.5
+
+# green glass sphere
+- add: sphere
+  transform:
+    - [ scale, 0.5, 0.5, 0.5 ]
+    - [ translate, -0.7, 0.5, -0.8 ]
+  material:
+    color: [0, 0.2, 0]
+    ambient: 0
+    diffuse: 0.4
+    specular: 0.9
+    shininess: 300
+    reflective: 0.9
+    transparency: 0.9
+    refractive-index: 1.5

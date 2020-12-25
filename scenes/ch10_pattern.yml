@@ -28,8 +28,8 @@
         - [ 0.5, 0.5, 0.5 ]
         - [ 1.0, 1.0, 1.0 ]
         - [ 0.7, 0.6, 0.7 ]
-    transform:
-      - [ shear, 1, 1, 0, 0, 0, 0]
+      transform:
+        - [ shear, 1, 1, 0, 0, 0, 0]
   transform:
       - [ rotate-x, 1.571]
       - [ translate, 0, 0, 5]
@@ -38,12 +38,12 @@
 - add: sphere
   material:
     pattern:
-        type: ring
-        colors:
-          - [1.0, 1.0, 1.0]
-          - [0.7, 0.6, 0.7]
-    transform:
-        - [ scale, 0.2, 0.2, 0.2]
+      type: ring
+      colors:
+        - [1.0, 1.0, 1.0]
+        - [0.7, 0.6, 0.7]
+      transform:
+          - [ scale, 0.2, 0.2, 0.2]
     diffuse: 0.7
     specular: 0.3
   transform:
