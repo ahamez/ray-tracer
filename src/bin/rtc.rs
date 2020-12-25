@@ -137,7 +137,7 @@ fn mk_pattern(hash: &yaml_rust::yaml::Hash) -> Option<Pattern> {
     if let Some(color) = hash.get(&Yaml::from_str(&"color")) {
         Some(Pattern::new_plain(mk_color(color)))
     } else if let Some(pattern) = hash.get(&Yaml::from_str(&"pattern")) {
-        let pattern_hash = pattern.clone().into_hash().unwrap();
+        let pattern_hash = pattern.as_hash().unwrap();
         let ty = pattern_hash
             .get(&Yaml::from_str(&"type"))
             .unwrap()
@@ -204,7 +204,7 @@ fn mk_material(hash: &yaml_rust::yaml::Hash) -> Material {
 
     match hash.get(&Yaml::from_str(&"material")) {
         Some(material_yaml) => {
-            let material_hash = material_yaml.clone().into_hash().unwrap();
+            let material_hash = material_yaml.as_hash().unwrap();
 
             let pattern = mk_pattern(&material_hash).unwrap_or(default.pattern);
 
@@ -240,7 +240,7 @@ where
     T: Transform,
 {
     if let Some(transform_array) = hash.get(&Yaml::from_str(&"transform")) {
-        let transform_array = transform_array.clone().into_vec().unwrap();
+        let transform_array = transform_array.as_vec().unwrap();
         for transform in transform_array {
             let operation = transform[0].as_str().unwrap();
 
@@ -402,7 +402,7 @@ fn main() {
     let mut camera = None;
 
     for elem in doc.as_vec().unwrap().iter() {
-        let hash = elem.clone().into_hash().unwrap();
+        let hash = elem.as_hash().unwrap();
 
         if let Some(x) = hash.get(&Yaml::from_str(&"add")) {
             let ty = x.as_str().unwrap().as_ref();
