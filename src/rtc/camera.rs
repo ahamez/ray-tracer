@@ -73,7 +73,15 @@ impl Camera {
         Ray { origin, direction }
     }
 
-    pub fn render(&self, world: &World) -> Canvas {
+    pub fn render(&self, world: &World, parallel: bool) -> Canvas {
+        if parallel {
+            self.parallel_render(world)
+        } else {
+            self.sequential_render(world)
+        }
+    }
+
+    pub fn sequential_render(&self, world: &World) -> Canvas {
         let mut image = Canvas::new(self.h_size, self.v_size);
 
         for row in 0..self.v_size {
@@ -88,7 +96,7 @@ impl Camera {
         image
     }
 
-    pub fn par_render(&self, world: &World) -> Canvas {
+    pub fn parallel_render(&self, world: &World) -> Canvas {
         const BAND_SIZE: usize = 10;
         let mut image = Canvas::new(self.h_size, self.v_size);
 
@@ -189,7 +197,7 @@ mod tests {
         let up = Vector::new(0.0, 1.0, 0.0);
         let c = Camera::new(11, 11, PI / 2.0).with_transformation(&view_transform(&from, &to, &up));
 
-        let image = c.render(&w);
+        let image = c.sequential_render(&w);
 
         assert_eq!(image[5][5], Color::new(0.38066, 0.47583, 0.2855));
     }
@@ -203,8 +211,8 @@ mod tests {
         let c =
             Camera::new(100, 100, PI / 2.0).with_transformation(&view_transform(&from, &to, &up));
 
-        let image = c.render(&w);
-        let par_image = c.par_render(&w);
+        let image = c.sequential_render(&w);
+        let par_image = c.parallel_render(&w);
 
         assert_eq!(image, par_image);
     }

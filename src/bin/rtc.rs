@@ -369,6 +369,13 @@ fn main() {
                 .takes_value(true),
         )
         .arg(
+            Arg::with_name("sequential")
+                .short("s")
+                .long("sequential")
+                .help("Deactivate parallel rendering")
+                .takes_value(false),
+        )
+        .arg(
             Arg::with_name("INPUT")
                 .help("Sets the input YAML file to use")
                 .required(true)
@@ -377,10 +384,12 @@ fn main() {
         .get_matches();
 
     let factor = clap::value_t!(matches.value_of("factor"), usize).unwrap_or(1);
+    let sequential = matches.is_present("sequential");
     let path_str = matches.value_of("INPUT").unwrap();
 
     println!("Using factor: {}", factor);
     println!("Using input file: {}", path_str);
+    println!("Parallel rendering: {}", !sequential);
 
     let path = std::path::Path::new(&path_str);
 
@@ -414,8 +423,7 @@ fn main() {
     }
 
     let world = World::new().with_objects(objects).with_lights(lights);
-    let canvas = camera.unwrap().par_render(&world);
-
+    let canvas = camera.unwrap().render(&world, !sequential);
     canvas.export(&output_path(&path)).unwrap();
 }
 
