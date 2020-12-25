@@ -18,13 +18,7 @@ pub struct Cylinder {
 // --------------------------------------------------------------------------------------------- //
 
 impl Cylinder {
-    pub fn new() -> Self {
-        Cylinder {
-            ..Default::default()
-        }
-    }
-
-    pub fn new_truncated(min: f64, max: f64, closed: bool) -> Self {
+    pub fn new(min: f64, max: f64, closed: bool) -> Self {
         let (min, max) = if min < max { (min, max) } else { (max, min) };
 
         Cylinder { min, max, closed }
@@ -125,7 +119,7 @@ pub mod tests {
 
     #[test]
     fn the_default_values_for_a_cylinder() {
-        let c = Cylinder::new();
+        let c: Cylinder = Default::default();
         assert_eq!(c.min, f64::NEG_INFINITY);
         assert_eq!(c.max, f64::INFINITY);
         assert_eq!(c.closed, false);
@@ -140,7 +134,8 @@ pub mod tests {
             };
             let mut xs = vec![];
 
-            Cylinder::new().intersects(&ray, |t| xs.push(t));
+            let c: Cylinder = Default::default();
+            c.intersects(&ray, |t| xs.push(t));
 
             assert_eq!(xs.len(), 2);
             assert!(xs[0].approx_eq_low_precision(t0));
@@ -179,7 +174,7 @@ pub mod tests {
             (Point::new(0.0, 1.5, -2.0), Vector::new(0.0, 0.0, 1.0), 2),
         ];
 
-        let c = Cylinder::new_truncated(1.0, 2.0, false);
+        let c = Cylinder::new(1.0, 2.0, false);
         for (origin, direction, count) in tests.into_iter() {
             let mut xs = vec![];
             c.intersects(
@@ -203,7 +198,7 @@ pub mod tests {
             (Point::new(0.0, -1.0, -2.0), Vector::new(0.0, 1.0, 1.0), 2),
         ];
 
-        let c = Cylinder::new_truncated(1.0, 2.0, true);
+        let c = Cylinder::new(1.0, 2.0, true);
         for (origin, direction, count) in tests.into_iter() {
             let mut xs = vec![];
             c.intersects(
@@ -225,7 +220,8 @@ pub mod tests {
                 direction: direction.normalize(),
             };
             let mut xs = vec![];
-            Cylinder::new().intersects(&ray, |t| xs.push(t));
+            let c: Cylinder = Default::default();
+            c.intersects(&ray, |t| xs.push(t));
             assert_eq!(xs.len(), 0);
         }
 
@@ -236,7 +232,7 @@ pub mod tests {
 
     #[test]
     fn normal_vector_on_a_cylinder() {
-        let c = Cylinder::new();
+        let c: Cylinder = Default::default();
         assert_eq!(
             c.normal_at(&Point::new(1.0, 0.0, 0.0)),
             Vector::new(1.0, 0.0, 0.0)
@@ -266,7 +262,7 @@ pub mod tests {
             (Point::new(0.0, 2.0, 0.5), Vector::new(0.0, 1.0, 0.0)),
         ];
 
-        let c = Cylinder::new_truncated(1.0, 2.0, true);
+        let c = Cylinder::new(1.0, 2.0, true);
         for (point, normal) in tests.into_iter() {
             assert_eq!(c.normal_at(&point), normal);
         }

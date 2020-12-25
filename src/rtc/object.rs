@@ -23,16 +23,9 @@ pub struct Object {
 // --------------------------------------------------------------------------------------------- //
 
 impl Object {
-    pub fn new_cone() -> Self {
+    pub fn new_cone(min: f64, max: f64, closed: bool) -> Self {
         Object {
-            shape: Shape::Cone(Cone::new()),
-            ..Default::default()
-        }
-    }
-
-    pub fn new_cone_truncated(min: f64, max: f64, closed: bool) -> Self {
-        Object {
-            shape: Shape::Cone(Cone::new_truncated(min, max, closed)),
+            shape: Shape::Cone(Cone::new(min, max, closed)),
             ..Default::default()
         }
     }
@@ -44,16 +37,9 @@ impl Object {
         }
     }
 
-    pub fn new_cylinder() -> Self {
+    pub fn new_cylinder(min: f64, max: f64, closed: bool) -> Self {
         Object {
-            shape: Shape::Cylinder(Cylinder::new()),
-            ..Default::default()
-        }
-    }
-
-    pub fn new_cylinder_truncated(min: f64, max: f64, closed: bool) -> Self {
-        Object {
-            shape: Shape::Cylinder(Cylinder::new_truncated(min, max, closed)),
+            shape: Shape::Cylinder(Cylinder::new(min, max, closed)),
             ..Default::default()
         }
     }

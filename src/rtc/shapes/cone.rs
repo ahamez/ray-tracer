@@ -18,13 +18,7 @@ pub struct Cone {
 // --------------------------------------------------------------------------------------------- //
 
 impl Cone {
-    pub fn new() -> Self {
-        Cone {
-            ..Default::default()
-        }
-    }
-
-    pub fn new_truncated(min: f64, max: f64, closed: bool) -> Self {
+    pub fn new(min: f64, max: f64, closed: bool) -> Self {
         let (min, max) = if min < max { (min, max) } else { (max, min) };
 
         Cone { min, max, closed }
@@ -136,7 +130,7 @@ pub mod tests {
 
     #[test]
     fn intersecting_a_cone_with_a_ray_parallel_to_one_of_its_halves() {
-        let c = Cone::new();
+        let c: Cone = Default::default();
         let ray = Ray {
             origin: Point::new(0.0, 0.0, -1.0),
             direction: Vector::new(0.0, 1.0, 1.0).normalize(),
@@ -170,7 +164,7 @@ pub mod tests {
             ),
         ];
 
-        let c = Cone::new();
+        let c: Cone = Default::default();
         for (origin, direction, t0, t1) in tests.into_iter() {
             let mut xs = vec![];
             c.intersects(
@@ -194,7 +188,7 @@ pub mod tests {
             (Point::new(0.0, 0.0, -0.25), Vector::new(0.0, 1.0, 0.0), 4),
         ];
 
-        let c = Cone::new_truncated(-0.5, 0.5, true);
+        let c = Cone::new(-0.5, 0.5, true);
         for (origin, direction, count) in tests.into_iter() {
             let mut xs = vec![];
             c.intersects(
@@ -210,7 +204,7 @@ pub mod tests {
 
     #[test]
     fn normal_vector_on_a_conee() {
-        let c = Cone::new();
+        let c: Cone = Default::default();
         assert_eq!(
             c.normal_at(&Point::new(0.0, 0.0, 0.0)),
             Vector::new(0.0, 0.0, 0.0)
