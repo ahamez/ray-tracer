@@ -7,7 +7,7 @@ use crate::{float::ApproxEq, primitive::tuple::Tuple};
 #[derive(Clone, Copy)]
 pub struct Matrix {
     size: usize,
-    data: [f64; 4 * 4],
+    data: [[f64; 4]; 4],
 }
 
 // --------------------------------------------------------------------------------------------- //
@@ -18,7 +18,7 @@ impl Matrix {
 
         Matrix {
             size,
-            data: [0.0; 4 * 4],
+            data: [[0.0; 4]; 4],
         }
     }
 
@@ -26,7 +26,10 @@ impl Matrix {
         Matrix {
             size: 4,
             data: [
-                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0],
             ],
         }
     }
@@ -137,20 +140,18 @@ impl PartialEq for Matrix {
 // --------------------------------------------------------------------------------------------- //
 
 impl std::ops::Index<usize> for Matrix {
-    type Output = [f64];
+    type Output = [f64; 4];
 
-    fn index(&self, row: usize) -> &[f64] {
-        let start = row * self.size;
-        &self.data[start..start + self.size]
+    fn index(&self, row: usize) -> &[f64; 4] {
+        &self.data[row]
     }
 }
 
 // --------------------------------------------------------------------------------------------- //
 
 impl std::ops::IndexMut<usize> for Matrix {
-    fn index_mut(&mut self, row: usize) -> &mut [f64] {
-        let start = row * self.size;
-        &mut self.data[start..start + self.size]
+    fn index_mut(&mut self, row: usize) -> &mut [f64; 4] {
+        &mut self.data[row]
     }
 }
 
