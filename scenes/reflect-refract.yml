@@ -29,6 +29,25 @@
   intensity: [1, 1, 1]
 
 # ======================================================
+# define constants to avoid duplication
+# ======================================================
+
+- define: wall-material
+  value:
+    pattern:
+      type: stripes
+      colors:
+        - [0.45, 0.45, 0.45]
+        - [0.55, 0.55, 0.55]
+      transform:
+        - [ scale, 0.25, 0.25, 0.25 ]
+        - [ rotate-y, 1.5708 ]
+    ambient: 0
+    diffuse: 0.4
+    specular: 0
+    reflective: 0.3
+
+# ======================================================
 # describe the elements of the scene
 # ======================================================
 
@@ -60,20 +79,7 @@
     - [ rotate-y, 1.5708 ] # orient texture
     - [ rotate-z, 1.5708 ] # rotate to vertical
     - [ translate, -5, 0, 0 ]
-  # material: wall-material
-  material:
-    pattern:
-      type: stripes
-      colors:
-        - [0.45, 0.45, 0.45]
-        - [0.55, 0.55, 0.55]
-      transform:
-        - [ scale, 0.25, 0.25, 0.25 ]
-        - [ rotate-y, 1.5708 ]
-    ambient: 0
-    diffuse: 0.4
-    specular: 0
-    reflective: 0.3
+  material: wall-material
 
 # east wall
 - add: plane
@@ -81,57 +87,21 @@
     - [ rotate-y, 1.5708 ] # orient texture
     - [ rotate-z, 1.5708 ] # rotate to vertical
     - [ translate, 5, 0, 0 ]
-  material:
-    pattern:
-      type: stripes
-      colors:
-        - [0.45, 0.45, 0.45]
-        - [0.55, 0.55, 0.55]
-      transform:
-        - [ scale, 0.25, 0.25, 0.25 ]
-        - [ rotate-y, 1.5708 ]
-    ambient: 0
-    diffuse: 0.4
-    specular: 0
-    reflective: 0.3
+  material: wall-material
 
 # north wall
 - add: plane
   transform:
     - [ rotate-x, 1.5708 ] # rotate to vertical
     - [ translate, 0, 0, 5 ]
-  material:
-    pattern:
-      type: stripes
-      colors:
-        - [0.45, 0.45, 0.45]
-        - [0.55, 0.55, 0.55]
-      transform:
-        - [ scale, 0.25, 0.25, 0.25 ]
-        - [ rotate-y, 1.5708 ]
-    ambient: 0
-    diffuse: 0.4
-    specular: 0
-    reflective: 0.3
+  material: wall-material
 
 # south wall
 - add: plane
   transform:
     - [ rotate-x, 1.5708 ] # rotate to vertical
     - [ translate, 0, 0, -5 ]
-  material:
-    pattern:
-      type: stripes
-      colors:
-        - [0.45, 0.45, 0.45]
-        - [0.55, 0.55, 0.55]
-      transform:
-        - [ scale, 0.25, 0.25, 0.25 ]
-        - [ rotate-y, 1.5708 ]
-    ambient: 0
-    diffuse: 0.4
-    specular: 0
-    reflective: 0.3
+  material: wall-material
 
 # ----------------------
 # background balls

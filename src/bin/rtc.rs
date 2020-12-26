@@ -4,13 +4,14 @@
 
 /* ---------------------------------------------------------------------------------------------- */
 
+use std::collections::HashMap;
 use std::sync::Arc;
 
 #[macro_use]
 extern crate clap;
 
 use clap::{App, Arg};
-use yaml_rust::{Yaml, YamlLoader};
+use yaml_rust::{yaml, Yaml, YamlLoader};
 
 use ray_tracer::{
     primitive::{Matrix, Point, Tuple, Vector},
@@ -19,6 +20,54 @@ use ray_tracer::{
         Color, Light, Material, Object, Pattern, Scene, Transform, World,
     },
 };
+
+/* ---------------------------------------------------------------------------------------------- */
+
+type Definitions<'a> = HashMap<&'a Yaml, &'a Yaml>;
+
+/* ---------------------------------------------------------------------------------------------- */
+
+fn get_definitions(yaml: &Yaml) -> Definitions {
+    let mut definitions = HashMap::new();
+
+    for elem in yaml.as_vec().unwrap().iter() {
+        let hash = elem.as_hash().unwrap();
+
+        if let Some(x) = hash.get(&Yaml::from_str(&"define")) {
+            let definition_key = x;
+            let definition_value = hash.get(&Yaml::from_str(&"value")).unwrap();
+            definitions.insert(definition_key, definition_value);
+        }
+    }
+
+    definitions
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+
+fn get_hash<'a>(definitions: &'a Definitions, yaml: &'a Yaml) -> &'a yaml::Hash {
+    match yaml.as_hash() {
+        Some(hash) => hash,
+        None => definitions
+            .get(yaml)
+            .unwrap_or_else(|| panic!("Definition {:?} not found", yaml))
+            .as_hash()
+            .unwrap(),
+    }
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+
+fn get_array<'a>(definitions: &'a Definitions, yaml: &'a Yaml) -> &'a yaml::Array {
+    match yaml.as_vec() {
+        Some(hash) => hash,
+        None => definitions
+            .get(yaml)
+            .unwrap_or_else(|| panic!("Definition {:?} not found", yaml))
+            .as_vec()
+            .unwrap(),
+    }
+}
 
 /* ---------------------------------------------------------------------------------------------- */
 
@@ -31,7 +80,7 @@ fn mk_bool(yaml: &Yaml) -> bool {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn mk_bool_from_key(hash: &yaml_rust::yaml::Hash, key: &str) -> Option<bool> {
+fn mk_bool_from_key(hash: &yaml::Hash, key: &str) -> Option<bool> {
     match hash.get(&Yaml::from_str(key)) {
         None => None,
         Some(x) => Some(mk_bool(x)),
@@ -49,7 +98,7 @@ fn mk_usize(yaml: &Yaml) -> usize {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn mk_usize_from_key(hash: &yaml_rust::yaml::Hash, key: &str) -> Option<usize> {
+fn mk_usize_from_key(hash: &yaml::Hash, key: &str) -> Option<usize> {
     match hash.get(&Yaml::from_str(key)) {
         None => None,
         Some(x) => Some(mk_usize(x)),
@@ -61,7 +110,7 @@ fn mk_usize_from_key(hash: &yaml_rust::yaml::Hash, key: &str) -> Option<usize> {
 fn mk_f64(yaml: &Yaml) -> f64 {
     match yaml.as_f64() {
         None => match yaml.as_i64() {
-            None => panic!("Expected a scalar, got: {:?}", yaml),
+            None => panic!("Expected scalar, got: {:?}", yaml),
             Some(value) => value as f64,
         },
         Some(value) => value,
@@ -70,7 +119,7 @@ fn mk_f64(yaml: &Yaml) -> f64 {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn mk_f64_from_key(hash: &yaml_rust::yaml::Hash, key: &str) -> Option<f64> {
+fn mk_f64_from_key(hash: &yaml::Hash, key: &str) -> Option<f64> {
     match hash.get(&Yaml::from_str(key)) {
         None => None,
         Some(x) => Some(mk_f64(x)),
@@ -88,7 +137,7 @@ fn mk_color(yaml: &Yaml) -> Color {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn mk_color_from_key(hash: &yaml_rust::yaml::Hash, key: &str) -> Option<Color> {
+fn mk_color_from_key(hash: &yaml::Hash, key: &str) -> Option<Color> {
     match hash.get(&Yaml::from_str(key)) {
         None => None,
         Some(x) => Some(mk_color(x)),
@@ -106,7 +155,7 @@ fn mk_point(yaml: &Yaml) -> Point {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn mk_point_from_key(hash: &yaml_rust::yaml::Hash, key: &str) -> Option<Point> {
+fn mk_point_from_key(hash: &yaml::Hash, key: &str) -> Option<Point> {
     match hash.get(&Yaml::from_str(key)) {
         None => None,
         Some(x) => Some(mk_point(x)),
@@ -124,7 +173,7 @@ fn mk_vector(yaml: &Yaml) -> Vector {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn mk_vector_from_key(hash: &yaml_rust::yaml::Hash, key: &str) -> Option<Vector> {
+fn mk_vector_from_key(hash: &yaml::Hash, key: &str) -> Option<Vector> {
     match hash.get(&Yaml::from_str(key)) {
         None => None,
         Some(x) => Some(mk_vector(x)),
@@ -133,7 +182,7 @@ fn mk_vector_from_key(hash: &yaml_rust::yaml::Hash, key: &str) -> Option<Vector>
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn mk_pattern(hash: &yaml_rust::yaml::Hash) -> Option<Pattern> {
+fn mk_pattern(defs: &Definitions, hash: &yaml::Hash) -> Option<Pattern> {
     if let Some(color) = hash.get(&Yaml::from_str(&"color")) {
         Some(Pattern::new_plain(mk_color(color)))
     } else if let Some(pattern) = hash.get(&Yaml::from_str(&"pattern")) {
@@ -188,10 +237,10 @@ fn mk_pattern(hash: &yaml_rust::yaml::Hash) -> Option<Pattern> {
 
                 Pattern::new_stripe(v)
             }
-            _ => unimplemented!(),
+            _ => panic!("Unknown pattern: {:?}", pattern),
         };
 
-        Some(transform(pattern, &pattern_hash))
+        Some(transform(defs, pattern, &pattern_hash))
     } else {
         None
     }
@@ -199,14 +248,12 @@ fn mk_pattern(hash: &yaml_rust::yaml::Hash) -> Option<Pattern> {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn mk_material(hash: &yaml_rust::yaml::Hash) -> Material {
+fn mk_material(defs: &Definitions, hash: &yaml::Hash) -> Material {
     let default = Material::new();
 
     match hash.get(&Yaml::from_str(&"material")) {
         Some(material_yaml) => {
-            let material_hash = material_yaml.as_hash().unwrap();
-
-            let pattern = mk_pattern(&material_hash).unwrap_or(default.pattern);
+            let material_hash = get_hash(defs, &material_yaml);
 
             Material::new()
                 .with_ambient(mk_f64_from_key(&material_hash, "ambient").unwrap_or(default.ambient))
@@ -227,7 +274,7 @@ fn mk_material(hash: &yaml_rust::yaml::Hash) -> Material {
                 .with_transparency(
                     mk_f64_from_key(&material_hash, "transparency").unwrap_or(default.transparency),
                 )
-                .with_pattern(pattern)
+                .with_pattern(mk_pattern(defs, &material_hash).unwrap_or(default.pattern))
         }
         None => default,
     }
@@ -235,13 +282,36 @@ fn mk_material(hash: &yaml_rust::yaml::Hash) -> Material {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn transform<T>(mut x: T, hash: &yaml_rust::yaml::Hash) -> T
+fn transform<T>(defs: &Definitions, mut x: T, hash: &yaml::Hash) -> T
 where
     T: Transform,
 {
+    // Recursively find transformations that are referenced via a "define" statement.
+    fn get_transformations(
+        defs: &Definitions,
+        array: &[Yaml],
+        mut transformations: &mut Vec<Yaml>,
+    ) {
+        for transform in array {
+            match transform[0].as_str() {
+                Some(_) => transformations.push(transform.clone()),
+                None => {
+                    let embedded_transformations = get_array(defs, transform);
+                    let embedded_transformations =
+                        get_transformations(defs, &embedded_transformations, &mut transformations);
+                }
+            }
+        }
+    }
+
     if let Some(transform_array) = hash.get(&Yaml::from_str(&"transform")) {
         let transform_array = transform_array.as_vec().unwrap();
-        for transform in transform_array {
+
+        let mut transformations_yaml = vec![];
+        get_transformations(defs, transform_array, &mut transformations_yaml);
+
+        for transform in transformations_yaml {
+            let transform = get_array(defs, &transform);
             let operation = transform[0].as_str().unwrap();
 
             let transformation = match operation {
@@ -266,8 +336,9 @@ where
                     mk_f64(&transform[2]),
                     mk_f64(&transform[3]),
                 ),
-                _ => unimplemented!(),
+                other => panic!("Unexpected transformation {:?}", other),
             };
+
             x = x.apply_transformation(&transformation);
         }
     }
@@ -277,24 +348,24 @@ where
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn mk_object(hash: &yaml_rust::yaml::Hash, ty: &str) -> Arc<Object> {
+fn mk_object(defs: &Definitions, hash: &yaml::Hash, ty: &str) -> Arc<Object> {
     let object = match ty {
         "cube" => Object::new_cube(),
         "plane" => Object::new_plane(),
         "sphere" => Object::new_sphere(),
         _ => panic!("Unexpected object type: {:?}", ty),
     }
-    .with_material(mk_material(&hash))
+    .with_material(mk_material(defs, &hash))
     .with_shadow(mk_bool_from_key(&hash, "shadow").unwrap_or(true));
 
-    let object = transform(object, &hash);
+    let object = transform(defs, object, &hash);
 
     Arc::new(object)
 }
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn mk_camera(hash: &yaml_rust::yaml::Hash, factor: usize) -> Camera {
+fn mk_camera(hash: &yaml::Hash, factor: usize) -> Camera {
     Camera::new(
         mk_usize_from_key(&hash, "width").unwrap() * factor,
         mk_usize_from_key(&hash, "height").unwrap() * factor,
@@ -309,7 +380,7 @@ fn mk_camera(hash: &yaml_rust::yaml::Hash, factor: usize) -> Camera {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn mk_area_light(hash: &yaml_rust::yaml::Hash) -> Light {
+fn mk_area_light(hash: &yaml::Hash) -> Light {
     Light::new_area_light(
         mk_color_from_key(hash, "intensity").unwrap(),
         mk_point_from_key(hash, "corner").unwrap(),
@@ -322,7 +393,7 @@ fn mk_area_light(hash: &yaml_rust::yaml::Hash) -> Light {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn mk_point_light(hash: &yaml_rust::yaml::Hash) -> Light {
+fn mk_point_light(hash: &yaml::Hash) -> Light {
     Light::new_point_light(
         mk_color_from_key(hash, "intensity").unwrap(),
         mk_point_from_key(hash, "at").unwrap(),
@@ -331,7 +402,7 @@ fn mk_point_light(hash: &yaml_rust::yaml::Hash) -> Light {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn mk_light(hash: &yaml_rust::yaml::Hash) -> Light {
+fn mk_light(hash: &yaml::Hash) -> Light {
     if hash.get(&Yaml::from_str("corner")).is_some() {
         mk_area_light(hash)
     } else if hash.get(&Yaml::from_str("at")).is_some() {
@@ -401,6 +472,9 @@ fn main() {
     let mut lights = vec![];
     let mut camera = None;
 
+    // First, look for all definitions
+    let definitions = get_definitions(&doc);
+
     for elem in doc.as_vec().unwrap().iter() {
         let hash = elem.as_hash().unwrap();
 
@@ -415,7 +489,7 @@ fn main() {
                     lights.push(mk_light(&hash));
                 }
                 "cube" | "plane" | "sphere" => {
-                    objects.push(mk_object(&hash, ty));
+                    objects.push(mk_object(&definitions, &hash, ty));
                 }
                 _ => unimplemented!(),
             }
