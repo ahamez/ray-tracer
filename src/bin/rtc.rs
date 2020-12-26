@@ -1,29 +1,22 @@
-#![allow(unused_variables)]
-#![allow(unused_imports)]
-#![allow(dead_code)]
-
 /* ---------------------------------------------------------------------------------------------- */
 
 use std::collections::HashMap;
 use std::sync::Arc;
 
-#[macro_use]
-extern crate clap;
-
 use clap::{App, Arg};
 use yaml_rust::{yaml, Yaml, YamlLoader};
 
 use ray_tracer::{
-    primitive::{Matrix, Point, Tuple, Vector},
+    primitive::{Point, Tuple, Vector},
     rtc::{
         rotation_x, rotation_y, rotation_z, scaling, shearing, translation, view_transform, Camera,
-        Color, Light, Material, Object, Pattern, Scene, Transform, World,
+        Color, Light, Material, Object, Pattern, Transform, World,
     },
 };
 
 /* ---------------------------------------------------------------------------------------------- */
 
-type Definitions<'a> = HashMap<&'a Yaml, &'a Yaml>;
+type Definitions<'a> = HashMap<&'a Yaml, Yaml>;
 
 /* ---------------------------------------------------------------------------------------------- */
 
@@ -33,9 +26,25 @@ fn get_definitions(yaml: &Yaml) -> Definitions {
     for elem in yaml.as_vec().unwrap().iter() {
         let hash = elem.as_hash().unwrap();
 
-        if let Some(x) = hash.get(&Yaml::from_str(&"define")) {
-            let definition_key = x;
+        if let Some(definition_key) = hash.get(&Yaml::from_str(&"define")) {
             let definition_value = hash.get(&Yaml::from_str(&"value")).unwrap();
+
+            // Does not handle recursive "extend"
+            let definition_value = match hash.get(&Yaml::from_str(&"extend")) {
+                Some(parent) => {
+                    if let Some(definition_value_hash) = definition_value.as_hash() {
+                        let mut parent_hash = get_hash(&definitions, parent).clone();
+                        parent_hash.extend(definition_value_hash.clone().into_iter());
+
+                        Yaml::Hash(parent_hash)
+                    } else {
+                        // To implement if encountered in the wild (like array extension)
+                        panic!("Extension unsupported for {:?}", definition_value);
+                    }
+                }
+                None => definition_value.clone(),
+            };
+
             definitions.insert(definition_key, definition_value);
         }
     }
@@ -297,8 +306,7 @@ where
                 Some(_) => transformations.push(transform.clone()),
                 None => {
                     let embedded_transformations = get_array(defs, transform);
-                    let embedded_transformations =
-                        get_transformations(defs, &embedded_transformations, &mut transformations);
+                    get_transformations(defs, &embedded_transformations, &mut transformations);
                 }
             }
         }

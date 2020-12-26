@@ -12,9 +12,13 @@ My main objective is to be fluent in Rust 🗣🦀. So, if some seasoned rustace
 
 ## Some samples
 
+![Cover](/samples/cover.png?raw=true "Cover")
+
 ![Shadow Glamour Shot](/samples/shadow-glamour-shot.png?raw=true "Shadow Glamour Shot")
 
 ![Reflect-Refract](/samples/reflect-refract.png?raw=true "Reflect Refract")
+
+![Fresnel](/samples/fresnel.png?raw=true "Fresnel")
 
 ![Plane](/samples/ch09_plane.png?raw=true "Plane")
 
@@ -30,4 +34,3 @@ My main objective is to be fluent in Rust 🗣🦀. So, if some seasoned rustace
 
 ![Cone](/samples/ch13_cone.png?raw=true "Cone")
 
-![Fresnel](/samples/fresnel.png?raw=true "Fresnel")
