@@ -506,6 +506,9 @@ fn main() {
 
     let world = World::new().with_objects(objects).with_lights(lights);
     let canvas = camera.unwrap().render(&world, !sequential);
+
+    println!("Computed intersections: {}", world.nb_intersections());
+
     canvas.export(&output_path(&path)).unwrap();
 }
 

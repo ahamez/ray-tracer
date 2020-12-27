@@ -2,6 +2,8 @@
 
 use std::sync::Arc;
 
+use atomic_counter::{AtomicCounter, RelaxedCounter};
+
 use crate::{
     float::ApproxEq,
     primitive::Point,
@@ -16,6 +18,7 @@ pub struct World {
     objects: Vec<Arc<Object>>,
     lights: Vec<Light>,
     recursion_limit: u8,
+    nb_intersections: RelaxedCounter,
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -51,6 +54,10 @@ impl World {
         &self.lights
     }
 
+    pub fn nb_intersections(&self) -> usize {
+        self.nb_intersections.get()
+    }
+
     pub fn color_at(&self, ray: &Ray) -> Color {
         self.color_at_impl(ray, self.recursion_limit)
     }
@@ -68,7 +75,10 @@ impl World {
     }
 
     fn intersects(&self, ray: &Ray) -> Intersections {
-        ray.intersects(&self.objects)
+        let is = ray.intersects(&self.objects);
+        self.nb_intersections.add(is.len());
+
+        is
     }
 
     fn shade_hit(&self, comps: &IntersectionState, remaining_recursions: u8) -> Color {
@@ -173,6 +183,7 @@ impl Default for World {
             objects: vec![],
             lights: vec![],
             recursion_limit: 4,
+            nb_intersections: RelaxedCounter::new(0),
         }
     }
 }
