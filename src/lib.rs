@@ -59,12 +59,14 @@ pub mod rtc {
         pub use cone::Cone;
         pub use cube::Cube;
         pub use cylinder::Cylinder;
+        pub use group::Group;
         pub use plane::Plane;
         pub use sphere::Sphere;
 
         mod cone;
         mod cube;
         mod cylinder;
+        mod group;
         mod plane;
         mod sphere;
     }
