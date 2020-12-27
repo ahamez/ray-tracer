@@ -84,6 +84,9 @@ impl Matrix {
 
     fn submatrix(&self, row: usize, col: usize) -> Matrix {
         assert!(self.size > 2);
+        assert!(self.size <= 4);
+        assert!(row < 4);
+        assert!(col < 4);
 
         let mut res = Matrix::new(self.size - 1);
 
@@ -143,6 +146,7 @@ impl std::ops::Index<usize> for Matrix {
     type Output = [f64; 4];
 
     fn index(&self, row: usize) -> &[f64; 4] {
+        assert!(row < 4);
         &self.data[row]
     }
 }
