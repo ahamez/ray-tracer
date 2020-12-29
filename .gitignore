@@ -2,3 +2,4 @@
 *.ppm
 /*.png
 .DS_Store
+*.textClipping
