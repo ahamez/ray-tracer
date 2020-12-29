@@ -39,7 +39,7 @@ impl Shape {
             Shape::Cone(c) => c.normal_at(&object_point),
             Shape::Cube() => Cube::normal_at(&object_point),
             Shape::Cylinder(c) => c.normal_at(&object_point),
-            Shape::Group(g) => g.normal_at(&object_point),
+            Shape::Group(_) => panic!("Group::normal_at() should never be called"),
             Shape::Plane() => Plane::normal_at(&object_point),
             Shape::Sphere() => Sphere::normal_at(&object_point),
         }

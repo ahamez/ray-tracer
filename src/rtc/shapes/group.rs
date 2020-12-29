@@ -18,8 +18,6 @@ impl Group {
         Self { objects }
     }
 
-    pub fn normal_at(&self, _object_point: &Point) -> Vector {
-        unimplemented!()
     pub fn intersects(&self, ray: &Ray, push: &mut impl FnMut(f64))
     {
         for o in &self.objects {
