@@ -1,9 +1,11 @@
 /* ---------------------------------------------------------------------------------------------- */
 
+use std::sync::Arc;
+
 use crate::{
     primitive::{Matrix, Point, Vector},
     rtc::{
-        shapes::{Cone, Cylinder},
+        shapes::{Cone, Cylinder, Group},
         Material, Ray, Shape, Transform,
     },
 };
@@ -44,6 +46,13 @@ impl Object {
         }
     }
 
+    pub fn new_group(objects: Vec<Arc<Object>>) -> Self {
+        Object {
+            shape: Shape::Group(Group::new(objects)),
+            ..Default::default()
+        }
+    }
+
     pub fn new_plane() -> Self {
         Object {
             shape: Shape::Plane(),
@@ -74,10 +83,7 @@ impl Object {
         self
     }
 
-    pub fn intersects<F>(&self, ray: &Ray, push: F)
-    where
-        F: FnMut(f64),
-    {
+    pub fn intersects(&self, ray: &Ray, push: &mut impl FnMut(f64)) {
         let transformed_ray = ray.apply_transformation(&self.transformation_inverse);
 
         self.shape.intersects(&transformed_ray, push);

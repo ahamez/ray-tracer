@@ -23,10 +23,7 @@ pub enum Shape {
 /* ---------------------------------------------------------------------------------------------- */
 
 impl Shape {
-    pub fn intersects<F>(&self, ray: &Ray, push: F)
-    where
-        F: FnMut(f64),
-    {
+    pub fn intersects(&self, ray: &Ray, push: &mut impl FnMut(f64)) {
         match self {
             Shape::Cone(c) => c.intersects(&ray, push),
             Shape::Cube() => Cube::intersects(&ray, push),
