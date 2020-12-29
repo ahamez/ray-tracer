@@ -47,11 +47,11 @@ impl Matrix {
         res
     }
 
-    pub fn invert(&self) -> Option<Matrix> {
+    pub fn invert(&self) -> Matrix {
         let determinant = self.determinant();
 
         if determinant.approx_eq(0.0) {
-            None
+            panic!("Non invertible matrix")
         } else {
             let mut res = Matrix::new(self.size);
 
@@ -62,7 +62,7 @@ impl Matrix {
                 }
             }
 
-            Some(res)
+            res
         }
     }
 
@@ -760,36 +760,35 @@ mod tests {
     }
 
     #[test]
+    #[should_panic]
+    fn inversion_impossible() {
+        let mut m = Matrix::new(4);
+
+        m[0][0] = -4.0;
+        m[0][1] = 2.0;
+        m[0][2] = -2.0;
+        m[0][3] = -3.0;
+
+        m[1][0] = 9.0;
+        m[1][1] = 6.0;
+        m[1][2] = 2.0;
+        m[1][3] = 6.0;
+
+        m[2][0] = 0.0;
+        m[2][1] = -5.0;
+        m[2][2] = 1.0;
+        m[2][3] = -5.0;
+
+        m[3][0] = 0.0;
+        m[3][1] = 0.0;
+        m[3][2] = 0.0;
+        m[3][3] = 0.0;
+
+        m.invert();
+    }
+
+    #[test]
     fn invert() {
-        {
-            let m = {
-                let mut m = Matrix::new(4);
-
-                m[0][0] = -4.0;
-                m[0][1] = 2.0;
-                m[0][2] = -2.0;
-                m[0][3] = -3.0;
-
-                m[1][0] = 9.0;
-                m[1][1] = 6.0;
-                m[1][2] = 2.0;
-                m[1][3] = 6.0;
-
-                m[2][0] = 0.0;
-                m[2][1] = -5.0;
-                m[2][2] = 1.0;
-                m[2][3] = -5.0;
-
-                m[3][0] = 0.0;
-                m[3][1] = 0.0;
-                m[3][2] = 0.0;
-                m[3][3] = 0.0;
-
-                m
-            };
-
-            assert_eq!(m.invert(), None);
-        }
         {
             let m = {
                 let mut m = Matrix::new(4);
@@ -843,7 +842,7 @@ mod tests {
                 m
             };
 
-            assert_eq!(m.invert(), Some(expected));
+            assert_eq!(m.invert(), expected);
         }
         {
             let a = {
@@ -900,7 +899,7 @@ mod tests {
 
             let c = a * b;
 
-            assert_eq!(c * b.invert().unwrap(), a);
+            assert_eq!(c * b.invert(), a);
         }
     }
 }

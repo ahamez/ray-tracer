@@ -181,7 +181,7 @@ mod tests {
         {
             let p = Point::new(-3.0, 4.0, 5.0);
             let transform = translation(5.0, -3.0, 2.0);
-            let inv = transform.invert().unwrap();
+            let inv = transform.invert();
             let expected = Point::new(-8.0, 7.0, 3.0);
 
             assert_eq!(inv * p, expected);
@@ -248,7 +248,7 @@ mod tests {
         {
             let p = Point::new(0.0, 1.0, 0.0);
             let half_quarter = rotation_x(PI / 4.0);
-            let inv = half_quarter.invert().unwrap();
+            let inv = half_quarter.invert();
 
             assert_eq!(
                 inv * p,

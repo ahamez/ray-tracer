@@ -50,7 +50,7 @@ impl Camera {
 
     pub fn with_transformation(mut self, transformation: &Matrix) -> Self {
         self.transformation = *transformation;
-        self.transformation_inverse = transformation.invert().unwrap();
+        self.transformation_inverse = transformation.invert();
         self
     }
 
@@ -126,7 +126,7 @@ impl Transform for Camera {
         let new_transformation = *transformation * self.transformation;
         Camera {
             transformation: new_transformation,
-            transformation_inverse: new_transformation.invert().unwrap(),
+            transformation_inverse: new_transformation.invert(),
             ..*self
         }
     }

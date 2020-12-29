@@ -79,7 +79,7 @@ impl Object {
 
     pub fn with_transformation(mut self, transformation: Matrix) -> Self {
         self.transformation = transformation;
-        self.transformation_inverse = transformation.invert().unwrap();
+        self.transformation_inverse = transformation.invert();
         self
     }
 
@@ -130,7 +130,7 @@ impl Default for Object {
 impl Transform for Object {
     fn apply_transformation(&self, transformation: &Matrix) -> Self {
         let transformation = *transformation * self.transformation;
-        let transformation_inverse = transformation.invert().unwrap();
+        let transformation_inverse = transformation.invert();
         let transformation_inverse_transpose = transformation_inverse.transpose();
 
         Object {

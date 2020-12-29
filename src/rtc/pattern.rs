@@ -102,7 +102,7 @@ impl Transform for Pattern {
 
         Pattern {
             transformation: new_transformation,
-            transformation_inverse: new_transformation.invert().unwrap(),
+            transformation_inverse: new_transformation.invert(),
             ..self.clone()
         }
     }
