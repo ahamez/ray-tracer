@@ -14,14 +14,31 @@
 # light sources
 # ======================================================
 
+# - add: light
+#   at: [ 50, 100, -50 ]
+#   intensity: [ 1, 1, 1 ]
 - add: light
-  at: [ 50, 100, -50 ]
-  intensity: [ 1, 1, 1 ]
+  corner: [50, 100, -50]
+  uvec: [40, 0, 0]
+  vvec: [0, 40, 0]
+  usteps: 10
+  vsteps: 10
+  jitter: true
+  intensity: [1, 1, 1]
+
 
 # an optional second light for additional illumination
+# - add: light
+#   at: [ -400, 50, -10 ]
+#   intensity: [ 0.2, 0.2, 0.2 ]
 - add: light
-  at: [ -400, 50, -10 ]
-  intensity: [ 0.2, 0.2, 0.2 ]
+  corner: [-400, 50, -10]
+  uvec: [40, 0, 0]
+  vvec: [0, 40, 0]
+  usteps: 10
+  vsteps: 10
+  jitter: true
+  intensity: [0.2, 0.2, 0.2]
 
 # ======================================================
 # define some constants to avoid duplication
