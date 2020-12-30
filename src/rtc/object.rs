@@ -79,7 +79,8 @@ impl Object {
 
     pub fn with_transformation(mut self, transformation: Matrix) -> Self {
         self.transformation = transformation;
-        self.transformation_inverse = transformation.invert();
+        self.transformation_inverse = self.transformation.invert();
+        self.transformation_inverse_transpose = self.transformation_inverse.transpose();
         self
     }
 
