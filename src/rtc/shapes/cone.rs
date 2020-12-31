@@ -3,7 +3,7 @@
 use crate::{
     float::{ApproxEq, EPSILON},
     primitive::{Point, Tuple, Vector},
-    rtc::Ray,
+    rtc::{IntersectionPusher, Ray},
 };
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -24,10 +24,7 @@ impl Cone {
         Cone { min, max, closed }
     }
 
-    pub fn intersects<F>(&self, ray: &Ray, mut push: F)
-    where
-        F: FnMut(f64),
-    {
+    pub fn intersects(&self, ray: &Ray, push: &mut impl IntersectionPusher) {
         let a = ray.direction.x().powi(2) - ray.direction.y().powi(2) + ray.direction.z().powi(2);
 
         let b = 2.0
@@ -38,7 +35,7 @@ impl Cone {
 
         if a.approx_eq(0.0) && !b.approx_eq(0.0) {
             let t = c / (-2.0 * b);
-            push(t);
+            push.t(t);
         } else {
             let discriminant = b.powi(2) - 4.0 * a * c;
 
@@ -52,12 +49,12 @@ impl Cone {
 
             let y0 = ray.origin.y() + t0 * ray.direction.y();
             if self.min < y0 && y0 < self.max {
-                push(t0);
+                push.t(t0);
             }
 
             let y1 = ray.origin.y() + t1 * ray.direction.y();
             if self.min < y1 && y1 < self.max {
-                push(t1);
+                push.t(t1);
             }
         }
         self.intersects_caps(&ray, push);
@@ -70,22 +67,19 @@ impl Cone {
         (x.powi(2) + z.powi(2)) <= radius.powi(2)
     }
 
-    fn intersects_caps<F>(&self, ray: &Ray, mut push: F)
-    where
-        F: FnMut(f64),
-    {
+    pub fn intersects_caps(&self, ray: &Ray, push: &mut impl IntersectionPusher) {
         if !self.closed || ray.direction.y().approx_eq(0.0) {
             return;
         }
 
         let t = (self.min - ray.origin.y()) / ray.direction.y();
         if Self::check_cap(&ray, t, self.min) {
-            push(t);
+            push.t(t);
         }
 
         let t = (self.max - ray.origin.y()) / ray.direction.y();
         if Self::check_cap(&ray, t, self.max) {
-            push(t);
+            push.t(t);
         }
     }
 
@@ -127,6 +121,22 @@ impl Default for Cone {
 #[cfg(test)]
 pub mod tests {
     use super::*;
+    use crate::rtc::IntersectionPusher;
+    use crate::rtc::Object;
+    use std::sync::Arc;
+
+    struct Push {
+        pub xs: Vec<f64>,
+    }
+
+    impl IntersectionPusher for Push {
+        fn t(&mut self, t: f64) {
+            self.xs.push(t);
+        }
+        fn set_object(&mut self, _object: Arc<Object>) {
+            panic!();
+        }
+    }
 
     #[test]
     fn intersecting_a_cone_with_a_ray_parallel_to_one_of_its_halves() {
@@ -135,10 +145,12 @@ pub mod tests {
             origin: Point::new(0.0, 0.0, -1.0),
             direction: Vector::new(0.0, 1.0, 1.0).normalize(),
         };
-        let mut xs = vec![];
-        c.intersects(&ray, |t| xs.push(t));
-        assert_eq!(xs.len(), 1);
-        assert!(xs[0].approx_eq_low_precision(0.35355));
+
+        let mut push = Push { xs: vec![] };
+        c.intersects(&ray, &mut push);
+
+        assert_eq!(push.xs.len(), 1);
+        assert!(push.xs[0].approx_eq_low_precision(0.35355));
     }
 
     #[test]
@@ -166,17 +178,17 @@ pub mod tests {
 
         let c: Cone = Default::default();
         for (origin, direction, t0, t1) in tests.into_iter() {
-            let mut xs = vec![];
+            let mut push = Push { xs: vec![] };
             c.intersects(
                 &Ray {
                     origin,
                     direction: direction.normalize(),
                 },
-                |t| xs.push(t),
+                &mut push,
             );
-            assert_eq!(xs.len(), 2);
-            assert!(xs[0].approx_eq_low_precision(t0));
-            assert!(xs[1].approx_eq_low_precision(t1));
+            assert_eq!(push.xs.len(), 2);
+            assert!(push.xs[0].approx_eq_low_precision(t0));
+            assert!(push.xs[1].approx_eq_low_precision(t1));
         }
     }
 
@@ -190,15 +202,15 @@ pub mod tests {
 
         let c = Cone::new(-0.5, 0.5, true);
         for (origin, direction, count) in tests.into_iter() {
-            let mut xs = vec![];
+            let mut push = Push { xs: vec![] };
             c.intersects(
                 &Ray {
                     origin,
                     direction: direction.normalize(),
                 },
-                |t| xs.push(t),
+                &mut push,
             );
-            assert_eq!(xs.len(), count as usize);
+            assert_eq!(push.xs.len(), count as usize);
         }
     }
 

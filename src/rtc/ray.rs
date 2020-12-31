@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use crate::{
     primitive::{Matrix, Point, Vector},
-    rtc::{Intersection, Intersections, Object, Transform},
+    rtc::{Intersection, IntersectionPusher, Intersections, Object, Transform},
 };
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -17,6 +17,26 @@ pub struct Ray {
 
 /* ---------------------------------------------------------------------------------------------- */
 
+pub struct RayIntersectionPusher<'a> {
+    pub is: &'a mut Vec<Intersection>,
+    pub object: Arc<Object>,
+}
+
+impl IntersectionPusher for RayIntersectionPusher<'_> {
+    fn t(&mut self, t: f64) {
+        self.is.push(Intersection {
+            t,
+            object: self.object.clone(),
+        })
+    }
+
+    fn set_object(&mut self, object: Arc<Object>) {
+        self.object = object;
+    }
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+
 impl Ray {
     pub fn position(&self, t: f64) -> Point {
         self.origin + self.direction * t
@@ -24,19 +44,13 @@ impl Ray {
 
     pub fn intersects(&self, objects: &[Arc<Object>]) -> Intersections {
         let mut is = Vec::<Intersection>::with_capacity(16);
+
         objects.iter().for_each(|object| {
-            if object.is_group() {
-                object.group_intersects(self, &mut |t: f64, object: Arc<Object>| {
-                    is.push(Intersection { t, object })
-                })
-            } else {
-                object.intersects(self, &mut |t: f64| {
-                    is.push(Intersection {
-                        t,
-                        object: object.clone(),
-                    })
-                });
-            }
+            let mut pusher = RayIntersectionPusher {
+                is: &mut is,
+                object: object.clone(),
+            };
+            object.intersects(self, &mut pusher);
         });
 
         Intersections::new(is)

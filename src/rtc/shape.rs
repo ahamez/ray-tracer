@@ -4,7 +4,7 @@ use crate::{
     primitive::{Point, Vector},
     rtc::{
         shapes::{Cone, Cube, Cylinder, Group, Plane, Sphere},
-        Ray,
+        IntersectionPusher, Ray,
     },
 };
 
@@ -24,13 +24,13 @@ pub enum Shape {
 /* ---------------------------------------------------------------------------------------------- */
 
 impl Shape {
-    pub fn intersects(&self, ray: &Ray, push: &mut impl FnMut(f64)) {
+    pub fn intersects(&self, ray: &Ray, push: &mut impl IntersectionPusher) {
         match self {
             Shape::Cone(c) => c.intersects(&ray, push),
             Shape::Cube() => Cube::intersects(&ray, push),
             Shape::Cylinder(c) => c.intersects(&ray, push),
             Shape::Dummy() => panic!("Dummy::intersects() should never be called"),
-            Shape::Group(_) => panic!(),
+            Shape::Group(g) => g.intersects(&ray, push),
             Shape::Plane() => Plane::intersects(&ray, push),
             Shape::Sphere() => Sphere::intersects(&ray, push),
         }
@@ -46,10 +46,6 @@ impl Shape {
             Shape::Plane() => Plane::normal_at(&object_point),
             Shape::Sphere() => Sphere::normal_at(&object_point),
         }
-    }
-
-    pub fn is_group(&self) -> bool {
-        matches!(self, Shape::Group(_))
     }
 
     pub fn as_group(&self) -> Option<&Group> {

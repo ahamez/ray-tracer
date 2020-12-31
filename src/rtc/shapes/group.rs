@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use crate::{
     primitive::Matrix,
-    rtc::{Object, Ray, Shape, Transform},
+    rtc::{IntersectionPusher, Object, Ray, Shape, Transform},
 };
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -21,13 +21,10 @@ impl Group {
         Self { children }
     }
 
-    pub fn intersects(&self, ray: &Ray, push: &mut impl FnMut(f64, Arc<Object>)) {
+    pub fn intersects(&self, ray: &Ray, push: &mut impl IntersectionPusher) {
         for child in &self.children {
-            if child.is_group() {
-                child.group_intersects(ray, push);
-            } else {
-                child.intersects(ray, &mut |t| push(t, child.clone()));
-            }
+            push.set_object(child.clone());
+            child.intersects(ray, push);
         }
     }
 
@@ -76,7 +73,23 @@ impl GroupBuilder {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::primitive::{Point, Tuple, Vector};
+    use crate::{
+        primitive::{Point, Tuple, Vector},
+        rtc::IntersectionPusher,
+    };
+
+    struct Push {
+        pub xs: Vec<f64>,
+    }
+
+    impl IntersectionPusher for Push {
+        fn t(&mut self, t: f64) {
+            self.xs.push(t);
+        }
+        fn set_object(&mut self, _object: Arc<Object>) {
+            panic!();
+        }
+    }
 
     #[test]
     fn intersecting_a_ray_with_an_empty_group() {
@@ -87,10 +100,11 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let mut xs = vec![];
-        group.group_intersects(&ray, &mut |t, _| xs.push(t));
+        let mut push = Push { xs: vec![] };
 
-        assert_eq!(xs.len(), 0);
+        group.intersects(&ray, &mut push);
+
+        assert_eq!(push.xs.len(), 0);
     }
 
     #[test]

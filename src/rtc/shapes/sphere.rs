@@ -2,7 +2,7 @@
 
 use crate::{
     primitive::{Point, Tuple, Vector},
-    rtc::Ray,
+    rtc::{IntersectionPusher, Ray},
 };
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -17,10 +17,7 @@ pub struct Sphere {}
 
 impl Sphere {
     #[allow(clippy::eq_op)]
-    pub fn intersects<F>(ray: &Ray, mut push: F)
-    where
-        F: FnMut(f64),
-    {
+    pub fn intersects(ray: &Ray, push: &mut impl IntersectionPusher) {
         let sphere_to_ray = ray.origin - Point::new(0.0, 0.0, 0.0);
 
         let a = ray.direction ^ ray.direction;
@@ -35,8 +32,8 @@ impl Sphere {
             let t1 = (-b - sqrt_discriminant) / double_a;
             let t2 = (-b + sqrt_discriminant) / double_a;
 
-            push(t1);
-            push(t2);
+            push.t(t1);
+            push.t(t2);
         }
     }
 
@@ -57,6 +54,19 @@ pub mod tests {
         scaling, Intersection, IntersectionState, Intersections, Material, Object, Transform,
     };
 
+    struct Push {
+        pub xs: Vec<f64>,
+    }
+
+    impl IntersectionPusher for Push {
+        fn t(&mut self, t: f64) {
+            self.xs.push(t);
+        }
+        fn set_object(&mut self, _object: Arc<Object>) {
+            panic!();
+        }
+    }
+
     fn glassy_sphere() -> Object {
         Object::new_sphere().with_material(
             Material::new()
@@ -72,12 +82,12 @@ pub mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let mut xs = vec![];
-        Sphere::intersects(&r, |t| xs.push(t));
+        let mut push = Push { xs: vec![] };
+        Sphere::intersects(&r, &mut push);
 
-        assert_eq!(xs.len(), 2);
-        assert_eq!(xs[0], 4.0);
-        assert_eq!(xs[1], 6.0);
+        assert_eq!(push.xs.len(), 2);
+        assert_eq!(push.xs[0], 4.0);
+        assert_eq!(push.xs[1], 6.0);
     }
 
     #[test]
@@ -87,12 +97,12 @@ pub mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let mut xs = vec![];
-        Sphere::intersects(&r, |t| xs.push(t));
+        let mut push = Push { xs: vec![] };
+        Sphere::intersects(&r, &mut push);
 
-        assert_eq!(xs.len(), 2);
-        assert_eq!(xs[0], 5.0);
-        assert_eq!(xs[1], 5.0);
+        assert_eq!(push.xs.len(), 2);
+        assert_eq!(push.xs[0], 5.0);
+        assert_eq!(push.xs[1], 5.0);
     }
 
     #[test]
@@ -102,10 +112,10 @@ pub mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let mut xs = vec![];
-        Sphere::intersects(&r, |t| xs.push(t));
+        let mut push = Push { xs: vec![] };
+        Sphere::intersects(&r, &mut push);
 
-        assert_eq!(xs.len(), 0);
+        assert_eq!(push.xs.len(), 0);
     }
 
     #[test]
@@ -115,12 +125,12 @@ pub mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let mut xs = vec![];
-        Sphere::intersects(&r, |t| xs.push(t));
+        let mut push = Push { xs: vec![] };
+        Sphere::intersects(&r, &mut push);
 
-        assert_eq!(xs.len(), 2);
-        assert_eq!(xs[0], -1.0);
-        assert_eq!(xs[1], 1.0);
+        assert_eq!(push.xs.len(), 2);
+        assert_eq!(push.xs[0], -1.0);
+        assert_eq!(push.xs[1], 1.0);
     }
 
     #[test]
@@ -130,12 +140,12 @@ pub mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let mut xs = vec![];
-        Sphere::intersects(&r, |t| xs.push(t));
+        let mut push = Push { xs: vec![] };
+        Sphere::intersects(&r, &mut push);
 
-        assert_eq!(xs.len(), 2);
-        assert_eq!(xs[0], -6.0);
-        assert_eq!(xs[1], -4.0);
+        assert_eq!(push.xs.len(), 2);
+        assert_eq!(push.xs[0], -6.0);
+        assert_eq!(push.xs[1], -4.0);
     }
 
     #[test]
@@ -147,12 +157,12 @@ pub mod tests {
 
         let s = Object::new_sphere().with_transformation(scaling(2.0, 2.0, 2.0));
 
-        let mut xs = vec![];
-        s.intersects(&r, &mut |t: f64| xs.push(t));
+        let mut push = Push { xs: vec![] };
+        s.intersects(&r, &mut push);
 
-        assert_eq!(xs.len(), 2);
-        assert_eq!(xs[0], 3.0);
-        assert_eq!(xs[1], 7.0);
+        assert_eq!(push.xs.len(), 2);
+        assert_eq!(push.xs[0], 3.0);
+        assert_eq!(push.xs[1], 7.0);
     }
 
     #[test]

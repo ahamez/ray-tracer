@@ -1,12 +1,10 @@
 /* ---------------------------------------------------------------------------------------------- */
 
-use std::sync::Arc;
-
 use crate::{
     primitive::{Matrix, Point, Vector},
     rtc::{
         shapes::{Cone, Cylinder, GroupBuilder},
-        Material, Ray, Shape, Transform,
+        IntersectionPusher, Material, Ray, Shape, Transform,
     },
 };
 
@@ -93,23 +91,10 @@ impl Object {
         self
     }
 
-    pub fn intersects(&self, ray: &Ray, push: &mut impl FnMut(f64)) {
+    pub fn intersects(&self, ray: &Ray, push: &mut impl IntersectionPusher) {
         let transformed_ray = ray.apply_transformation(&self.transformation_inverse);
 
         self.shape.intersects(&transformed_ray, push);
-    }
-
-    pub fn is_group(&self) -> bool {
-        self.shape.is_group()
-    }
-
-    pub fn group_intersects(&self, ray: &Ray, push: &mut impl FnMut(f64, Arc<Object>)) {
-        let transformed_ray = ray.apply_transformation(&self.transformation_inverse);
-
-        self.shape
-            .as_group()
-            .unwrap()
-            .intersects(&transformed_ray, push);
     }
 
     pub fn normal_at(&self, world_point: &Point) -> Vector {

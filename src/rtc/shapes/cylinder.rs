@@ -3,7 +3,7 @@
 use crate::{
     float::{ApproxEq, EPSILON},
     primitive::{Point, Tuple, Vector},
-    rtc::Ray,
+    rtc::{IntersectionPusher, Ray},
 };
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -24,10 +24,7 @@ impl Cylinder {
         Cylinder { min, max, closed }
     }
 
-    pub fn intersects<F>(&self, ray: &Ray, mut push: F)
-    where
-        F: FnMut(f64),
-    {
+    pub fn intersects(&self, ray: &Ray, push: &mut impl IntersectionPusher) {
         let a = ray.direction.x().powi(2) + ray.direction.z().powi(2);
 
         if a.approx_eq(0.0) {
@@ -48,12 +45,12 @@ impl Cylinder {
 
             let y0 = ray.origin.y() + t0 * ray.direction.y();
             if self.min < y0 && y0 < self.max {
-                push(t0);
+                push.t(t0);
             }
 
             let y1 = ray.origin.y() + t1 * ray.direction.y();
             if self.min < y1 && y1 < self.max {
-                push(t1);
+                push.t(t1);
             }
 
             self.intersects_caps(&ray, push);
@@ -67,22 +64,19 @@ impl Cylinder {
         (x.powi(2) + z.powi(2)) <= 1.0
     }
 
-    fn intersects_caps<F>(&self, ray: &Ray, mut push: F)
-    where
-        F: FnMut(f64),
-    {
+    pub fn intersects_caps(&self, ray: &Ray, push: &mut impl IntersectionPusher) {
         if !self.closed || ray.direction.y().approx_eq(0.0) {
             return;
         }
 
         let t = (self.min - ray.origin.y()) / ray.direction.y();
         if Self::check_cap(&ray, t) {
-            push(t);
+            push.t(t);
         }
 
         let t = (self.max - ray.origin.y()) / ray.direction.y();
         if Self::check_cap(&ray, t) {
-            push(t);
+            push.t(t);
         }
     }
 
@@ -116,6 +110,21 @@ impl Default for Cylinder {
 #[cfg(test)]
 pub mod tests {
     use super::*;
+    use crate::rtc::{IntersectionPusher, Object};
+    use std::sync::Arc;
+
+    struct Push {
+        pub xs: Vec<f64>,
+    }
+
+    impl IntersectionPusher for Push {
+        fn t(&mut self, t: f64) {
+            self.xs.push(t);
+        }
+        fn set_object(&mut self, _object: Arc<Object>) {
+            panic!();
+        }
+    }
 
     #[test]
     fn the_default_values_for_a_cylinder() {
@@ -132,14 +141,14 @@ pub mod tests {
                 origin,
                 direction: direction.normalize(),
             };
-            let mut xs = vec![];
+            let mut push = Push { xs: vec![] };
 
             let c: Cylinder = Default::default();
-            c.intersects(&ray, |t| xs.push(t));
+            c.intersects(&ray, &mut push);
 
-            assert_eq!(xs.len(), 2);
-            assert!(xs[0].approx_eq_low_precision(t0));
-            assert!(xs[1].approx_eq_low_precision(t1));
+            assert_eq!(push.xs.len(), 2);
+            assert!(push.xs[0].approx_eq_low_precision(t0));
+            assert!(push.xs[1].approx_eq_low_precision(t1));
         }
 
         test(
@@ -176,15 +185,15 @@ pub mod tests {
 
         let c = Cylinder::new(1.0, 2.0, false);
         for (origin, direction, count) in tests.into_iter() {
-            let mut xs = vec![];
+            let mut push = Push { xs: vec![] };
             c.intersects(
                 &Ray {
                     origin,
                     direction: direction.normalize(),
                 },
-                |t| xs.push(t),
+                &mut push,
             );
-            assert_eq!(xs.len(), count as usize);
+            assert_eq!(push.xs.len(), count as usize);
         }
     }
 
@@ -200,15 +209,15 @@ pub mod tests {
 
         let c = Cylinder::new(1.0, 2.0, true);
         for (origin, direction, count) in tests.into_iter() {
-            let mut xs = vec![];
+            let mut push = Push { xs: vec![] };
             c.intersects(
                 &Ray {
                     origin,
                     direction: direction.normalize(),
                 },
-                |t| xs.push(t),
+                &mut push,
             );
-            assert_eq!(xs.len(), count as usize);
+            assert_eq!(push.xs.len(), count as usize);
         }
     }
 
@@ -219,10 +228,10 @@ pub mod tests {
                 origin,
                 direction: direction.normalize(),
             };
-            let mut xs = vec![];
+            let mut push = Push { xs: vec![] };
             let c: Cylinder = Default::default();
-            c.intersects(&ray, |t| xs.push(t));
-            assert_eq!(xs.len(), 0);
+            c.intersects(&ray, &mut push);
+            assert_eq!(push.xs.len(), 0);
         }
 
         test(Point::new(1.0, 0.0, 0.0), Vector::new(0.0, 1.0, 0.0));

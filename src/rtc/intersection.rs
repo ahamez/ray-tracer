@@ -233,6 +233,13 @@ impl IntersectionState {
 
 /* ---------------------------------------------------------------------------------------------- */
 
+pub trait IntersectionPusher {
+    fn t(&mut self, t: f64);
+    fn set_object(&mut self, object: Arc<Object>);
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+
 #[cfg(test)]
 mod tests {
 

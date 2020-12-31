@@ -8,6 +8,7 @@ My main objective is to be fluent in Rust 🗣🦀. So, if some seasoned rustace
 * Parallelization with [rayon](https://github.com/rayon-rs/rayon) (I can't believe how easy it was!)
 * Matrices inversion are cached (which provides a significant speedup!)
 * Don't explicitly store the w component for tuples. Instead, it's up to the implementation of the Tuple trait to return the correct value (1.0 or 0.0)
+* Avoid creating a new vec for each call to a shape intersects() method using a kind of closure (it provides an interesting speedup as it prevents the dynamic allocation of many temporaries)
 * Use f64 everywhere
 
 ## Some samples

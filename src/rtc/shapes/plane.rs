@@ -3,7 +3,7 @@
 use crate::{
     float::EPSILON,
     primitive::{Point, Tuple, Vector},
-    rtc::Ray,
+    rtc::{IntersectionPusher, Ray},
 };
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -14,12 +14,9 @@ pub struct Plane {}
 /* ---------------------------------------------------------------------------------------------- */
 
 impl Plane {
-    pub fn intersects<F>(ray: &Ray, push: F)
-    where
-        F: FnOnce(f64),
-    {
+    pub fn intersects(ray: &Ray, push: &mut impl IntersectionPusher) {
         if ray.direction.y().abs() >= EPSILON {
-            push(-ray.origin.y() / ray.direction.y())
+            push.t(-ray.origin.y() / ray.direction.y())
         }
     }
 
@@ -33,7 +30,24 @@ impl Plane {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{primitive::Vector, rtc::Object};
+    use crate::{
+        primitive::Vector,
+        rtc::{IntersectionPusher, Object},
+    };
+    use std::sync::Arc;
+
+    struct Push {
+        pub xs: Vec<f64>,
+    }
+
+    impl IntersectionPusher for Push {
+        fn t(&mut self, t: f64) {
+            self.xs.push(t);
+        }
+        fn set_object(&mut self, _object: Arc<Object>) {
+            panic!();
+        }
+    }
 
     #[test]
     fn the_normal_of_a_plane_is_constant_everywhere() {
@@ -50,10 +64,10 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let mut is = vec![];
+        let mut push = Push { xs: vec![] };
 
-        p.intersects(&ray, &mut |t: f64| is.push(t));
-        assert!(is.len() == 0);
+        p.intersects(&ray, &mut push);
+        assert!(push.xs.len() == 0);
     }
 
     #[test]
@@ -64,10 +78,10 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let mut is = vec![];
+        let mut push = Push { xs: vec![] };
 
-        p.intersects(&ray, &mut |t: f64| is.push(t));
-        assert!(is.len() == 0);
+        p.intersects(&ray, &mut push);
+        assert!(push.xs.len() == 0);
     }
 
     #[test]
@@ -78,11 +92,11 @@ mod tests {
             direction: Vector::new(0.0, -1.0, 0.0),
         };
 
-        let mut is = vec![];
+        let mut push = Push { xs: vec![] };
 
-        p.intersects(&ray, &mut |t: f64| is.push(t));
-        assert!(is.len() == 1);
-        assert_eq!(is[0], 1.0);
+        p.intersects(&ray, &mut push);
+        assert!(push.xs.len() == 1);
+        assert_eq!(push.xs[0], 1.0);
     }
 
     #[test]
@@ -93,11 +107,11 @@ mod tests {
             direction: Vector::new(0.0, 1.0, 0.0),
         };
 
-        let mut is = vec![];
+        let mut push = Push { xs: vec![] };
 
-        p.intersects(&ray, &mut |t: f64| is.push(t));
-        assert!(is.len() == 1);
-        assert_eq!(is[0], 1.0);
+        p.intersects(&ray, &mut push);
+        assert!(push.xs.len() == 1);
+        assert_eq!(push.xs[0], 1.0);
     }
 }
 

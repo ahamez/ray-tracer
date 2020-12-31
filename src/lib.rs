@@ -22,7 +22,7 @@ pub mod rtc {
     pub use camera::Camera;
     pub use canvas::Canvas;
     pub use color::Color;
-    pub use intersection::{Intersection, IntersectionState, Intersections};
+    pub use intersection::{Intersection, IntersectionPusher, IntersectionState, Intersections};
     pub use light::Light;
     pub use material::Material;
     pub use object::Object;

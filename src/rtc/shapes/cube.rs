@@ -3,7 +3,7 @@
 use crate::{
     float::ApproxEq,
     primitive::{Point, Tuple, Vector},
-    rtc::Ray,
+    rtc::{IntersectionPusher, Ray},
 };
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -14,10 +14,7 @@ pub struct Cube {}
 /* ---------------------------------------------------------------------------------------------- */
 
 impl Cube {
-    pub fn intersects<F>(ray: &Ray, mut push: F)
-    where
-        F: FnMut(f64),
-    {
+    pub fn intersects(ray: &Ray, push: &mut impl IntersectionPusher) {
         let (xtmin, xtmax) = Cube::check_axis(ray.origin.x(), ray.direction.x());
         let (ytmin, ytmax) = Cube::check_axis(ray.origin.y(), ray.direction.y());
         let (ztmin, ztmax) = Cube::check_axis(ray.origin.z(), ray.direction.z());
@@ -30,8 +27,8 @@ impl Cube {
         let tmin = xtmin.max(ytmin.max(ztmin));
 
         if tmin <= tmax {
-            push(tmin);
-            push(tmax);
+            push.t(tmin);
+            push.t(tmax);
         }
     }
 
@@ -100,16 +97,31 @@ impl Cube {
 #[cfg(test)]
 pub mod tests {
     use super::*;
+    use crate::rtc::{IntersectionPusher, Object};
+    use std::sync::Arc;
+
+    struct Push {
+        pub xs: Vec<f64>,
+    }
+
+    impl IntersectionPusher for Push {
+        fn t(&mut self, t: f64) {
+            self.xs.push(t);
+        }
+        fn set_object(&mut self, _object: Arc<Object>) {
+            panic!();
+        }
+    }
 
     #[test]
     fn a_ray_intersects_a_cube() {
         fn test(origin: Point, direction: Vector, t1: f64, t2: f64) {
             let ray = Ray { origin, direction };
-            let mut xs = vec![];
-            Cube::intersects(&ray, |t| xs.push(t));
-            assert_eq!(xs.len(), 2);
-            assert!(xs[0].approx_eq(t1));
-            assert!(xs[1].approx_eq(t2));
+            let mut push = Push { xs: vec![] };
+            Cube::intersects(&ray, &mut push);
+            assert_eq!(push.xs.len(), 2);
+            assert!(push.xs[0].approx_eq(t1));
+            assert!(push.xs[1].approx_eq(t2));
         }
 
         test(
@@ -160,9 +172,9 @@ pub mod tests {
     fn a_ray_misses_a_cube() {
         fn test(origin: Point, direction: Vector) {
             let ray = Ray { origin, direction };
-            let mut xs = vec![];
-            Cube::intersects(&ray, |t| xs.push(t));
-            assert_eq!(xs.len(), 0);
+            let mut push = Push { xs: vec![] };
+            Cube::intersects(&ray, &mut push);
+            assert_eq!(push.xs.len(), 0);
         }
 
         test(
