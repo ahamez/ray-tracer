@@ -43,10 +43,7 @@ pub enum GroupBuilder {
 
 impl GroupBuilder {
     pub fn build(&self) -> Object {
-        match self {
-            GroupBuilder::Leaf(o) => o.clone(),
-            GroupBuilder::Node(_, _) => GroupBuilder::rec(self, &Matrix::id()),
-        }
+        GroupBuilder::rec(self, &Matrix::id())
     }
 
     fn rec(gb: &Self, transform: &Matrix) -> Object {
