@@ -4,7 +4,7 @@ use crate::{float::ApproxEq, primitive::tuple::Tuple};
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Matrix {
     size: usize,
     data: [[f64; 4]; 4],
@@ -208,21 +208,6 @@ where
                 + self[2][2] * rhs.z()
                 + self[2][3] * rhs.w(),
         )
-    }
-}
-
-/* ---------------------------------------------------------------------------------------------- */
-
-impl std::fmt::Debug for Matrix {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        for i in 0..self.size {
-            for j in 0..self.size {
-                write!(f, "{} ", self[i][j])?;
-            }
-            writeln!(f)?;
-        }
-
-        writeln!(f)
     }
 }
 
