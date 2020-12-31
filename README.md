@@ -21,6 +21,8 @@ My main objective is to be fluent in Rust 🗣🦀. So, if some seasoned rustace
 
 ![Fresnel](/samples/fresnel.png?raw=true "Fresnel")
 
+![Hexagon](/samples/hexagon.png?raw=true "Hexagon")
+
 ![Plane](/samples/ch09_plane.png?raw=true "Plane")
 
 ![Pattern](/samples/ch10_pattern.png?raw=true "Pattern")

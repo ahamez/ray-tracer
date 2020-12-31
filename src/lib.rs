@@ -30,6 +30,7 @@ pub mod rtc {
     pub use ray::Ray;
     pub use scene::Scene;
     pub use shape::Shape;
+    pub use shapes::GroupBuilder;
     pub use transformation::*;
     pub use world::World;
 
