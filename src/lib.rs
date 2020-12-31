@@ -60,6 +60,7 @@ pub mod rtc {
         pub use cube::Cube;
         pub use cylinder::Cylinder;
         pub use group::Group;
+        pub use group::GroupBuilder;
         pub use plane::Plane;
         pub use sphere::Sphere;
 
