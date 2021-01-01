@@ -14,7 +14,7 @@ fn hexagon_corner() -> GroupBuilder {
 }
 
 fn hexagon_edge() -> GroupBuilder {
-    let edge = Object::new_cylinder(0.0, 1.0, true)
+    let edge = Object::new_cylinder(0.0, 1.0, false)
         .scale(0.25, 1.0, 0.25)
         .rotate_z(-PI / 2.0)
         .rotate_y(-PI / 6.0)
@@ -39,7 +39,12 @@ fn hexagon() -> Object {
         sides.push(side);
     }
 
-    let hex_builder = GroupBuilder::Node(Object::new_dummy(), sides);
+    let hex_builder = GroupBuilder::Node(
+        Object::new_dummy()
+            .rotate_x(PI / 3.0)
+            .translate(0.0, 0.75, 0.0),
+        sides,
+    );
 
     Object::new_group(&hex_builder)
 }
@@ -52,13 +57,13 @@ fn main() {
         .with_objects(vec![hexagon])
         .with_lights(vec![light]);
 
-    let from = Point::new(0.0, 7.0, -5.0);
-    let to = Point::new(0.0, 0.0, 0.0);
-    let up = Vector::new(0.0, 1.0, 1.0);
+    let from = Point::new(0.0, 1.5, -5.0);
+    let to = Point::new(0.0, 1.0, 0.0);
+    let up = Vector::new(0.0, 1.0, 0.0);
 
     let width = 5000;
     let height = 5000;
-    let fov = 0.4;
+    let fov = PI / 3.0;
 
     let camera =
         Camera::new(width, height, fov).with_transformation(&view_transform(&from, &to, &up));
