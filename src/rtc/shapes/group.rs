@@ -149,12 +149,8 @@ mod tests {
                     GroupBuilder::Leaf(s3),
                 ],
             );
-            let group_1 = Object::new_group(&group_builder_1);
 
-            let group_builder_2 = GroupBuilder::Node(
-                Object::new_dummy(),
-                vec![GroupBuilder::Leaf(group_1.clone())],
-            );
+            let group_builder_2 = GroupBuilder::Node(Object::new_dummy(), vec![group_builder_1]);
             let group_2 = Object::new_group(&group_builder_2);
 
             let ray = Ray {
@@ -180,14 +176,10 @@ mod tests {
                 Object::new_dummy(),
                 vec![GroupBuilder::Leaf(s1.clone()), GroupBuilder::Leaf(s3)],
             );
-            let group_1 = Object::new_group(&group_builder_1);
 
             let group_builder_2 = GroupBuilder::Node(
                 Object::new_dummy(),
-                vec![
-                    GroupBuilder::Leaf(group_1.clone()),
-                    GroupBuilder::Leaf(s2.clone()),
-                ],
+                vec![group_builder_1, GroupBuilder::Leaf(s2.clone())],
             );
             let group_2 = Object::new_group(&group_builder_2);
 
@@ -233,11 +225,10 @@ mod tests {
 
             let group_builder_1 =
                 GroupBuilder::Node(Object::new_dummy(), vec![GroupBuilder::Leaf(s.clone())]);
-            let group_1 = Object::new_group(&group_builder_1);
 
             let group_builder_2 = GroupBuilder::Node(
                 Object::new_dummy().scale(2.0, 2.0, 2.0),
-                vec![GroupBuilder::Leaf(group_1.clone())],
+                vec![group_builder_1],
             );
             let group_2 = Object::new_group(&group_builder_2);
 
@@ -257,12 +248,8 @@ mod tests {
                 Object::new_dummy().scale(2.0, 2.0, 2.0),
                 vec![GroupBuilder::Leaf(s.clone())],
             );
-            let group_1 = Object::new_group(&group_builder_1);
 
-            let group_builder_2 = GroupBuilder::Node(
-                Object::new_dummy(),
-                vec![GroupBuilder::Leaf(group_1.clone())],
-            );
+            let group_builder_2 = GroupBuilder::Node(Object::new_dummy(), vec![group_builder_1]);
             let group_2 = Object::new_group(&group_builder_2);
 
             let ray = Ray {
