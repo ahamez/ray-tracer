@@ -92,9 +92,15 @@ impl Object {
     }
 
     pub fn intersects(&self, ray: &Ray, push: &mut impl IntersectionPusher) {
-        let transformed_ray = ray.apply_transformation(&self.transformation_inverse);
-
-        self.shape.intersects(&transformed_ray, push);
+        match self.shape.as_group() {
+            None => {
+                let transformed_ray = ray.apply_transformation(&self.transformation_inverse);
+                self.shape.intersects(&transformed_ray, push)
+            }
+            // Skip world to local conversion for groups, since the transformation matrix
+            // has been propagated to children at build time via GroupBuilder.
+            Some(_) => self.shape.intersects(&ray, push),
+        }
     }
 
     pub fn normal_at(&self, world_point: &Point) -> Vector {
