@@ -92,14 +92,11 @@ impl Object {
     }
 
     pub fn intersects(&self, ray: &Ray, push: &mut impl IntersectionPusher) {
-        match self.shape.as_group() {
-            None => {
-                let transformed_ray = ray.apply_transformation(&self.transformation_inverse);
-                self.shape.intersects(&transformed_ray, push)
-            }
-            // Skip world to local conversion for groups, since the transformation matrix
-            // has been propagated to children at build time via GroupBuilder.
-            Some(_) => self.shape.intersects(&ray, push),
+        if self.shape.skip_world_to_local() {
+            self.shape.intersects(&ray, push)
+        } else {
+            let transformed_ray = ray.apply_transformation(&self.transformation_inverse);
+            self.shape.intersects(&transformed_ray, push)
         }
     }
 
