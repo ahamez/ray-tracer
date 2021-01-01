@@ -9,7 +9,7 @@ use crate::{
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Ray {
     pub origin: Point,
     pub direction: Vector,
