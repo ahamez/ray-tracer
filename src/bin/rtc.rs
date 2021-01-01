@@ -347,7 +347,7 @@ where
                 other => panic!("Unexpected transformation {:?}", other),
             };
 
-            x = x.apply_transformation(&transformation);
+            x = x.transform(&transformation);
         }
     }
 

@@ -48,7 +48,7 @@ impl GroupBuilder {
 
     fn rec(gb: &Self, transform: &Matrix) -> Object {
         match gb {
-            GroupBuilder::Leaf(o) => o.apply_transformation(transform),
+            GroupBuilder::Leaf(o) => o.transform(transform),
             GroupBuilder::Node(group, children) => {
                 let child_transform = *transform * *group.transformation();
                 let mut new_children = vec![];

@@ -95,7 +95,7 @@ impl Object {
         if self.shape.skip_world_to_local() {
             self.shape.intersects(&ray, push)
         } else {
-            let transformed_ray = ray.apply_transformation(&self.transformation_inverse);
+            let transformed_ray = ray.transform(&self.transformation_inverse);
             self.shape.intersects(&transformed_ray, push)
         }
     }
@@ -154,7 +154,7 @@ impl Default for Object {
 /* ---------------------------------------------------------------------------------------------- */
 
 impl Transform for Object {
-    fn apply_transformation(&self, transformation: &Matrix) -> Self {
+    fn transform(&self, transformation: &Matrix) -> Self {
         let transformation = *transformation * self.transformation;
         let transformation_inverse = transformation.invert();
         let transformation_inverse_transpose = transformation_inverse.transpose();

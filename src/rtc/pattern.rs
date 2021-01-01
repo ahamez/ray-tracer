@@ -97,7 +97,7 @@ impl Default for Pattern {
 /* ---------------------------------------------------------------------------------------------- */
 
 impl Transform for Pattern {
-    fn apply_transformation(&self, transformation: &Matrix) -> Self {
+    fn transform(&self, transformation: &Matrix) -> Self {
         let new_transformation = *transformation * self.transformation;
 
         Pattern {

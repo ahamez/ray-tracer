@@ -122,7 +122,7 @@ impl Camera {
 /* ---------------------------------------------------------------------------------------------- */
 
 impl Transform for Camera {
-    fn apply_transformation(&self, transformation: &Matrix) -> Self {
+    fn transform(&self, transformation: &Matrix) -> Self {
         let new_transformation = *transformation * self.transformation;
         Camera {
             transformation: new_transformation,
