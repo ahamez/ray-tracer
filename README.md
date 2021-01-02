@@ -37,3 +37,4 @@ My main objective is to be fluent in Rust 🗣🦀. So, if some seasoned rustace
 
 ![Cone](/samples/ch13_cone.png?raw=true "Cone")
 
+![Triangle](/samples/ch15_triangle.png?raw=true "Triangle")
