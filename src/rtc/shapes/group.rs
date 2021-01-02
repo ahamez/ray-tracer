@@ -28,7 +28,7 @@ impl Group {
     }
 
     pub fn intersects(&self, ray: &Ray, push: &mut impl IntersectionPusher) {
-        if self.bounds().intersects(ray) {
+        if self.bounds().is_intersected(ray) {
             for child in &self.children {
                 push.set_object(child.clone());
                 child.intersects(ray, push);

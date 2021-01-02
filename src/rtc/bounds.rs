@@ -69,7 +69,7 @@ impl BoundingBox {
         self.contains_point(&other.min) && self.contains_point(&other.max)
     }
 
-    pub fn intersects(&self, ray: &Ray) -> bool {
+    pub fn is_intersected(&self, ray: &Ray) -> bool {
         let (xtmin, xtmax) = BoundingBox::check_axis(
             ray.origin.x(),
             ray.direction.x(),
@@ -315,7 +315,7 @@ mod tests {
                 origin,
                 direction: direction.normalize(),
             };
-            assert_eq!(bbox.intersects(&ray), result);
+            assert_eq!(bbox.is_intersected(&ray), result);
         }
     }
 }
