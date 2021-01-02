@@ -14,7 +14,7 @@ use crate::{
 pub enum Shape {
     Cone(Cone),
     Cube(),
-    Dummy(),
+    Dummy(), // Does not exist on its own
     Cylinder(Cylinder),
     Group(Group),
     Plane(),
@@ -44,7 +44,7 @@ impl Shape {
             Shape::Cube() => Cube::normal_at(&object_point),
             Shape::Cylinder(c) => c.normal_at(&object_point),
             Shape::Dummy() => panic!("Dummy::normal_at() should never be called"),
-            Shape::Group(_) => panic!("Group::normal_at() should never be called"),
+            Shape::Group(g) => g.normal_at(&object_point),
             Shape::Plane() => Plane::normal_at(&object_point),
             Shape::Sphere() => Sphere::normal_at(&object_point),
             Shape::TestShape(t) => t.normal_at(&object_point),
@@ -54,10 +54,11 @@ impl Shape {
     pub fn skip_world_to_local(&self) -> bool {
         // Skip world to local conversion for groups, since the transformation matrix
         // has been propagated to children at build time via GroupBuilder.
-        // Would be better to dispatch this to shapes to further decouple from concrete types.
+        // TODO. Dispatch this to shapes to further decouple from concrete types.
         matches!(self, Shape::Group(_))
     }
 
+    // TODO. Remove this. Quite ugly as it's only used for tests.
     pub fn as_group(&self) -> Option<&Group> {
         match self {
             Shape::Group(g) => Some(g),

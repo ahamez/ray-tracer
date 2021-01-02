@@ -3,8 +3,8 @@
 use std::sync::Arc;
 
 use crate::{
-    primitive::Matrix,
     rtc::{IntersectionPusher, Object, Ray, Shape, Transform},
+    primitive::{Matrix, Point, Vector},
 };
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -26,6 +26,10 @@ impl Group {
             push.set_object(child.clone());
             child.intersects(ray, push);
         }
+    }
+
+    pub fn normal_at(&self, _object_point: &Point) -> Vector {
+        unreachable!()
     }
 
     pub fn children(&self) -> &Vec<Arc<Object>> {
