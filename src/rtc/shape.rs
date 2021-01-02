@@ -3,8 +3,8 @@
 use crate::{
     primitive::{Point, Vector},
     rtc::{
-        shapes::{Cone, Cube, Cylinder, Group, Plane, Sphere},
         IntersectionPusher, Ray,
+        shapes::{Cone, Cube, Cylinder, Group, Plane, Sphere, TestShape},
     },
 };
 
@@ -19,6 +19,7 @@ pub enum Shape {
     Group(Group),
     Plane(),
     Sphere(),
+    TestShape(TestShape),
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -33,6 +34,7 @@ impl Shape {
             Shape::Group(g) => g.intersects(&ray, push),
             Shape::Plane() => Plane::intersects(&ray, push),
             Shape::Sphere() => Sphere::intersects(&ray, push),
+            Shape::TestShape(t) => t.intersects(&ray, push),
         }
     }
 
@@ -45,6 +47,7 @@ impl Shape {
             Shape::Group(_) => panic!("Group::normal_at() should never be called"),
             Shape::Plane() => Plane::normal_at(&object_point),
             Shape::Sphere() => Sphere::normal_at(&object_point),
+            Shape::TestShape(t) => t.normal_at(&object_point),
         }
     }
 

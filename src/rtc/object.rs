@@ -3,8 +3,8 @@
 use crate::{
     primitive::{Matrix, Point, Vector},
     rtc::{
-        shapes::{Cone, Cylinder, GroupBuilder},
         IntersectionPusher, Material, Ray, Shape, Transform,
+        shapes::{Cone, Cylinder, GroupBuilder, TestShape},
     },
 };
 
@@ -65,6 +65,13 @@ impl Object {
     pub fn new_sphere() -> Self {
         Object {
             shape: Shape::Sphere(),
+            ..Default::default()
+        }
+    }
+
+    pub fn new_test_shape() -> Self {
+        Object {
+            shape: Shape::TestShape(TestShape::new()),
             ..Default::default()
         }
     }
