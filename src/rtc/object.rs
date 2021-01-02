@@ -3,7 +3,7 @@
 use crate::{
     primitive::{Matrix, Point, Vector},
     rtc::{
-        shapes::{Cone, Cylinder, GroupBuilder, Sphere, TestShape},
+        shapes::{Cone, Cylinder, GroupBuilder, Sphere, TestShape, Triangle},
         BoundingBox, IntersectionPusher, Material, Ray, Shape, Transform,
     },
 };
@@ -93,6 +93,17 @@ impl Object {
     pub fn new_test_shape() -> Self {
         Object {
             shape: Shape::TestShape(TestShape::new()),
+            ..Default::default()
+        }
+    }
+
+    pub fn new_triangle(p1: Point, p2: Point, p3: Point) -> Self {
+        let shape = Shape::Triangle(Triangle::new(p1, p2, p3));
+        let bounding_box = shape.bounds();
+
+        Object {
+            shape,
+            bounding_box,
             ..Default::default()
         }
     }

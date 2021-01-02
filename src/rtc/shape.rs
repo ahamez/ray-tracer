@@ -3,7 +3,7 @@
 use crate::{
     primitive::{Point, Vector},
     rtc::{
-        shapes::{Cone, Cube, Cylinder, Group, Plane, Sphere, TestShape},
+        shapes::{Cone, Cube, Cylinder, Group, Plane, Sphere, TestShape, Triangle},
         BoundingBox, IntersectionPusher, Ray,
     },
 };
@@ -20,6 +20,7 @@ pub enum Shape {
     Plane(),
     Sphere(),
     TestShape(TestShape),
+    Triangle(Triangle),
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -35,6 +36,7 @@ impl Shape {
             Shape::Plane() => Plane::intersects(&ray, push),
             Shape::Sphere() => Sphere::intersects(&ray, push),
             Shape::TestShape(t) => t.intersects(&ray, push),
+            Shape::Triangle(t) => t.intersects(&ray, push),
         }
     }
 
@@ -48,6 +50,7 @@ impl Shape {
             Shape::Plane() => Plane::normal_at(&object_point),
             Shape::Sphere() => Sphere::normal_at(&object_point),
             Shape::TestShape(t) => t.normal_at(&object_point),
+            Shape::Triangle(t) => t.normal_at(&object_point),
         }
     }
 
@@ -61,6 +64,7 @@ impl Shape {
             Shape::Plane() => Plane::bounds(),
             Shape::Sphere() => Sphere::bounds(),
             Shape::TestShape(t) => t.bounds(),
+            Shape::Triangle(t) => t.bounds(),
         }
     }
 

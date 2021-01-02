@@ -67,6 +67,7 @@ pub mod rtc {
         pub use plane::Plane;
         pub use sphere::Sphere;
         pub use test_shape::TestShape;
+        pub use triangle::Triangle;
 
         mod cone;
         mod cube;
@@ -75,5 +76,6 @@ pub mod rtc {
         mod plane;
         mod sphere;
         mod test_shape;
+        mod triangle;
     }
 }
