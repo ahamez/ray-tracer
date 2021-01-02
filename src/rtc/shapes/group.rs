@@ -274,7 +274,7 @@ mod tests {
             .scale(2.0, 2.0, 2.0)
             .rotate_y(std::f64::consts::PI / 2.0);
 
-        let t_ref = s.transformation();
+        let expected_transformation = s.transformation();
 
         // With one group
         {
@@ -291,7 +291,7 @@ mod tests {
             // Retrieve the s with the baked-in group transform.
             let group_s = g2.shape().as_group().unwrap().children[0].clone();
 
-            assert_eq!(group_s.transformation(), t_ref);
+            assert_eq!(group_s.transformation(), expected_transformation);
         }
         {
             let s = Object::new_sphere().translate(5.0, 0.0, 0.0);
@@ -310,7 +310,7 @@ mod tests {
             let group_g2 = g1.shape().as_group().unwrap().children[0].clone();
             let group_s = group_g2.shape().as_group().unwrap().children[0].clone();
 
-            assert_eq!(group_s.transformation(), t_ref);
+            assert_eq!(group_s.transformation(), expected_transformation);
         }
         // With three nested groups, only one being transformed
         {
@@ -333,7 +333,7 @@ mod tests {
             let group_g2 = group_g1.shape().as_group().unwrap().children[0].clone();
             let group_s = group_g2.shape().as_group().unwrap().children[0].clone();
 
-            assert_eq!(group_s.transformation(), t_ref);
+            assert_eq!(group_s.transformation(), expected_transformation);
         }
         // With two nested groups with transformations in both
         {
@@ -354,7 +354,7 @@ mod tests {
             let group_g2 = g1.shape().as_group().unwrap().children[0].clone();
             let group_s = group_g2.shape().as_group().unwrap().children[0].clone();
 
-            assert_eq!(group_s.transformation(), t_ref);
+            assert_eq!(group_s.transformation(), expected_transformation);
         }
     }
 }
