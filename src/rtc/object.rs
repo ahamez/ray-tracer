@@ -25,27 +25,36 @@ pub struct Object {
 
 impl Object {
     pub fn new_cone(min: f64, max: f64, closed: bool) -> Self {
+        let shape = Shape::Cone(Cone::new(min, max, closed));
+        let bounding_box = shape.bounds();
+
         Object {
-            shape: Shape::Cone(Cone::new(min, max, closed)),
+            shape,
+            bounding_box,
             ..Default::default()
         }
-        .transform(&Matrix::id()) // to update bounding box
     }
 
     pub fn new_cube() -> Self {
+        let shape = Shape::Cube();
+        let bounding_box = shape.bounds();
+
         Object {
             shape: Shape::Cube(),
+            bounding_box,
             ..Default::default()
         }
-        .transform(&Matrix::id()) // to update bounding box
     }
 
     pub fn new_cylinder(min: f64, max: f64, closed: bool) -> Self {
+        let shape = Shape::Cylinder(Cylinder::new(min, max, closed));
+        let bounding_box = shape.bounds();
+
         Object {
-            shape: Shape::Cylinder(Cylinder::new(min, max, closed)),
+            shape,
+            bounding_box,
             ..Default::default()
         }
-        .transform(&Matrix::id()) // to update bounding box
     }
 
     pub fn new_dummy() -> Self {
@@ -60,19 +69,25 @@ impl Object {
     }
 
     pub fn new_plane() -> Self {
+        let shape = Shape::Plane();
+        let bounding_box = shape.bounds();
+
         Object {
-            shape: Shape::Plane(),
+            shape,
+            bounding_box,
             ..Default::default()
         }
-        .transform(&Matrix::id()) // to update bounding box
     }
 
     pub fn new_sphere() -> Self {
+        let shape = Shape::Sphere();
+        let bounding_box = shape.bounds();
+
         Object {
-            shape: Shape::Sphere(),
+            shape,
+            bounding_box,
             ..Default::default()
         }
-        .transform(&Matrix::id()) // to update bounding box
     }
 
     pub fn new_test_shape() -> Self {
@@ -80,7 +95,6 @@ impl Object {
             shape: Shape::TestShape(TestShape::new()),
             ..Default::default()
         }
-        .transform(&Matrix::id()) // to update bounding box
     }
 
     pub fn with_material(mut self, material: Material) -> Self {
