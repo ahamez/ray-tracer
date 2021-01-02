@@ -3,8 +3,8 @@
 use crate::{
     primitive::{Matrix, Point, Vector},
     rtc::{
-        IntersectionPusher, Material, Ray, Shape, Transform,
-        shapes::{Cone, Cylinder, GroupBuilder, TestShape},
+        shapes::{Cone, Cylinder, GroupBuilder, Sphere, TestShape},
+        BoundingBox, IntersectionPusher, Material, Ray, Shape, Transform,
     },
 };
 
@@ -12,6 +12,7 @@ use crate::{
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Object {
+    bounding_box: BoundingBox,
     has_shadow: bool,
     material: Material,
     shape: Shape,
@@ -28,6 +29,7 @@ impl Object {
             shape: Shape::Cone(Cone::new(min, max, closed)),
             ..Default::default()
         }
+        .transform(&Matrix::id()) // to update bounding box
     }
 
     pub fn new_cube() -> Self {
@@ -35,6 +37,7 @@ impl Object {
             shape: Shape::Cube(),
             ..Default::default()
         }
+        .transform(&Matrix::id()) // to update bounding box
     }
 
     pub fn new_cylinder(min: f64, max: f64, closed: bool) -> Self {
@@ -42,6 +45,7 @@ impl Object {
             shape: Shape::Cylinder(Cylinder::new(min, max, closed)),
             ..Default::default()
         }
+        .transform(&Matrix::id()) // to update bounding box
     }
 
     pub fn new_dummy() -> Self {
@@ -52,7 +56,7 @@ impl Object {
     }
 
     pub fn new_group(builder: &GroupBuilder) -> Self {
-        builder.build()
+        builder.build().transform(&Matrix::id())
     }
 
     pub fn new_plane() -> Self {
@@ -60,6 +64,7 @@ impl Object {
             shape: Shape::Plane(),
             ..Default::default()
         }
+        .transform(&Matrix::id()) // to update bounding box
     }
 
     pub fn new_sphere() -> Self {
@@ -67,6 +72,7 @@ impl Object {
             shape: Shape::Sphere(),
             ..Default::default()
         }
+        .transform(&Matrix::id()) // to update bounding box
     }
 
     pub fn new_test_shape() -> Self {
@@ -74,6 +80,7 @@ impl Object {
             shape: Shape::TestShape(TestShape::new()),
             ..Default::default()
         }
+        .transform(&Matrix::id()) // to update bounding box
     }
 
     pub fn with_material(mut self, material: Material) -> Self {
@@ -95,12 +102,14 @@ impl Object {
         self.transformation = transformation;
         self.transformation_inverse = self.transformation.invert();
         self.transformation_inverse_transpose = self.transformation_inverse.transpose();
+        self.bounding_box = self.bounds().transform(&self.transformation);
+
         self
     }
 
     pub fn intersects(&self, ray: &Ray, push: &mut impl IntersectionPusher) {
         if self.shape.skip_world_to_local() {
-            self.shape.intersects(&ray, push)
+            self.shape.intersects(ray, push)
         } else {
             let transformed_ray = ray.transform(&self.transformation_inverse);
             self.shape.intersects(&transformed_ray, push)
@@ -141,6 +150,14 @@ impl Object {
     pub fn transformation_inverse(&self) -> &Matrix {
         &self.transformation_inverse
     }
+
+    pub fn bounds(&self) -> BoundingBox {
+        self.shape.bounds()
+    }
+
+    pub fn bounding_box(&self) -> BoundingBox {
+        self.bounding_box
+    }
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -148,6 +165,7 @@ impl Object {
 impl Default for Object {
     fn default() -> Self {
         Object {
+            bounding_box: Sphere::bounds(),
             has_shadow: true,
             material: Material::new(),
             shape: Shape::Sphere(),
@@ -165,8 +183,10 @@ impl Transform for Object {
         let transformation = *transformation * self.transformation;
         let transformation_inverse = transformation.invert();
         let transformation_inverse_transpose = transformation_inverse.transpose();
+        let bounding_box = self.shape.bounds().transform(&transformation);
 
         Object {
+            bounding_box,
             transformation,
             transformation_inverse,
             transformation_inverse_transpose,

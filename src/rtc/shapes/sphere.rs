@@ -2,7 +2,7 @@
 
 use crate::{
     primitive::{Point, Tuple, Vector},
-    rtc::{IntersectionPusher, Ray},
+    rtc::{BoundingBox, IntersectionPusher, Ray},
 };
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -39,6 +39,12 @@ impl Sphere {
 
     pub fn normal_at(object_point: &Point) -> Vector {
         *object_point - Point::zero()
+    }
+
+    pub fn bounds() -> BoundingBox {
+        BoundingBox::new()
+            .with_min(Point::new(-1.0, -1.0, -1.0))
+            .with_max(Point::new(1.0, 1.0, 1.0))
     }
 }
 
@@ -279,6 +285,23 @@ pub mod tests {
         assert_eq!(IntersectionState::new(&xs, 3, &ray).n(), (2.5, 2.5));
         assert_eq!(IntersectionState::new(&xs, 4, &ray).n(), (2.5, 1.5));
         assert_eq!(IntersectionState::new(&xs, 5, &ray).n(), (1.5, 1.0));
+    }
+
+    #[test]
+    fn a_sphere_has_a_bounding_box() {
+        let s = Object::new_sphere();
+        assert_eq!(s.bounds().min(), Point::new(-1.0, -1.0, -1.0));
+        assert_eq!(s.bounds().max(), Point::new(1.0, 1.0, 1.0));
+    }
+
+    #[test]
+    fn querying_a_shape_s_bounding_box_in_its_parent_space() {
+        let s = Object::new_sphere()
+            .scale(0.5, 2.0, 4.0)
+            .translate(1.0, -3.0, 5.0);
+
+        assert_eq!(s.bounding_box().min(), Point::new(0.5, -5.0, 1.0));
+        assert_eq!(s.bounding_box().max(), Point::new(1.5, -1.0, 9.0));
     }
 }
 

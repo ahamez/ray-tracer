@@ -10,7 +10,7 @@ use std::sync::{Arc, Mutex};
 
 #[derive(Clone, Debug)]
 pub struct TestShape {
-    ray: Arc<Mutex<Ray>>,
+    ray: Arc<Mutex<Option<Ray>>>,
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -18,16 +18,13 @@ pub struct TestShape {
 impl TestShape {
     pub fn new() -> Self {
         Self {
-            ray: Arc::new(Mutex::new(Ray {
-                origin: Point::zero(),
-                direction: Vector::zero(),
-            })),
+            ray: Arc::new(Mutex::new(None)),
         }
     }
 
     pub fn intersects(&self, ray: &Ray, _push: &mut impl IntersectionPusher) {
         let mut reference = self.ray.lock().unwrap();
-        *reference = ray.clone();
+        *reference = Some(ray.clone());
     }
 
     pub fn normal_at(&self, _object_point: &Point) -> Vector {
@@ -40,7 +37,7 @@ impl TestShape {
             .with_max(Point::new(1.0, 1.0, 1.0))
     }
 
-    pub fn ray(&self) -> Ray {
+    pub fn ray(&self) -> Option<Ray> {
         *self.ray.lock().unwrap()
     }
 }
@@ -89,8 +86,15 @@ mod tests {
             _ => panic!(),
         };
 
-        assert_eq!(s.ray().origin, Point::new(0.0, 0.0, -2.5));
-        assert_eq!(s.ray().direction, Vector::new(0.0, 0.0, 0.5));
+        assert_eq!(s.ray().unwrap().origin, Point::new(0.0, 0.0, -2.5));
+        assert_eq!(s.ray().unwrap().direction, Vector::new(0.0, 0.0, 0.5));
+    }
+
+    #[test]
+    fn a_test_shape_has_a_bounding_box() {
+        let t = Object::new_test_shape();
+        assert_eq!(t.bounds().min(), Point::new(-1.0, -1.0, -1.0));
+        assert_eq!(t.bounds().max(), Point::new(1.0, 1.0, 1.0));
     }
 }
 

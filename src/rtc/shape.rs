@@ -3,8 +3,8 @@
 use crate::{
     primitive::{Point, Vector},
     rtc::{
-        IntersectionPusher, Ray,
         shapes::{Cone, Cube, Cylinder, Group, Plane, Sphere, TestShape},
+        BoundingBox, IntersectionPusher, Ray,
     },
 };
 
@@ -51,6 +51,19 @@ impl Shape {
         }
     }
 
+    pub fn bounds(&self) -> BoundingBox {
+        match self {
+            Shape::Cone(c) => c.bounds(),
+            Shape::Cube() => Cube::bounds(),
+            Shape::Cylinder(c) => c.bounds(),
+            Shape::Dummy() => BoundingBox::new(),
+            Shape::Group(g) => g.bounds(),
+            Shape::Plane() => Plane::bounds(),
+            Shape::Sphere() => Sphere::bounds(),
+            Shape::TestShape(t) => t.bounds(),
+        }
+    }
+
     pub fn skip_world_to_local(&self) -> bool {
         // Skip world to local conversion for groups, since the transformation matrix
         // has been propagated to children at build time via GroupBuilder.
@@ -58,10 +71,16 @@ impl Shape {
         matches!(self, Shape::Group(_))
     }
 
-    // TODO. Remove this. Quite ugly as it's only used for tests.
     pub fn as_group(&self) -> Option<&Group> {
         match self {
             Shape::Group(g) => Some(g),
+            _ => None,
+        }
+    }
+
+    pub fn as_test_shape(&self) -> Option<&TestShape> {
+        match self {
+            Shape::TestShape(ts) => Some(ts),
             _ => None,
         }
     }

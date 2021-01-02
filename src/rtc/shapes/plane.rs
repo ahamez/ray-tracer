@@ -3,7 +3,7 @@
 use crate::{
     float::EPSILON,
     primitive::{Point, Tuple, Vector},
-    rtc::{IntersectionPusher, Ray},
+    rtc::{BoundingBox, IntersectionPusher, Ray},
 };
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -22,6 +22,12 @@ impl Plane {
 
     pub fn normal_at(_object_point: &Point) -> Vector {
         Vector::new(0.0, 1.0, 0.0)
+    }
+
+    pub fn bounds() -> BoundingBox {
+        BoundingBox::new()
+            .with_min(Point::new(f64::NEG_INFINITY, 0.0, f64::NEG_INFINITY))
+            .with_max(Point::new(f64::INFINITY, 0.0, f64::INFINITY))
     }
 }
 
@@ -112,6 +118,19 @@ mod tests {
         p.intersects(&ray, &mut push);
         assert!(push.xs.len() == 1);
         assert_eq!(push.xs[0], 1.0);
+    }
+
+    #[test]
+    fn a_plane_has_a_bounding_box() {
+        let p = Object::new_plane();
+        assert_eq!(
+            p.bounds().min(),
+            Point::new(f64::NEG_INFINITY, 0.0, f64::NEG_INFINITY)
+        );
+        assert_eq!(
+            p.bounds().max(),
+            Point::new(f64::INFINITY, 0.0, f64::INFINITY)
+        );
     }
 }
 

@@ -3,7 +3,7 @@
 use crate::{
     float::ApproxEq,
     primitive::{Point, Tuple, Vector},
-    rtc::{IntersectionPusher, Ray},
+    rtc::{BoundingBox, IntersectionPusher, Ray},
 };
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -89,6 +89,12 @@ impl Cube {
         } else {
             Vector::new(0.0, 0.0, z)
         }
+    }
+
+    pub fn bounds() -> BoundingBox {
+        BoundingBox::new()
+            .with_min(Point::new(-1.0, -1.0, -1.0))
+            .with_max(Point::new(1.0, 1.0, 1.0))
     }
 }
 
@@ -229,6 +235,13 @@ pub mod tests {
             Cube::normal_at(&Point::new(-1.0, -1.0, -1.0)),
             Vector::new(-1.0, 0.0, 0.0)
         );
+    }
+
+    #[test]
+    fn a_cube_has_a_bounding_box() {
+        let c = Object::new_cube();
+        assert_eq!(c.bounds().min(), Point::new(-1.0, -1.0, -1.0));
+        assert_eq!(c.bounds().max(), Point::new(1.0, 1.0, 1.0));
     }
 }
 

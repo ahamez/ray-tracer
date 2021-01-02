@@ -3,14 +3,15 @@
 use std::sync::Arc;
 
 use crate::{
-    rtc::{IntersectionPusher, Object, Ray, Shape, Transform},
     primitive::{Matrix, Point, Vector},
+    rtc::{BoundingBox, IntersectionPusher, Object, Ray, Shape, Transform},
 };
 
 /* ---------------------------------------------------------------------------------------------- */
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Group {
+    bounding_box: BoundingBox,
     children: Vec<Arc<Object>>,
 }
 
@@ -18,13 +19,20 @@ pub struct Group {
 
 impl Group {
     fn new(children: Vec<Arc<Object>>) -> Self {
-        Self { children }
+        let bounding_box = Group::mk_bounding_box(&children);
+
+        Self {
+            children,
+            bounding_box,
+        }
     }
 
     pub fn intersects(&self, ray: &Ray, push: &mut impl IntersectionPusher) {
-        for child in &self.children {
-            push.set_object(child.clone());
-            child.intersects(ray, push);
+        if self.bounds().intersects(ray) {
+            for child in &self.children {
+                push.set_object(child.clone());
+                child.intersects(ray, push);
+            }
         }
     }
 
@@ -34,6 +42,19 @@ impl Group {
 
     pub fn children(&self) -> &Vec<Arc<Object>> {
         &self.children
+    }
+
+    pub fn bounds(&self) -> BoundingBox {
+        self.bounding_box
+    }
+
+    fn mk_bounding_box(children: &Vec<Arc<Object>>) -> BoundingBox {
+        let mut bbox = BoundingBox::new();
+        for child in children {
+            bbox = bbox + child.bounding_box();
+        }
+
+        bbox
     }
 }
 
@@ -81,14 +102,24 @@ mod tests {
 
     struct Push {
         pub xs: Vec<f64>,
+        pub object: Arc<Object>,
+    }
+
+    impl Push {
+        pub fn new() -> Self {
+            Self {
+                xs: vec![],
+                object: Arc::new(Object::new_dummy()),
+            }
+        }
     }
 
     impl IntersectionPusher for Push {
         fn t(&mut self, t: f64) {
             self.xs.push(t);
         }
-        fn set_object(&mut self, _object: Arc<Object>) {
-            panic!();
+        fn set_object(&mut self, object: Arc<Object>) {
+            self.object = object
         }
     }
 
@@ -101,7 +132,7 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let mut push = Push { xs: vec![] };
+        let mut push = Push::new();
 
         group.intersects(&ray, &mut push);
 
@@ -356,6 +387,71 @@ mod tests {
 
             assert_eq!(group_s.transformation(), expected_transformation);
         }
+    }
+
+    #[test]
+    fn a_group_has_a_bounding_box_that_contains_its_children() {
+        let s = Object::new_sphere()
+            .scale(2.0, 2.0, 2.0)
+            .translate(2.0, 5.0, -3.0);
+        let c = Object::new_cylinder(-2.0, 2.0, true)
+            .scale(0.5, 1.0, 0.5)
+            .translate(-4.0, -1.0, 4.0);
+
+        let group_builder = GroupBuilder::Node(
+            Object::new_dummy(),
+            vec![GroupBuilder::Leaf(s), GroupBuilder::Leaf(c)],
+        );
+        let g = Object::new_group(&group_builder);
+
+        assert_eq!(g.bounding_box().min(), Point::new(-4.5, -3.0, -5.0));
+        assert_eq!(g.bounding_box().max(), Point::new(4.0, 7.0, 4.5));
+    }
+
+    #[test]
+    fn intersecting_a_ray_with_doesnt_test_children_if_bbox_is_missed() {
+        let ts = Object::new_test_shape();
+
+        let group_builder = GroupBuilder::Node(Object::new_dummy(), vec![GroupBuilder::Leaf(ts)]);
+        let g = Object::new_group(&group_builder);
+
+        let ray = Ray {
+            origin: Point::new(0.0, 0.0, -5.0),
+            direction: Vector::new(0.0, 1.0, 0.0),
+        };
+
+        let mut push = Push::new();
+        g.intersects(&ray, &mut push);
+
+        let ts = g.shape().as_group().unwrap().children()[0]
+            .shape()
+            .as_test_shape()
+            .unwrap();
+
+        assert!(ts.ray().is_none());
+    }
+
+    #[test]
+    fn intersecting_a_ray_with_tests_children_if_bbox_is_hit() {
+        let ts = Object::new_test_shape();
+
+        let group_builder = GroupBuilder::Node(Object::new_dummy(), vec![GroupBuilder::Leaf(ts)]);
+        let g = Object::new_group(&group_builder);
+
+        let ray = Ray {
+            origin: Point::new(0.0, 0.0, -5.0),
+            direction: Vector::new(0.0, 0.0, 1.0),
+        };
+
+        let mut push = Push::new();
+        g.intersects(&ray, &mut push);
+
+        let ts = g.shape().as_group().unwrap().children()[0]
+            .shape()
+            .as_test_shape()
+            .unwrap();
+
+        assert!(ts.ray().is_some());
     }
 }
 

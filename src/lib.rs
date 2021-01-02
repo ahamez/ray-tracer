@@ -19,6 +19,7 @@ pub mod primitive {
 }
 
 pub mod rtc {
+    use bounds::BoundingBox;
     pub use camera::Camera;
     pub use canvas::Canvas;
     pub use color::Color;
@@ -34,6 +35,7 @@ pub mod rtc {
     pub use transformation::*;
     pub use world::World;
 
+    mod bounds;
     mod camera;
     mod canvas;
     mod color;
@@ -64,6 +66,7 @@ pub mod rtc {
         pub use group::GroupBuilder;
         pub use plane::Plane;
         pub use sphere::Sphere;
+        pub use test_shape::TestShape;
 
         mod cone;
         mod cube;
@@ -71,5 +74,6 @@ pub mod rtc {
         mod group;
         mod plane;
         mod sphere;
+        mod test_shape;
     }
 }

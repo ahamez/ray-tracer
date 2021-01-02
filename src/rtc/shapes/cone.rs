@@ -3,7 +3,7 @@
 use crate::{
     float::{ApproxEq, EPSILON},
     primitive::{Point, Tuple, Vector},
-    rtc::{IntersectionPusher, Ray},
+    rtc::{BoundingBox, IntersectionPusher, Ray},
 };
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -101,6 +101,12 @@ impl Cone {
                 object_point.z(),
             )
         }
+    }
+
+    pub fn bounds(&self) -> BoundingBox {
+        BoundingBox::new()
+            .with_min(Point::new(self.min, self.min, self.min))
+            .with_max(Point::new(self.max, self.max, self.max))
     }
 }
 
@@ -229,6 +235,26 @@ pub mod tests {
             c.normal_at(&Point::new(-1.0, -1.0, 0.0)),
             Vector::new(-1.0, 1.0, 0.0)
         );
+    }
+
+    #[test]
+    fn an_unbounded_cone_has_a_bounding_box() {
+        let c = Object::new_cone(f64::NEG_INFINITY, f64::INFINITY, false);
+        assert_eq!(
+            c.bounds().min(),
+            Point::new(f64::NEG_INFINITY, f64::NEG_INFINITY, f64::NEG_INFINITY)
+        );
+        assert_eq!(
+            c.bounds().max(),
+            Point::new(f64::INFINITY, f64::INFINITY, f64::INFINITY)
+        );
+    }
+
+    #[test]
+    fn a_bounded_cone_has_a_bounding_box() {
+        let c = Object::new_cone(-5.0, 3.0, false);
+        assert_eq!(c.bounds().min(), Point::new(-5.0, -5.0, -5.0));
+        assert_eq!(c.bounds().max(), Point::new(3.0, 3.0, 3.0));
     }
 }
 

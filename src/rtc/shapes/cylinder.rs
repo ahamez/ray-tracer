@@ -3,7 +3,7 @@
 use crate::{
     float::{ApproxEq, EPSILON},
     primitive::{Point, Tuple, Vector},
-    rtc::{IntersectionPusher, Ray},
+    rtc::{BoundingBox, IntersectionPusher, Ray},
 };
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -90,6 +90,12 @@ impl Cylinder {
         } else {
             Vector::new(object_point.x(), 0.0, object_point.z())
         }
+    }
+
+    pub fn bounds(&self) -> BoundingBox {
+        BoundingBox::new()
+            .with_min(Point::new(-1.0, self.min, -1.0))
+            .with_max(Point::new(1.0, self.max, 1.0))
     }
 }
 
@@ -275,6 +281,20 @@ pub mod tests {
         for (point, normal) in tests.into_iter() {
             assert_eq!(c.normal_at(&point), normal);
         }
+    }
+
+    #[test]
+    fn an_unbounded_cylinder_has_a_bounding_box() {
+        let c = Object::new_cylinder(f64::NEG_INFINITY, f64::INFINITY, false);
+        assert_eq!(c.bounds().min(), Point::new(-1.0, f64::NEG_INFINITY, -1.0));
+        assert_eq!(c.bounds().max(), Point::new(1.0, f64::INFINITY, 1.0));
+    }
+
+    #[test]
+    fn a_bounded_cylinder_has_a_bounding_box() {
+        let c = Object::new_cylinder(-5.0, 3.0, false);
+        assert_eq!(c.bounds().min(), Point::new(-1.0, -5.0, -1.0));
+        assert_eq!(c.bounds().max(), Point::new(1.0, 3.0, 1.0));
     }
 }
 
