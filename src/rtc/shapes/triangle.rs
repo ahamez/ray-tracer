@@ -36,6 +36,7 @@ impl Triangle {
         }
     }
 
+    #[allow(clippy::manual_range_contains)]
     pub fn intersects(&self, ray: &Ray, push: &mut impl IntersectionPusher) {
         let dir_cross_e2 = ray.direction * self.e2;
         let det = self.e1 ^ dir_cross_e2;

@@ -17,14 +17,12 @@ pub struct TestShape {
 
 impl TestShape {
     pub fn new() -> Self {
-        Self {
-            ray: Arc::new(Mutex::new(None)),
-        }
+        Default::default()
     }
 
     pub fn intersects(&self, ray: &Ray, _push: &mut impl IntersectionPusher) {
         let mut reference = self.ray.lock().unwrap();
-        *reference = Some(ray.clone());
+        *reference = Some(*ray);
     }
 
     pub fn normal_at(&self, _object_point: &Point) -> Vector {
@@ -39,6 +37,16 @@ impl TestShape {
 
     pub fn ray(&self) -> Option<Ray> {
         *self.ray.lock().unwrap()
+    }
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+
+impl Default for TestShape {
+    fn default() -> Self {
+        Self {
+            ray: Arc::new(Mutex::new(None)),
+        }
     }
 }
 

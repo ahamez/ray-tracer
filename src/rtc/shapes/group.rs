@@ -48,7 +48,7 @@ impl Group {
         self.bounding_box
     }
 
-    fn mk_bounding_box(children: &Vec<Arc<Object>>) -> BoundingBox {
+    fn mk_bounding_box(children: &[Arc<Object>]) -> BoundingBox {
         let mut bbox = BoundingBox::new();
         for child in children {
             bbox = bbox + child.bounding_box();
