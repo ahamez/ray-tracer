@@ -63,6 +63,7 @@ impl GroupBuilder {
                 group
                     .clone()
                     .with_shape(Shape::Group(Group::new(new_children)))
+                    .with_transformation(Matrix::id())
             }
         }
     }
