@@ -18,6 +18,10 @@ pub mod primitive {
     mod vector;
 }
 
+pub mod io {
+    pub mod yaml;
+}
+
 pub mod rtc {
     use bounds::BoundingBox;
     pub use camera::Camera;
