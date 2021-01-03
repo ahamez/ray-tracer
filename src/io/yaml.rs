@@ -370,11 +370,11 @@ fn mk_object(defs: &Definitions, hash: &yaml::Hash, ty: &str) -> Arc<Object> {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn mk_camera(hash: &yaml::Hash, factor: usize) -> Camera {
+fn mk_camera(hash: &yaml::Hash) -> Camera {
     Camera::new()
         .with_size(
-            mk_usize_from_key(&hash, "width").unwrap() * factor,
-            mk_usize_from_key(&hash, "height").unwrap() * factor,
+            mk_usize_from_key(&hash, "width").unwrap(),
+            mk_usize_from_key(&hash, "height").unwrap(),
         )
         .with_fov(mk_f64_from_key(&hash, "field-of-view").unwrap())
         .with_transformation(&view_transform(
@@ -420,9 +420,8 @@ fn mk_light(hash: &yaml::Hash) -> Light {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-// TODO: `factor` should not be part of the API
 // TODO: don't unwrap() everywhere...
-pub fn parse(path: &std::path::Path, factor: usize) -> (World, Camera) {
+pub fn parse(path: &std::path::Path) -> (World, Camera) {
     let yaml = std::fs::read_to_string(path).unwrap();
     let docs = YamlLoader::load_from_str(&yaml).unwrap();
     let doc = &docs[0];
@@ -442,7 +441,7 @@ pub fn parse(path: &std::path::Path, factor: usize) -> (World, Camera) {
 
             match ty {
                 "camera" => {
-                    camera = Some(mk_camera(&hash, factor));
+                    camera = Some(mk_camera(&hash));
                 }
                 "light" => {
                     lights.push(mk_light(&hash));

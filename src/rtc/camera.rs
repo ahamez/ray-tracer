@@ -135,8 +135,12 @@ impl Camera {
         image
     }
 
-    pub fn size(&self) -> (usize, usize) {
-        (self.h_size, self.v_size)
+    pub fn h_size(&self) -> usize {
+        self.h_size
+    }
+
+    pub fn v_size(&self) -> usize {
+        self.v_size
     }
 
     pub fn fov(&self) -> f64 {

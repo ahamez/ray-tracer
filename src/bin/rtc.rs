@@ -65,7 +65,7 @@ fn main() {
     println!("Parallel rendering: {}", !sequential);
 
     let (world, camera) = match ext.to_str() {
-        Some("yml") => yaml::parse(&path, factor),
+        Some("yml") => yaml::parse(&path),
         Some("obj") => {
             let group = Arc::new(obj::parse_file(&path).unwrap());
 
@@ -94,6 +94,7 @@ fn main() {
         None => panic!(),
     };
 
+    let camera = camera.with_size(camera.h_size() * factor, camera.v_size() * factor);
     let canvas = camera.render(&world, !sequential);
 
     println!("Computed intersections: {}", world.nb_intersections());
