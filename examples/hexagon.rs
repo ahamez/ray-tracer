@@ -65,8 +65,10 @@ fn main() {
     let height = 5000;
     let fov = PI / 3.0;
 
-    let camera =
-        Camera::new(width, height, fov).with_transformation(&view_transform(&from, &to, &up));
+    let camera = Camera::new()
+        .with_size(width, height)
+        .with_fov(fov)
+        .with_transformation(&view_transform(&from, &to, &up));
 
     let canvas = camera.render(&world, true);
     canvas.export("hexagon.png").unwrap();

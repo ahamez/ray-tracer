@@ -24,7 +24,33 @@ pub struct Camera {
 /* ---------------------------------------------------------------------------------------------- */
 
 impl Camera {
-    pub fn new(h_size: usize, v_size: usize, fov: f64) -> Self {
+    pub fn new() -> Self {
+        Default::default()
+    }
+
+    pub fn with_size(mut self, h_size: usize, v_size: usize) -> Self {
+        let (pixel_size, half_width, half_height) = Camera::pixel_size(h_size, v_size, self.fov);
+        self.h_size = h_size;
+        self.v_size = v_size;
+        self.pixel_size = pixel_size;
+        self.half_width = half_width;
+        self.half_height = half_height;
+
+        self
+    }
+
+    pub fn with_fov(mut self, fov: f64) -> Self {
+        let (pixel_size, half_width, half_height) =
+            Camera::pixel_size(self.h_size, self.v_size, fov);
+        self.fov = fov;
+        self.pixel_size = pixel_size;
+        self.half_width = half_width;
+        self.half_height = half_height;
+
+        self
+    }
+
+    fn pixel_size(h_size: usize, v_size: usize, fov: f64) -> (f64, f64, f64) {
         let half_view = (fov / 2.0).tan();
         let aspect = h_size as f64 / v_size as f64;
 
@@ -36,16 +62,7 @@ impl Camera {
 
         let pixel_size = (half_width * 2.0) / h_size as f64;
 
-        Camera {
-            h_size,
-            v_size,
-            fov,
-            transformation: Matrix::id(),
-            transformation_inverse: Matrix::id(),
-            pixel_size,
-            half_width,
-            half_height,
-        }
+        (pixel_size, half_width, half_height)
     }
 
     pub fn with_transformation(mut self, transformation: &Matrix) -> Self {
@@ -117,6 +134,37 @@ impl Camera {
 
         image
     }
+
+    pub fn size(&self) -> (usize, usize) {
+        (self.h_size, self.v_size)
+    }
+
+    pub fn fov(&self) -> f64 {
+        self.fov
+    }
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+
+impl Default for Camera {
+    fn default() -> Self {
+        let h_size = 100;
+        let v_size = 100;
+        let fov = std::f64::consts::PI / 2.0;
+
+        let (pixel_size, half_width, half_height) = Camera::pixel_size(h_size, v_size, fov);
+
+        Camera {
+            h_size,
+            v_size,
+            fov,
+            transformation: Matrix::id(),
+            transformation_inverse: Matrix::id(),
+            pixel_size,
+            half_width,
+            half_height,
+        }
+    }
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -147,19 +195,19 @@ mod tests {
 
     #[test]
     fn pixel_size_for_a_horizontal_canvas() {
-        let c = Camera::new(200, 125, PI / 2.0);
+        let c = Camera::new().with_size(200, 125).with_fov(PI / 2.0);
         assert!(c.pixel_size.approx_eq(0.01));
     }
 
     #[test]
     fn pixel_size_for_a_vertical_canvas() {
-        let c = Camera::new(125, 200, PI / 2.0);
+        let c = Camera::new().with_size(200, 125).with_fov(PI / 2.0);
         assert!(c.pixel_size.approx_eq(0.01));
     }
 
     #[test]
     fn constructing_a_ray_through_the_center_of_the_canvas() {
-        let c = Camera::new(201, 101, PI / 2.0);
+        let c = Camera::new().with_size(201, 101).with_fov(PI / 2.0);
         let r = c.ray_for_pixel(100, 50);
 
         assert_eq!(r.origin, Point::new(0.0, 0.0, 0.0));
@@ -168,7 +216,7 @@ mod tests {
 
     #[test]
     fn constructing_a_ray_through_a_corner_of_the_canvas() {
-        let c = Camera::new(201, 101, PI / 2.0);
+        let c = Camera::new().with_size(201, 101).with_fov(PI / 2.0);
         let r = c.ray_for_pixel(0, 0);
 
         assert_eq!(r.origin, Point::new(0.0, 0.0, 0.0));
@@ -177,7 +225,9 @@ mod tests {
 
     #[test]
     fn constructing_a_ray_when_the_camera_is_transformed() {
-        let c = Camera::new(201, 101, PI / 2.0)
+        let c = Camera::new()
+            .with_size(201, 101)
+            .with_fov(PI / 2.0)
             .translate(0.0, -2.0, 5.0)
             .rotate_y(PI / 4.0);
         let r = c.ray_for_pixel(100, 50);
@@ -195,7 +245,10 @@ mod tests {
         let from = Point::new(0.0, 0.0, -5.0);
         let to = Point::new(0.0, 0.0, 0.0);
         let up = Vector::new(0.0, 1.0, 0.0);
-        let c = Camera::new(11, 11, PI / 2.0).with_transformation(&view_transform(&from, &to, &up));
+        let c = Camera::new()
+            .with_size(11, 11)
+            .with_fov(PI / 2.0)
+            .with_transformation(&view_transform(&from, &to, &up));
 
         let image = c.sequential_render(&w);
 
@@ -208,8 +261,10 @@ mod tests {
         let from = Point::new(0.0, 0.0, -5.0);
         let to = Point::new(0.0, 0.0, 0.0);
         let up = Vector::new(0.0, 1.0, 0.0);
-        let c =
-            Camera::new(100, 100, PI / 2.0).with_transformation(&view_transform(&from, &to, &up));
+        let c = Camera::new()
+            .with_size(100, 100)
+            .with_fov(PI / 2.0)
+            .with_transformation(&view_transform(&from, &to, &up));
 
         let image = c.sequential_render(&w);
         let par_image = c.parallel_render(&w);

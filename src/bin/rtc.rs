@@ -83,7 +83,9 @@ fn main() {
             let height = 500;
             let fov = PI / 2.0;
 
-            let camera = Camera::new(width, height, fov)
+            let camera = Camera::new()
+                .with_size(width, height)
+                .with_fov(fov)
                 .with_transformation(&view_transform(&from, &to, &up));
 
             (world, camera)

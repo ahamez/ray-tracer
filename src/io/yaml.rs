@@ -371,16 +371,17 @@ fn mk_object(defs: &Definitions, hash: &yaml::Hash, ty: &str) -> Arc<Object> {
 /* ---------------------------------------------------------------------------------------------- */
 
 fn mk_camera(hash: &yaml::Hash, factor: usize) -> Camera {
-    Camera::new(
-        mk_usize_from_key(&hash, "width").unwrap() * factor,
-        mk_usize_from_key(&hash, "height").unwrap() * factor,
-        mk_f64_from_key(&hash, "field-of-view").unwrap(),
-    )
-    .with_transformation(&view_transform(
-        &mk_point_from_key(&hash, "from").unwrap(),
-        &mk_point_from_key(&hash, "to").unwrap(),
-        &mk_vector_from_key(&hash, "up").unwrap(),
-    ))
+    Camera::new()
+        .with_size(
+            mk_usize_from_key(&hash, "width").unwrap() * factor,
+            mk_usize_from_key(&hash, "height").unwrap() * factor,
+        )
+        .with_fov(mk_f64_from_key(&hash, "field-of-view").unwrap())
+        .with_transformation(&view_transform(
+            &mk_point_from_key(&hash, "from").unwrap(),
+            &mk_point_from_key(&hash, "to").unwrap(),
+            &mk_vector_from_key(&hash, "up").unwrap(),
+        ))
 }
 
 /* ---------------------------------------------------------------------------------------------- */
