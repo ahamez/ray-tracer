@@ -7,6 +7,7 @@ use ray_tracer::io::yaml;
 
 fn output_path(path_str: &str) -> String {
     let path = std::path::Path::new(&path_str);
+fn output_path(path: &std::path::Path) -> String {
     let file_name = path.file_name().and_then(|p| p.to_str()).unwrap();
     let extension = path.extension().and_then(|p| p.to_str()).unwrap();
 
@@ -49,17 +50,18 @@ fn main() {
     let factor = clap::value_t!(matches.value_of("factor"), usize).unwrap_or(1);
     let sequential = matches.is_present("sequential");
     let path_str = matches.value_of("INPUT").unwrap();
+    let path = std::path::Path::new(&path_str);
 
     println!("Using factor: {}", factor);
     println!("Using input file: {}", path_str);
     println!("Parallel rendering: {}", !sequential);
 
-    let (world, camera) = yaml::parse(path_str, factor);
+    let (world, camera) = yaml::parse(&path, factor);
     let canvas = camera.render(&world, !sequential);
 
     println!("Computed intersections: {}", world.nb_intersections());
 
-    canvas.export(&output_path(&path_str)).unwrap();
+    canvas.export(&output_path(&path)).unwrap();
 }
 
 /* ---------------------------------------------------------------------------------------------- */

@@ -420,8 +420,9 @@ fn mk_light(hash: &yaml::Hash) -> Light {
 /* ---------------------------------------------------------------------------------------------- */
 
 // TODO: `factor` should not be part of the API
-pub fn parse(path_str: &str, factor: usize) -> (World, Camera) {
-    let yaml = std::fs::read_to_string(path_str).unwrap();
+// TODO: don't unwrap() everywhere...
+pub fn parse(path: &std::path::Path, factor: usize) -> (World, Camera) {
+    let yaml = std::fs::read_to_string(path).unwrap();
     let docs = YamlLoader::load_from_str(&yaml).unwrap();
     let doc = &docs[0];
 
