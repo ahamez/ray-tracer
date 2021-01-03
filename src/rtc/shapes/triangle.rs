@@ -74,6 +74,18 @@ impl Triangle {
             .add_point(self.p2)
             .add_point(self.p3)
     }
+
+    pub fn p1(&self) -> Point {
+        self.p1
+    }
+
+    pub fn p2(&self) -> Point {
+        self.p2
+    }
+
+    pub fn p3(&self) -> Point {
+        self.p3
+    }
 }
 
 /* ---------------------------------------------------------------------------------------------- */
