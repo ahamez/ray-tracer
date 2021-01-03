@@ -1,12 +1,15 @@
 /* ---------------------------------------------------------------------------------------------- */
 
 use clap::{App, Arg};
-use ray_tracer::io::yaml;
+use ray_tracer::{
+    io::{obj, yaml},
+    primitive::{Point, Tuple, Vector},
+    rtc::{view_transform, Camera, Color, Light, World},
+};
+use std::{f64::consts::PI, sync::Arc};
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn output_path(path_str: &str) -> String {
-    let path = std::path::Path::new(&path_str);
 fn output_path(path: &std::path::Path) -> String {
     let file_name = path.file_name().and_then(|p| p.to_str()).unwrap();
     let extension = path.extension().and_then(|p| p.to_str()).unwrap();
@@ -41,7 +44,7 @@ fn main() {
         )
         .arg(
             Arg::with_name("INPUT")
-                .help("Sets the input YAML file to use")
+                .help("Sets the input YAML or OBJ file to use")
                 .required(true)
                 .index(1),
         )
@@ -52,11 +55,43 @@ fn main() {
     let path_str = matches.value_of("INPUT").unwrap();
     let path = std::path::Path::new(&path_str);
 
+    let ext = match path.extension() {
+        Some(ext) => ext,
+        None => todo!(),
+    };
+
     println!("Using factor: {}", factor);
     println!("Using input file: {}", path_str);
     println!("Parallel rendering: {}", !sequential);
 
-    let (world, camera) = yaml::parse(&path, factor);
+    let (world, camera) = match ext.to_str() {
+        Some("yml") => yaml::parse(&path, factor),
+        Some("obj") => {
+            let group = Arc::new(obj::parse_file(&path).unwrap());
+
+            let light = Light::new_point_light(Color::white(), Point::new(-5.0, 10.0, -10.0));
+
+            let world = World::new()
+                .with_objects(vec![group])
+                .with_lights(vec![light]);
+
+            let from = Point::new(0.0, 1.5, -5.0);
+            let to = Point::new(0.0, 1.0, 0.0);
+            let up = Vector::new(0.0, 1.0, 0.0);
+
+            let width = 500;
+            let height = 500;
+            let fov = PI / 2.0;
+
+            let camera = Camera::new(width, height, fov)
+                .with_transformation(&view_transform(&from, &to, &up));
+
+            (world, camera)
+        }
+        Some(_) => panic!(),
+        None => panic!(),
+    };
+
     let canvas = camera.render(&world, !sequential);
 
     println!("Computed intersections: {}", world.nb_intersections());

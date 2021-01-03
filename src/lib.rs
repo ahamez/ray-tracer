@@ -19,6 +19,7 @@ pub mod primitive {
 }
 
 pub mod io {
+    pub mod obj;
     pub mod yaml;
 }
 
