@@ -60,7 +60,7 @@ impl Group {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum GroupBuilder {
     Leaf(Object),
     Node(Object, Vec<GroupBuilder>),
