@@ -88,6 +88,13 @@ impl Shape {
             _ => None,
         }
     }
+
+    pub fn as_triangle(&self) -> Option<&Triangle> {
+        match self {
+            Shape::Triangle(t) => Some(t),
+            _ => None,
+        }
+    }
 }
 
 /* ---------------------------------------------------------------------------------------------- */
