@@ -1,8 +1,8 @@
 use ray_tracer::{
     primitive::{Point, Tuple, Vector},
     rtc::{
-        view_transform, Camera, Color, GroupBuilder, Light, Material, Object, Pattern, Transform,
-        World,
+        view_transform, Camera, Color, GroupBuilder, Light, Material, Object, ParallelRendering,
+        Pattern, Transform, World,
     },
 };
 use std::f64::consts::PI;
@@ -95,6 +95,6 @@ fn main() {
         .with_fov(fov)
         .with_transformation(&view_transform(&from, &to, &up));
 
-    let canvas = camera.render(&world, true);
+    let canvas = camera.render(&world, ParallelRendering::True);
     canvas.export("ch15_triangle.png").unwrap();
 }

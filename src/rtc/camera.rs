@@ -23,6 +23,23 @@ pub struct Camera {
 
 /* ---------------------------------------------------------------------------------------------- */
 
+#[derive(Debug)]
+pub enum ParallelRendering {
+    True,
+    False,
+}
+
+impl std::fmt::Display for ParallelRendering {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            ParallelRendering::True => write!(f, "true"),
+            ParallelRendering::False => write!(f, "false"),
+        }
+    }
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+
 impl Camera {
     pub fn new() -> Self {
         Default::default()
@@ -90,11 +107,10 @@ impl Camera {
         Ray { origin, direction }
     }
 
-    pub fn render(&self, world: &World, parallel: bool) -> Canvas {
-        if parallel {
-            self.parallel_render(world)
-        } else {
-            self.sequential_render(world)
+    pub fn render(&self, world: &World, parallel: ParallelRendering) -> Canvas {
+        match parallel {
+            ParallelRendering::True => self.parallel_render(world),
+            ParallelRendering::False => self.sequential_render(world),
         }
     }
 

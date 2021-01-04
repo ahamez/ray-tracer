@@ -26,6 +26,7 @@ pub mod io {
 pub mod rtc {
     use bounds::BoundingBox;
     pub use camera::Camera;
+    pub use camera::ParallelRendering;
     pub use canvas::Canvas;
     pub use color::Color;
     pub use intersection::{Intersection, IntersectionPusher, IntersectionState, Intersections};

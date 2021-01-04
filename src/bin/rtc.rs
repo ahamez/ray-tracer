@@ -4,7 +4,7 @@ use clap::{App, Arg};
 use ray_tracer::{
     io::{obj, yaml},
     primitive::{Point, Tuple, Vector},
-    rtc::{view_transform, Camera, Color, Light, World},
+    rtc::{view_transform, Camera, Color, Light, ParallelRendering, World},
 };
 use std::{f64::consts::PI, sync::Arc};
 
@@ -51,7 +51,11 @@ fn main() {
         .get_matches();
 
     let factor = clap::value_t!(matches.value_of("factor"), usize).unwrap_or(1);
-    let sequential = matches.is_present("sequential");
+    let parallel = if matches.is_present("sequential") {
+        ParallelRendering::False
+    } else {
+        ParallelRendering::True
+    };
     let path_str = matches.value_of("INPUT").unwrap();
     let path = std::path::Path::new(&path_str);
 
@@ -62,7 +66,7 @@ fn main() {
 
     println!("Using factor: {}", factor);
     println!("Using input file: {}", path_str);
-    println!("Parallel rendering: {}", !sequential);
+    println!("Parallel rendering: {}", parallel);
 
     let (world, camera) = match ext.to_str() {
         Some("yml") => yaml::parse(&path),
@@ -95,7 +99,7 @@ fn main() {
     };
 
     let camera = camera.with_size(camera.h_size() * factor, camera.v_size() * factor);
-    let canvas = camera.render(&world, !sequential);
+    let canvas = camera.render(&world, parallel);
 
     println!("Computed intersections: {}", world.nb_intersections());
 
