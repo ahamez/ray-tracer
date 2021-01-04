@@ -73,6 +73,9 @@ mod tests {
         fn t(&mut self, t: f64) {
             self.xs.push(t);
         }
+        fn t_u_v(&mut self, _t: f64, _u: f64, _v: f64) {
+            panic!();
+        }
         fn set_object(&mut self, _object: Arc<Object>) {
             panic!();
         }

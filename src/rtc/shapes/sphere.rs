@@ -68,6 +68,9 @@ pub mod tests {
         fn t(&mut self, t: f64) {
             self.xs.push(t);
         }
+        fn t_u_v(&mut self, _t: f64, _u: f64, _v: f64) {
+            panic!();
+        }
         fn set_object(&mut self, _object: Arc<Object>) {
             panic!();
         }
@@ -214,8 +217,10 @@ pub mod tests {
     #[test]
     fn normal_on_a_translated_sphere() {
         let s = Object::new_sphere().translate(0.0, 1.0, 0.0);
+        let dummy_intersection =
+            Intersection::new(std::f64::INFINITY, Arc::new(Object::new_dummy()));
         assert_eq!(
-            s.normal_at(&Point::new(0.0, 1.70711, -0.70711)),
+            s.normal_at(&Point::new(0.0, 1.70711, -0.70711), &dummy_intersection),
             Vector::new(0.0, 0.70711, -0.70711)
         );
     }
@@ -225,13 +230,14 @@ pub mod tests {
         let s = Object::new_sphere()
             .rotate_z(std::f64::consts::PI / 5.0)
             .scale(1.0, 0.5, 1.0);
+        let dummy_intersection =
+            Intersection::new(std::f64::INFINITY, Arc::new(Object::new_dummy()));
 
         assert_eq!(
-            s.normal_at(&Point::new(
-                0.0,
-                f64::sqrt(2.0) / 2.0,
-                -f64::sqrt(2.0) / 2.0
-            )),
+            s.normal_at(
+                &Point::new(0.0, f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0),
+                &dummy_intersection
+            ),
             Vector::new(0.0, 0.97014, -0.24254)
         );
     }

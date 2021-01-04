@@ -14,13 +14,27 @@ use crate::{
 pub struct Intersection {
     t: f64,
     object: Arc<Object>,
+    u: f64, // used by smooth triangles
+    v: f64, // used by smooth triangles
 }
 
 /* ---------------------------------------------------------------------------------------------- */
 
 impl Intersection {
     pub fn new(t: f64, object: Arc<Object>) -> Self {
-        Self { t, object }
+        Self {
+            t,
+            object,
+            u: 0.0,
+            v: 0.0,
+        }
+    }
+
+    pub fn with_u_and_v(mut self, u: f64, v: f64) -> Self {
+        self.u = u;
+        self.v = v;
+
+        self
     }
 
     pub fn t(&self) -> f64 {
@@ -29,6 +43,14 @@ impl Intersection {
 
     pub fn object(&self) -> &Arc<Object> {
         &self.object
+    }
+
+    pub fn u(&self) -> f64 {
+        self.u
+    }
+
+    pub fn v(&self) -> f64 {
+        self.v
     }
 }
 
@@ -169,7 +191,7 @@ impl IntersectionState {
         let point = ray.position(intersection.t);
 
         let eye_v = -ray.direction;
-        let normal_v = intersection.object.normal_at(&point);
+        let normal_v = intersection.object.normal_at(&point, &intersection);
         let (inside, normal_v) = if normal_v ^ eye_v < 0.0 {
             (true, -normal_v)
         } else {
@@ -251,6 +273,7 @@ impl IntersectionState {
 
 pub trait IntersectionPusher {
     fn t(&mut self, t: f64);
+    fn t_u_v(&mut self, t: f64, u: f64, v: f64);
     fn set_object(&mut self, object: Arc<Object>);
 }
 
@@ -482,6 +505,15 @@ mod tests {
         let comps = IntersectionState::new(&xs, 0, &ray);
 
         assert!(comps.schlick().approx_eq_low_precision(0.48873));
+    }
+
+    #[test]
+    fn an_intersection_can_encapsulates_u_and_v() {
+        let object = Arc::new(Object::new_dummy());
+        let i = Intersection::new(3.5, object).with_u_and_v(0.2, 0.4);
+
+        assert_eq!(i.u(), 0.2);
+        assert_eq!(i.v(), 0.4);
     }
 }
 

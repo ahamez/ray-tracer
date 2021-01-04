@@ -71,6 +71,7 @@ pub mod rtc {
         pub use group::Group;
         pub use group::GroupBuilder;
         pub use plane::Plane;
+        pub use smooth_triangle::SmoothTriangle;
         pub use sphere::Sphere;
         pub use test_shape::TestShape;
         pub use triangle::Triangle;
@@ -80,6 +81,7 @@ pub mod rtc {
         mod cylinder;
         mod group;
         mod plane;
+        mod smooth_triangle;
         mod sphere;
         mod test_shape;
         mod triangle;

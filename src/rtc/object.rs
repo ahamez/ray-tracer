@@ -3,8 +3,8 @@
 use crate::{
     primitive::{Matrix, Point, Vector},
     rtc::{
-        shapes::{Cone, Cylinder, GroupBuilder, Sphere, TestShape, Triangle},
-        BoundingBox, IntersectionPusher, Material, Ray, Shape, Transform,
+        shapes::{Cone, Cylinder, GroupBuilder, SmoothTriangle, Sphere, TestShape, Triangle},
+        BoundingBox, Intersection, IntersectionPusher, Material, Ray, Shape, Transform,
     },
 };
 
@@ -79,6 +79,24 @@ impl Object {
         }
     }
 
+    pub fn new_smooth_triangle(
+        p1: Point,
+        p2: Point,
+        p3: Point,
+        n1: Vector,
+        n2: Vector,
+        n3: Vector,
+    ) -> Self {
+        let shape = Shape::SmoothTriangle(SmoothTriangle::new(p1, p2, p3, n1, n2, n3));
+        let bounding_box = shape.bounds();
+
+        Object {
+            shape,
+            bounding_box,
+            ..Default::default()
+        }
+    }
+
     pub fn new_sphere() -> Self {
         let shape = Shape::Sphere();
         let bounding_box = shape.bounds();
@@ -141,9 +159,9 @@ impl Object {
         }
     }
 
-    pub fn normal_at(&self, world_point: &Point) -> Vector {
+    pub fn normal_at(&self, world_point: &Point, hit: &Intersection) -> Vector {
         let local_point = self.world_to_object(world_point);
-        let local_normal = self.shape.normal_at(&local_point);
+        let local_normal = self.shape.normal_at(&local_point, hit);
 
         self.normal_to_world(&local_normal)
     }
@@ -226,6 +244,7 @@ impl Transform for Object {
 mod tests {
     use super::*;
     use crate::primitive::Tuple;
+    use std::sync::Arc;
 
     #[test]
     fn an_object_default_transformation_is_id() {
@@ -319,8 +338,11 @@ mod tests {
         let group_g2 = g1.shape().as_group().unwrap().children()[0].clone();
         let group_s = group_g2.shape().as_group().unwrap().children()[0].clone();
 
+        let dummy_intersection =
+            Intersection::new(std::f64::INFINITY, Arc::new(Object::new_dummy()));
+
         assert_eq!(
-            group_s.normal_at(&Point::new(1.7321, 1.1547, -5.5774)),
+            group_s.normal_at(&Point::new(1.7321, 1.1547, -5.5774), &dummy_intersection),
             Vector::new(0.2857, 0.4286, -0.8571)
         );
     }

@@ -61,7 +61,13 @@ impl Triangle {
         }
 
         let t = f * (self.e2 ^ origin_cross_e1);
-        push.t(t);
+
+        // As SmoothTriangle delegates its intersection to Triangle, we need to take care
+        // of pushing u and v as well here.
+        // It's not very satisfying in regard to the code architecture, but it avoids code
+        // duplication or a lot of boiler plate (like returning Option<f64, f64, f64> that would be
+        // used differently by SmoothTriangle::intersects and Triangle::intersects)
+        push.t_u_v(t, u, v);
     }
 
     pub fn normal_at(&self, _object_point: &Point) -> Vector {
@@ -102,6 +108,9 @@ pub mod tests {
 
     impl IntersectionPusher for Push {
         fn t(&mut self, t: f64) {
+            self.xs.push(t);
+        }
+        fn t_u_v(&mut self, t: f64, _u: f64, _v: f64) {
             self.xs.push(t);
         }
         fn set_object(&mut self, _object: Arc<Object>) {

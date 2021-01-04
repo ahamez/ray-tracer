@@ -24,7 +24,12 @@ pub struct RayIntersectionPusher<'a> {
 
 impl IntersectionPusher for RayIntersectionPusher<'_> {
     fn t(&mut self, t: f64) {
-        self.is.push(Intersection::new(t, self.object.clone()))
+        self.is.push(Intersection::new(t, self.object.clone()));
+    }
+
+    fn t_u_v(&mut self, t: f64, u: f64, v: f64) {
+        self.is
+            .push(Intersection::new(t, self.object.clone()).with_u_and_v(u, v));
     }
 
     fn set_object(&mut self, object: Arc<Object>) {
