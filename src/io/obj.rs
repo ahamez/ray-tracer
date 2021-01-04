@@ -52,6 +52,71 @@ impl Error for ParseError {}
 
 /* ---------------------------------------------------------------------------------------------- */
 
+fn parse_group(
+    line_vec: &[&str],
+    line: &str,
+    line_number: usize,
+) -> Result<Option<String>, ParseError> {
+    if line_vec.len() != 2 {
+        let err_msg = format!("Invalid group `{}` at line {}", line.trim(), line_number);
+        return Err(ParseError(err_msg));
+    }
+
+    Ok(Some(line_vec[1].into()))
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+
+fn parse_vertex(
+    line_vec: &[&str],
+    line: &str,
+    line_number: usize,
+    mut data: Data,
+) -> Result<Data, ParseError> {
+    let err_msg = format!("Invalid vertex `{}` at line {}", line.trim(), line_number);
+    let err_fn = |_| ParseError(err_msg.clone());
+
+    if line_vec.len() != 4 {
+        return Err(ParseError(err_msg.clone()));
+    }
+
+    let x = line_vec[1].parse::<f64>().map_err(err_fn)?;
+    let y = line_vec[2].parse::<f64>().map_err(err_fn)?;
+    let z = line_vec[3].parse::<f64>().map_err(err_fn)?;
+
+    data.vertices.push(Point::new(x, y, z));
+
+    Ok(data)
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+
+fn parse_face(
+    line_vec: &[&str],
+    line: &str,
+    line_number: usize,
+    mut data: Data,
+    current_group: &Option<String>,
+) -> Result<Data, ParseError> {
+    let err_msg = format!("Invalid face `{}` at line {}", line.trim(), line_number);
+    let err_fn = |_| ParseError(err_msg.clone());
+
+    if line_vec.len() < 4 {
+        return Err(ParseError(err_msg.clone()));
+    }
+
+    let mut faces = vec![];
+    for vertex in line_vec.iter().skip(1) {
+        faces.push(vertex.parse::<usize>().map_err(err_fn)?);
+    }
+
+    data.faces.push((current_group.clone(), faces));
+
+    Ok(data)
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+
 fn parse_data(s: &str) -> Result<Data, ParseError> {
     let buf = BufReader::new(s.as_bytes());
     let mut data = Data::new();
@@ -63,41 +128,11 @@ fn parse_data(s: &str) -> Result<Data, ParseError> {
             let vec = line.split_whitespace().collect::<Vec<&str>>();
             if !vec.is_empty() {
                 if vec[0] == "g" {
-                    if vec.len() != 2 {
-                        let err_msg =
-                            format!("Invalid group `{}` at line {}", line.trim(), line_number);
-                        return Err(ParseError(err_msg));
-                    }
-
-                    current_group = Some(vec[1].into());
+                    current_group = parse_group(&vec[..], &line, line_number)?;
                 } else if vec[0] == "v" {
-                    let err_msg =
-                        format!("Invalid vertex `{}` at line {}", line.trim(), line_number);
-                    let err_fn = |_| ParseError(err_msg.clone());
-
-                    if vec.len() != 4 {
-                        return Err(ParseError(err_msg.clone()));
-                    }
-
-                    let x = vec[1].parse::<f64>().map_err(err_fn)?;
-                    let y = vec[2].parse::<f64>().map_err(err_fn)?;
-                    let z = vec[3].parse::<f64>().map_err(err_fn)?;
-
-                    data.vertices.push(Point::new(x, y, z));
+                    data = parse_vertex(&vec[..], &line, line_number, data)?;
                 } else if vec[0] == "f" {
-                    let err_msg = format!("Invalid face `{}` at line {}", line.trim(), line_number);
-                    let err_fn = |_| ParseError(err_msg.clone());
-
-                    if vec.len() < 4 {
-                        return Err(ParseError(err_msg.clone()));
-                    }
-
-                    let mut faces = vec![];
-                    for vertex in vec.iter().skip(1) {
-                        faces.push(vertex.parse::<usize>().map_err(err_fn)?);
-                    }
-
-                    data.faces.push((current_group.clone(), faces));
+                    data = parse_face(&vec[..], &line, line_number, data, &current_group)?;
                 } else {
                     data.ignored += 1;
                 }
