@@ -169,13 +169,13 @@ fn parse_face(
         let (vertex_index, normal_index) = match vertex.parse::<usize>() {
             Ok(value) => (value, None),
             Err(_) => {
-                let extended = vertex.split("/").collect::<Vec<&str>>();
+                let extended = vertex.split('/').collect::<Vec<&str>>();
                 if extended.len() != 3 {
                     return Err(ParseError(err_msg.clone()));
                 }
 
                 let vertex_index = extended[0].parse::<usize>().map_err(err_fn)?;
-                let normal_index = extended[2].parse::<usize>().map_or(None, |v| Some(v));
+                let normal_index = extended[2].parse::<usize>().ok();
 
                 (vertex_index, normal_index)
             }
