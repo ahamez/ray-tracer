@@ -1,7 +1,7 @@
 /* ---------------------------------------------------------------------------------------------- */
 
 use crate::{
-    primitive::{Point, Tuple},
+    primitive::{Point, Tuple, Vector},
     rtc::{GroupBuilder, Object},
 };
 use std::{
@@ -25,6 +25,12 @@ struct Face {
     pub group: Option<String>,
 }
 
+impl Face {
+    fn has_normals(&self) -> bool {
+        self.vertices[0].normal_index != None
+    }
+}
+
 impl Default for Face {
     fn default() -> Self {
         Self {
@@ -40,6 +46,7 @@ impl Default for Face {
 struct Data {
     pub ignored: usize,
     pub vertices: Vec<Point>,
+    pub normals: Vec<Vector>,
     pub faces: Vec<Face>,
 }
 
@@ -54,7 +61,9 @@ impl Default for Data {
         Self {
             ignored: 0,
             // A dummy point is added as vertices are addressed in a 1-based fashion
-            vertices: vec![Point::new(0.0, 0.0, 0.0)],
+            vertices: vec![Point::zero()],
+            // A dummy vector is added as normals are addressed in a 1-based fashion
+            normals: vec![Vector::zero()],
             faces: vec![],
         }
     }
@@ -114,6 +123,30 @@ fn parse_vertex(
 
 /* ---------------------------------------------------------------------------------------------- */
 
+fn parse_normal(
+    line_vec: &[&str],
+    line: &str,
+    line_number: usize,
+    mut data: Data,
+) -> Result<Data, ParseError> {
+    let err_msg = format!("Invalid normal `{}` at line {}", line.trim(), line_number);
+    let err_fn = |_| ParseError(err_msg.clone());
+
+    if line_vec.len() != 4 {
+        return Err(ParseError(err_msg.clone()));
+    }
+
+    let x = line_vec[1].parse::<f64>().map_err(err_fn)?;
+    let y = line_vec[2].parse::<f64>().map_err(err_fn)?;
+    let z = line_vec[3].parse::<f64>().map_err(err_fn)?;
+
+    data.normals.push(Vector::new(x, y, z));
+
+    Ok(data)
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+
 fn parse_face(
     line_vec: &[&str],
     line: &str,
@@ -133,10 +166,24 @@ fn parse_face(
         group: current_group.clone(),
     };
     for vertex in line_vec.iter().skip(1) {
-        let vertex_index = vertex.parse::<usize>().map_err(err_fn)?;
+        let (vertex_index, normal_index) = match vertex.parse::<usize>() {
+            Ok(value) => (value, None),
+            Err(_) => {
+                let extended = vertex.split("/").collect::<Vec<&str>>();
+                if extended.len() != 3 {
+                    return Err(ParseError(err_msg.clone()));
+                }
+
+                let vertex_index = extended[0].parse::<usize>().map_err(err_fn)?;
+                let normal_index = extended[2].parse::<usize>().map_or(None, |v| Some(v));
+
+                (vertex_index, normal_index)
+            }
+        };
+
         face.vertices.push(FaceVertex {
             vertex_index,
-            normal_index: None,
+            normal_index,
         });
     }
 
@@ -161,6 +208,8 @@ fn parse_data(s: &str) -> Result<Data, ParseError> {
                     current_group = parse_group(&vec[..], &line, line_number)?;
                 } else if vec[0] == "v" {
                     data = parse_vertex(&vec[..], &line, line_number, data)?;
+                } else if vec[0] == "vn" {
+                    data = parse_normal(&vec[..], &line, line_number, data)?;
                 } else if vec[0] == "f" {
                     data = parse_face(&vec[..], &line, line_number, data, &current_group)?;
                 } else {
@@ -178,15 +227,26 @@ fn parse_data(s: &str) -> Result<Data, ParseError> {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn mk_triangles(indexes: &[FaceVertex], vertices: &[Point]) -> Vec<Object> {
+fn mk_triangles(face: &Face, vertices: &[Point], normals: &[Vector]) -> Vec<Object> {
     let mut triangles = vec![];
 
-    for i in 1..indexes.len() - 1 {
-        triangles.push(Object::new_triangle(
-            vertices[indexes[0].vertex_index],
-            vertices[indexes[i].vertex_index],
-            vertices[indexes[i + 1].vertex_index],
-        ));
+    for i in 1..face.vertices.len() - 1 {
+        if face.has_normals() {
+            triangles.push(Object::new_smooth_triangle(
+                vertices[face.vertices[0].vertex_index],
+                vertices[face.vertices[i].vertex_index],
+                vertices[face.vertices[i + 1].vertex_index],
+                normals[face.vertices[0].normal_index.unwrap()],
+                normals[face.vertices[i].normal_index.unwrap()],
+                normals[face.vertices[i + 1].normal_index.unwrap()],
+            ));
+        } else {
+            triangles.push(Object::new_triangle(
+                vertices[face.vertices[0].vertex_index],
+                vertices[face.vertices[i].vertex_index],
+                vertices[face.vertices[i + 1].vertex_index],
+            ));
+        }
     }
 
     triangles
@@ -212,15 +272,11 @@ pub fn parse_str(s: &str) -> Result<Object, ParseError> {
     let mut anonymous = vec![];
     let mut named = HashMap::new();
 
-    for Face {
-        group: group_name,
-        vertices: face_indexes,
-    } in data.faces
-    {
-        let triangles = mk_triangles(&face_indexes, &data.vertices);
+    for face in data.faces {
+        let triangles = mk_triangles(&face, &data.vertices, &data.normals);
         let group = mk_group(triangles);
 
-        match group_name {
+        match face.group {
             None => anonymous.push(group),
             Some(name) => match named.get_mut(&name) {
                 None => {
@@ -291,6 +347,21 @@ mod tests {
         assert_eq!(data.vertices[2], Point::new(-1.0, 0.5, 0.0));
         assert_eq!(data.vertices[3], Point::new(1.0, 0.0, 0.0));
         assert_eq!(data.vertices[4], Point::new(1.0, 1.0, 0.0));
+    }
+
+    #[test]
+    fn vertex_normal_records() {
+        let txt = r#"
+        vn 0 0 1
+        vn 0.707 0 -0.707
+        vn 1 2 3
+        "#;
+
+        let data = parse_data(&txt).unwrap();
+        assert_eq!(data.normals.len(), 4);
+        assert_eq!(data.normals[1], Vector::new(0.0, 0.0, 1.0));
+        assert_eq!(data.normals[2], Vector::new(0.707, 0.0, -0.707));
+        assert_eq!(data.normals[3], Vector::new(1.0, 2.0, 3.0));
     }
 
     #[test]
@@ -487,8 +558,8 @@ mod tests {
 
             let data = parse_data(&txt).unwrap();
 
-            let face_indexes = &data.faces[0].vertices;
-            let triangles = mk_triangles(face_indexes, &data.vertices);
+            let face = &data.faces[0];
+            let triangles = mk_triangles(face, &data.vertices, &data.normals);
 
             assert_eq!(triangles.len(), 3);
 
@@ -507,6 +578,50 @@ mod tests {
             assert_eq!(t2.p2(), data.vertices[4]);
             assert_eq!(t2.p3(), data.vertices[5]);
         }
+    }
+
+    #[test]
+    fn faces_with_normal() {
+        let txt = r#"
+        v 0 1 0
+        v -1 0 0
+        v 1 0 0
+
+        vn -1 0 0
+        vn 1 0 0
+        vn 0 1 0
+
+        f 1//3 2//1 3//2
+        f 1/0/3 2/102/1 3/14/2
+        "#;
+
+        let data = parse_data(&txt).unwrap();
+
+        let face0 = &data.faces[0];
+        let face0_triangles = mk_triangles(face0, &data.vertices, &data.normals);
+
+        assert_eq!(face0_triangles.len(), 1);
+
+        let t0 = face0_triangles[0].shape().as_smooth_triangle().unwrap();
+        assert_eq!(t0.p1(), data.vertices[1]);
+        assert_eq!(t0.p2(), data.vertices[2]);
+        assert_eq!(t0.p3(), data.vertices[3]);
+        assert_eq!(t0.n1(), data.normals[3]);
+        assert_eq!(t0.n2(), data.normals[1]);
+        assert_eq!(t0.n3(), data.normals[2]);
+
+        let face1 = &data.faces[0];
+        let face1_triangles = mk_triangles(face1, &data.vertices, &data.normals);
+
+        assert_eq!(face1_triangles.len(), 1);
+
+        let t1 = face1_triangles[0].shape().as_smooth_triangle().unwrap();
+        assert_eq!(t1.p1(), data.vertices[1]);
+        assert_eq!(t1.p2(), data.vertices[2]);
+        assert_eq!(t1.p3(), data.vertices[3]);
+        assert_eq!(t1.n1(), data.normals[3]);
+        assert_eq!(t1.n2(), data.normals[1]);
+        assert_eq!(t1.n3(), data.normals[2]);
     }
 }
 

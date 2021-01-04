@@ -86,6 +86,13 @@ impl Shape {
         }
     }
 
+    pub fn as_smooth_triangle(&self) -> Option<&SmoothTriangle> {
+        match self {
+            Shape::SmoothTriangle(t) => Some(t),
+            _ => None,
+        }
+    }
+
     pub fn as_test_shape(&self) -> Option<&TestShape> {
         match self {
             Shape::TestShape(ts) => Some(ts),
