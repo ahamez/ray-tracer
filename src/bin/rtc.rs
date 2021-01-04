@@ -82,13 +82,13 @@ fn main() {
         Some("obj") => {
             let group = Arc::new(obj::parse_file(&path).unwrap());
 
-            let light = Light::new_point_light(Color::white(), Point::new(-5.0, 10.0, -10.0));
+            let light = Light::new_point_light(Color::white(), Point::new(0.0, -10.0, 20.0));
 
             let world = World::new()
                 .with_objects(vec![group])
                 .with_lights(vec![light]);
 
-            let from = Point::new(0.0, 1.5, -5.0);
+            let from = Point::new(0.0, -13.0, 17.0);
             let to = Point::new(0.0, 1.0, 0.0);
             let up = Vector::new(0.0, 1.0, 0.0);
 
