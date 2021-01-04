@@ -12,8 +12,24 @@ use crate::{
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Intersection {
-    pub t: f64,
-    pub object: Arc<Object>,
+    t: f64,
+    object: Arc<Object>,
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+
+impl Intersection {
+    pub fn new(t: f64, object: Arc<Object>) -> Self {
+        Self { t, object }
+    }
+
+    pub fn t(&self) -> f64 {
+        self.t
+    }
+
+    pub fn object(&self) -> &Arc<Object> {
+        &self.object
+    }
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -262,10 +278,7 @@ mod tests {
     fn an_intersection_encapsulates_t_and_object() {
         let object = Arc::new(Object::new_sphere());
         let t = 3.5;
-        let i = Intersection {
-            t,
-            object: object.clone(),
-        };
+        let i = Intersection::new(t, object.clone());
 
         assert_eq!(i.t, t);
         assert_eq!(i.object, object);
@@ -273,18 +286,9 @@ mod tests {
 
     #[test]
     fn sort_intersections() {
-        let i0 = Intersection {
-            t: 1.0,
-            object: Arc::new(Object::new_sphere()),
-        };
-        let i1 = Intersection {
-            t: -1.0,
-            object: Arc::new(Object::new_sphere()),
-        };
-        let i2 = Intersection {
-            t: 0.0,
-            object: Arc::new(Object::new_sphere()),
-        };
+        let i0 = Intersection::new(1.0, Arc::new(Object::new_sphere()));
+        let i1 = Intersection::new(-1.0, Arc::new(Object::new_sphere()));
+        let i2 = Intersection::new(0.0, Arc::new(Object::new_sphere()));
 
         let mut vec = vec![i0.clone(), i1.clone(), i2.clone()];
         vec.sort();
@@ -296,11 +300,8 @@ mod tests {
     fn hit_when_all_intersections_have_positive_t() {
         let object = Arc::new(Object::new_sphere());
 
-        let i0 = Intersection {
-            t: 1.0,
-            object: object.clone(),
-        };
-        let i1 = Intersection { t: 2.0, object };
+        let i0 = Intersection::new(1.0, object.clone());
+        let i1 = Intersection::new(2.0, object);
         let is = Intersections::new(vec![i0.clone(), i1]);
 
         let i = is.hit();
@@ -312,11 +313,8 @@ mod tests {
     fn hit_when_some_intersections_have_negative_t() {
         let object = Arc::new(Object::new_sphere());
 
-        let i0 = Intersection {
-            t: -1.0,
-            object: object.clone(),
-        };
-        let i1 = Intersection { t: 2.0, object };
+        let i0 = Intersection::new(-1.0, object.clone());
+        let i1 = Intersection::new(2.0, object);
         let is = Intersections::new(vec![i0, i1.clone()]);
 
         let i = is.hit();
@@ -328,11 +326,8 @@ mod tests {
     fn hit_when_all_intersections_have_negative_t() {
         let object = Arc::new(Object::new_sphere());
 
-        let i0 = Intersection {
-            t: -1.0,
-            object: object.clone(),
-        };
-        let i1 = Intersection { t: -1.0, object };
+        let i0 = Intersection::new(-1.0, object.clone());
+        let i1 = Intersection::new(-1.0, object);
         let is = Intersections::new(vec![i0.clone(), i1.clone()]);
 
         let i = is.hit();
@@ -344,19 +339,10 @@ mod tests {
     fn hit_is_always_the_lowest_nonnegative_intersection() {
         let object = Arc::new(Object::new_sphere());
 
-        let i0 = Intersection {
-            t: 5.0,
-            object: object.clone(),
-        };
-        let i1 = Intersection {
-            t: 7.0,
-            object: object.clone(),
-        };
-        let i2 = Intersection {
-            t: -3.0,
-            object: object.clone(),
-        };
-        let i3 = Intersection { t: 2.0, object };
+        let i0 = Intersection::new(5.0, object.clone());
+        let i1 = Intersection::new(7.0, object.clone());
+        let i2 = Intersection::new(-3.0, object.clone());
+        let i3 = Intersection::new(2.0, object);
         let is = Intersections::new(vec![i0, i1, i2, i3.clone()]);
 
         let i = is.hit();
@@ -370,10 +356,7 @@ mod tests {
             origin: Point::new(0.0, 0.0, -5.0),
             direction: Vector::new(0.0, 0.0, 1.0),
         };
-        let i = Intersection {
-            t: 4.0,
-            object: Arc::new(Object::new_sphere()),
-        };
+        let i = Intersection::new(4.0, Arc::new(Object::new_sphere()));
         let comps = IntersectionState::new(&Intersections::new(vec![i.clone()]), 0, &r);
 
         assert_eq!(comps.t, i.t);
@@ -390,10 +373,7 @@ mod tests {
             origin: Point::new(0.0, 0.0, 0.0),
             direction: Vector::new(0.0, 0.0, 1.0),
         };
-        let i = Intersection {
-            t: 1.0,
-            object: Arc::new(Object::new_sphere()),
-        };
+        let i = Intersection::new(1.0, Arc::new(Object::new_sphere()));
         let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &r);
 
         assert_eq!(comps.point, Point::new(0.0, 0.0, 1.0));
@@ -411,7 +391,7 @@ mod tests {
 
         let object = Arc::new(Object::new_sphere().translate(0.0, 0.0, 1.0));
 
-        let i = Intersection { t: 5.0, object };
+        let i = Intersection::new(5.0, object);
 
         let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &r);
 
@@ -429,7 +409,7 @@ mod tests {
             direction: Vector::new(0.0, -half_sqrt2, half_sqrt2),
         };
         let object = Arc::new(Object::new_plane());
-        let i = Intersection { t: sqrt2, object };
+        let i = Intersection::new(sqrt2, object);
 
         let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
 
@@ -445,7 +425,7 @@ mod tests {
 
         let object = Arc::new(glassy_sphere().translate(0.0, 0.0, 1.0));
 
-        let i = Intersection { t: 5.0, object };
+        let i = Intersection::new(5.0, object);
 
         let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
 
@@ -462,14 +442,8 @@ mod tests {
         };
 
         let xs = Intersections::new(vec![
-            Intersection {
-                t: -f64::sqrt(2.0) / 2.0,
-                object: object.clone(),
-            },
-            Intersection {
-                t: f64::sqrt(2.0) / 2.0,
-                object,
-            },
+            Intersection::new(-f64::sqrt(2.0) / 2.0, object.clone()),
+            Intersection::new(f64::sqrt(2.0) / 2.0, object),
         ]);
 
         let comps = IntersectionState::new(&xs, 1, &ray);
@@ -486,11 +460,8 @@ mod tests {
         };
 
         let xs = Intersections::new(vec![
-            Intersection {
-                t: -1.0,
-                object: object.clone(),
-            },
-            Intersection { t: 1.0, object },
+            Intersection::new(-1.0, object.clone()),
+            Intersection::new(1.0, object),
         ]);
 
         let comps = IntersectionState::new(&xs, 1, &ray);
@@ -506,7 +477,7 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let xs = Intersections::new(vec![Intersection { t: 1.8589, object }]);
+        let xs = Intersections::new(vec![Intersection::new(1.8589, object)]);
 
         let comps = IntersectionState::new(&xs, 0, &ray);
 

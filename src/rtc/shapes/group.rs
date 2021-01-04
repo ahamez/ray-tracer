@@ -163,10 +163,10 @@ mod tests {
         let xs = ray.intersects(&(vec![Arc::new(group)][..]));
 
         assert_eq!(xs.len(), 4);
-        assert_eq!(xs[0].object, Arc::new(s2.clone()));
-        assert_eq!(xs[1].object, Arc::new(s2));
-        assert_eq!(xs[2].object, Arc::new(s1.clone()));
-        assert_eq!(xs[3].object, Arc::new(s1));
+        assert_eq!(*xs[0].object(), Arc::new(s2.clone()));
+        assert_eq!(*xs[1].object(), Arc::new(s2));
+        assert_eq!(*xs[2].object(), Arc::new(s1.clone()));
+        assert_eq!(*xs[3].object(), Arc::new(s1));
     }
 
     #[test]
@@ -196,10 +196,10 @@ mod tests {
             let xs = ray.intersects(&(vec![Arc::new(group_2)][..]));
 
             assert_eq!(xs.len(), 4);
-            assert_eq!(xs[0].object, Arc::new(s2.clone()));
-            assert_eq!(xs[1].object, Arc::new(s2));
-            assert_eq!(xs[2].object, Arc::new(s1.clone()));
-            assert_eq!(xs[3].object, Arc::new(s1));
+            assert_eq!(*xs[0].object(), Arc::new(s2.clone()));
+            assert_eq!(*xs[1].object(), Arc::new(s2));
+            assert_eq!(*xs[2].object(), Arc::new(s1.clone()));
+            assert_eq!(*xs[3].object(), Arc::new(s1));
         }
         // s1 and s2 in different groups
         {
@@ -226,10 +226,10 @@ mod tests {
             let xs = ray.intersects(&(vec![Arc::new(group_2)][..]));
 
             assert_eq!(xs.len(), 4);
-            assert_eq!(xs[0].object, Arc::new(s2.clone()));
-            assert_eq!(xs[1].object, Arc::new(s2));
-            assert_eq!(xs[2].object, Arc::new(s1.clone()));
-            assert_eq!(xs[3].object, Arc::new(s1));
+            assert_eq!(*xs[0].object(), Arc::new(s2.clone()));
+            assert_eq!(*xs[1].object(), Arc::new(s2));
+            assert_eq!(*xs[2].object(), Arc::new(s1.clone()));
+            assert_eq!(*xs[3].object(), Arc::new(s1));
         }
     }
 

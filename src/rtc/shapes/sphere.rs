@@ -262,21 +262,12 @@ pub mod tests {
         };
 
         let xs = Intersections::new(vec![
-            Intersection {
-                t: 2.0,
-                object: a.clone(),
-            },
-            Intersection {
-                t: 2.75,
-                object: b.clone(),
-            },
-            Intersection {
-                t: 3.25,
-                object: c.clone(),
-            },
-            Intersection { t: 4.75, object: b },
-            Intersection { t: 5.25, object: c },
-            Intersection { t: 6.0, object: a },
+            Intersection::new(2.0, a.clone()),
+            Intersection::new(2.75, b.clone()),
+            Intersection::new(3.25, c.clone()),
+            Intersection::new(4.75, b),
+            Intersection::new(5.25, c),
+            Intersection::new(6.0, a),
         ]);
 
         assert_eq!(IntersectionState::new(&xs, 0, &ray).n(), (1.0, 1.5));

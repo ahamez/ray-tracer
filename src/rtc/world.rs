@@ -123,7 +123,7 @@ impl World {
         let intersections = self.intersects(&ray);
 
         if let Some(hit) = intersections.hit() {
-            if hit.object.has_shadow() && hit.t < distance {
+            if hit.object().has_shadow() && hit.t() < distance {
                 return true;
             }
         }
@@ -231,10 +231,10 @@ pub mod tests {
         let xs = w.intersects(&ray);
 
         assert_eq!(xs.len(), 4);
-        assert_eq!(xs[0].t, 4.0);
-        assert_eq!(xs[1].t, 4.5);
-        assert_eq!(xs[2].t, 5.5);
-        assert_eq!(xs[3].t, 6.0);
+        assert_eq!(xs[0].t(), 4.0);
+        assert_eq!(xs[1].t(), 4.5);
+        assert_eq!(xs[2].t(), 5.5);
+        assert_eq!(xs[3].t(), 6.0);
     }
 
     #[test]
@@ -247,7 +247,7 @@ pub mod tests {
         };
 
         let object = w.objects[0].clone();
-        let i = Intersection { t: 4.0, object };
+        let i = Intersection::new(4.0, object);
 
         let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
         let color = w.shade_hit(&comps, 1);
@@ -271,7 +271,7 @@ pub mod tests {
         };
 
         let object = w.objects[1].clone();
-        let i = Intersection { t: 0.5, object };
+        let i = Intersection::new(0.5, object);
 
         let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
 
@@ -300,7 +300,7 @@ pub mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let i = Intersection { t: 4.0, object: s2 };
+        let i = Intersection::new(4.0, s2);
 
         let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
 
@@ -392,10 +392,7 @@ pub mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let i = Intersection {
-            t: 1.0,
-            object: Arc::new(object),
-        };
+        let i = Intersection::new(1.0, Arc::new(object));
 
         let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
 
@@ -420,7 +417,7 @@ pub mod tests {
             direction: Vector::new(0.0, -sqrt2 / 2.0, sqrt2 / 2.0),
         };
 
-        let i = Intersection { t: sqrt2, object };
+        let i = Intersection::new(sqrt2, object);
 
         let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
 
@@ -449,7 +446,7 @@ pub mod tests {
             direction: Vector::new(0.0, -sqrt2 / 2.0, sqrt2 / 2.0),
         };
 
-        let i = Intersection { t: sqrt2, object };
+        let i = Intersection::new(sqrt2, object);
 
         let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
 
@@ -501,11 +498,8 @@ pub mod tests {
         };
 
         let xs = Intersections::new(vec![
-            Intersection {
-                t: 4.0,
-                object: object.clone(),
-            },
-            Intersection { t: 6.0, object },
+            Intersection::new(4.0, object.clone()),
+            Intersection::new(6.0, object),
         ]);
 
         let comps = IntersectionState::new(&xs, 0, &ray);
@@ -531,14 +525,8 @@ pub mod tests {
         };
 
         let xs = Intersections::new(vec![
-            Intersection {
-                t: 4.0,
-                object: Arc::new(object.clone()),
-            },
-            Intersection {
-                t: 6.0,
-                object: Arc::new(object),
-            },
+            Intersection::new(4.0, Arc::new(object.clone())),
+            Intersection::new(6.0, Arc::new(object)),
         ]);
 
         let comps = IntersectionState::new(&xs, 0, &ray);
@@ -564,14 +552,8 @@ pub mod tests {
         };
 
         let xs = Intersections::new(vec![
-            Intersection {
-                t: -f64::sqrt(2.0) / 2.0,
-                object: Arc::new(object.clone()),
-            },
-            Intersection {
-                t: f64::sqrt(2.0) / 2.0,
-                object: Arc::new(object),
-            },
+            Intersection::new(-f64::sqrt(2.0) / 2.0, Arc::new(object.clone())),
+            Intersection::new(f64::sqrt(2.0) / 2.0, Arc::new(object)),
         ]);
 
         let comps = IntersectionState::new(&xs, 1, &ray);
@@ -609,22 +591,10 @@ pub mod tests {
         w.objects = vec![a.clone(), b.clone()];
 
         let xs = Intersections::new(vec![
-            Intersection {
-                t: -0.9899,
-                object: a.clone(),
-            },
-            Intersection {
-                t: -0.4899,
-                object: b.clone(),
-            },
-            Intersection {
-                t: 0.4899,
-                object: b,
-            },
-            Intersection {
-                t: 0.9899,
-                object: a,
-            },
+            Intersection::new(-0.9899, a.clone()),
+            Intersection::new(-0.4899, b.clone()),
+            Intersection::new(0.4899, b),
+            Intersection::new(0.9899, a),
         ]);
 
         let comps = IntersectionState::new(&xs, 2, &ray);
@@ -666,10 +636,7 @@ pub mod tests {
             direction: Vector::new(0.0, -f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0),
         };
 
-        let xs = Intersections::new(vec![Intersection {
-            t: f64::sqrt(2.0),
-            object: floor,
-        }]);
+        let xs = Intersections::new(vec![Intersection::new(f64::sqrt(2.0), floor)]);
 
         let comps = IntersectionState::new(&xs, 0, &ray);
 
@@ -711,10 +678,7 @@ pub mod tests {
             direction: Vector::new(0.0, -f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0),
         };
 
-        let xs = Intersections::new(vec![Intersection {
-            t: f64::sqrt(2.0),
-            object: floor,
-        }]);
+        let xs = Intersections::new(vec![Intersection::new(f64::sqrt(2.0), floor)]);
 
         let comps = IntersectionState::new(&xs, 0, &ray);
 
