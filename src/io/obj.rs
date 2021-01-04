@@ -13,6 +13,54 @@ use std::{
 
 /* ---------------------------------------------------------------------------------------------- */
 
+#[derive(Debug)]
+pub enum ObjParserError {
+    ParseError(ParseError),
+    IoError(std::io::Error),
+}
+
+impl fmt::Display for ObjParserError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match &*self {
+            ObjParserError::ParseError(err) => write!(f, "{}", err),
+            ObjParserError::IoError(err) => write!(f, "{}", err),
+        }
+    }
+}
+
+impl Error for ObjParserError {}
+
+impl From<ParseError> for ObjParserError {
+    fn from(err: ParseError) -> ObjParserError {
+        ObjParserError::ParseError(err)
+    }
+}
+
+impl From<std::io::Error> for ObjParserError {
+    fn from(err: std::io::Error) -> ObjParserError {
+        ObjParserError::IoError(err)
+    }
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+
+type Result<T> = std::result::Result<T, ObjParserError>;
+
+/* ---------------------------------------------------------------------------------------------- */
+
+#[derive(Debug)]
+pub struct ParseError(String);
+
+impl fmt::Display for ParseError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl Error for ParseError {}
+
+/* ---------------------------------------------------------------------------------------------- */
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 struct FaceVertex {
     pub vertex_index: usize,
@@ -71,27 +119,10 @@ impl Default for Data {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Debug)]
-pub struct ParseError(String);
-
-impl fmt::Display for ParseError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-impl Error for ParseError {}
-
-/* ---------------------------------------------------------------------------------------------- */
-
-fn parse_group(
-    line_vec: &[&str],
-    line: &str,
-    line_number: usize,
-) -> Result<Option<String>, ParseError> {
+fn parse_group(line_vec: &[&str], line: &str, line_number: usize) -> Result<Option<String>> {
     if line_vec.len() != 2 {
         let err_msg = format!("Invalid group `{}` at line {}", line.trim(), line_number);
-        return Err(ParseError(err_msg));
+        return Err(ParseError(err_msg).into());
     }
 
     Ok(Some(line_vec[1].into()))
@@ -99,17 +130,12 @@ fn parse_group(
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn parse_vertex(
-    line_vec: &[&str],
-    line: &str,
-    line_number: usize,
-    mut data: Data,
-) -> Result<Data, ParseError> {
+fn parse_vertex(line_vec: &[&str], line: &str, line_number: usize, mut data: Data) -> Result<Data> {
     let err_msg = format!("Invalid vertex `{}` at line {}", line.trim(), line_number);
     let err_fn = |_| ParseError(err_msg.clone());
 
     if line_vec.len() != 4 {
-        return Err(ParseError(err_msg.clone()));
+        return Err(ParseError(err_msg).into());
     }
 
     let x = line_vec[1].parse::<f64>().map_err(err_fn)?;
@@ -123,17 +149,12 @@ fn parse_vertex(
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn parse_normal(
-    line_vec: &[&str],
-    line: &str,
-    line_number: usize,
-    mut data: Data,
-) -> Result<Data, ParseError> {
+fn parse_normal(line_vec: &[&str], line: &str, line_number: usize, mut data: Data) -> Result<Data> {
     let err_msg = format!("Invalid normal `{}` at line {}", line.trim(), line_number);
     let err_fn = |_| ParseError(err_msg.clone());
 
     if line_vec.len() != 4 {
-        return Err(ParseError(err_msg.clone()));
+        return Err(ParseError(err_msg).into());
     }
 
     let x = line_vec[1].parse::<f64>().map_err(err_fn)?;
@@ -153,12 +174,12 @@ fn parse_face(
     line_number: usize,
     mut data: Data,
     current_group: &Option<String>,
-) -> Result<Data, ParseError> {
+) -> Result<Data> {
     let err_msg = format!("Invalid face `{}` at line {}", line.trim(), line_number);
     let err_fn = |_| ParseError(err_msg.clone());
 
     if line_vec.len() < 4 {
-        return Err(ParseError(err_msg.clone()));
+        return Err(ParseError(err_msg).into());
     }
 
     let mut face = Face {
@@ -171,7 +192,7 @@ fn parse_face(
             Err(_) => {
                 let extended = vertex.split('/').collect::<Vec<&str>>();
                 if extended.len() != 3 {
-                    return Err(ParseError(err_msg.clone()));
+                    return Err(ParseError(err_msg).into());
                 }
 
                 let vertex_index = extended[0].parse::<usize>().map_err(err_fn)?;
@@ -194,7 +215,7 @@ fn parse_face(
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn parse_data(s: &str) -> Result<Data, ParseError> {
+fn parse_data(s: &str) -> Result<Data> {
     let buf = BufReader::new(s.as_bytes());
     let mut data = Data::new();
     let mut line_number = 1;
@@ -236,9 +257,9 @@ fn mk_triangles(face: &Face, vertices: &[Point], normals: &[Vector]) -> Vec<Obje
                 vertices[face.vertices[0].vertex_index],
                 vertices[face.vertices[i].vertex_index],
                 vertices[face.vertices[i + 1].vertex_index],
-                normals[face.vertices[0].normal_index.unwrap()],
-                normals[face.vertices[i].normal_index.unwrap()],
-                normals[face.vertices[i + 1].normal_index.unwrap()],
+                normals[face.vertices[0].normal_index.expect("Unset normal")],
+                normals[face.vertices[i].normal_index.expect("Unset normal")],
+                normals[face.vertices[i + 1].normal_index.expect("Unset normal")],
             ));
         } else {
             triangles.push(Object::new_triangle(
@@ -266,7 +287,7 @@ fn mk_group(triangles: Vec<Object>) -> GroupBuilder {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-pub fn parse_str(s: &str) -> Result<Object, ParseError> {
+pub fn parse_str(s: &str) -> Result<Object> {
     let data = parse_data(s)?;
 
     let mut anonymous = vec![];
@@ -306,9 +327,9 @@ pub fn parse_str(s: &str) -> Result<Object, ParseError> {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-pub fn parse_file(path: &std::path::Path) -> Result<Object, ParseError> {
-    let s = std::fs::read_to_string(path).unwrap();
-    parse_str(&s)
+pub fn parse_file(path: &std::path::Path) -> Result<Object> {
+    let string = std::fs::read_to_string(path)?;
+    parse_str(&string)
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -378,7 +399,7 @@ mod tests {
             let data = parse_data(&txt);
             assert!(data.is_err());
             let err = data.unwrap_err();
-            assert_eq!(err.0, "Invalid vertex `v 3` at line 4");
+            assert_eq!(format!("{}", err), "Invalid vertex `v 3` at line 4");
         }
         {
             let txt = r#"
@@ -388,7 +409,7 @@ mod tests {
             let data = parse_data(&txt);
             assert!(data.is_err());
             let err = data.unwrap_err();
-            assert_eq!(err.0, "Invalid vertex `v -1 a 0` at line 2");
+            assert_eq!(format!("{}", err), "Invalid vertex `v -1 a 0` at line 2");
         }
     }
 
