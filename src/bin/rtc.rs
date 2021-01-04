@@ -10,9 +10,16 @@ use std::{f64::consts::PI, sync::Arc};
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn output_path(path: &std::path::Path) -> String {
-    let file_name = path.file_name().and_then(|p| p.to_str()).unwrap();
-    let extension = path.extension().and_then(|p| p.to_str()).unwrap();
+fn output_path(path: &std::path::Path) -> Result<String, Box<dyn std::error::Error>> {
+    let file_name = path
+        .file_name()
+        .and_then(|p| p.to_str())
+        .ok_or(format!("Can't get the file name of {:?}", path))?;
+
+    let extension = path
+        .extension()
+        .and_then(|p| p.to_str())
+        .ok_or(format!("Can't get the extension of {:?}", path))?;
 
     let path = if let Some(stripped) = file_name.strip_suffix(extension) {
         stripped
@@ -20,12 +27,12 @@ fn output_path(path: &std::path::Path) -> String {
         file_name
     };
 
-    format!("./{}png", path)
+    Ok(format!("./{}png", path))
 }
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = App::new("Ray Tracer")
         .arg(
             Arg::with_name("factor")
@@ -80,7 +87,7 @@ fn main() {
     let (world, camera) = match ext.to_str() {
         Some("yml") => yaml::parse(&path),
         Some("obj") => {
-            let group = Arc::new(obj::parse_file(&path).unwrap());
+            let group = Arc::new(obj::parse_file(&path)?);
 
             let light = Light::new_point_light(Color::white(), Point::new(0.0, -10.0, 20.0));
 
@@ -111,7 +118,9 @@ fn main() {
 
     println!("Computed intersections: {}", world.nb_intersections());
 
-    canvas.export(&output_path(&path)).unwrap();
+    canvas.export(&output_path(&path)?)?;
+
+    Ok(())
 }
 
 /* ---------------------------------------------------------------------------------------------- */
