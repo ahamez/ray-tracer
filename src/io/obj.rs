@@ -13,11 +13,34 @@ use std::{
 
 /* ---------------------------------------------------------------------------------------------- */
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+struct FaceVertex {
+    pub vertex_index: usize,
+    pub normal_index: Option<usize>,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct Face {
+    pub vertices: Vec<FaceVertex>,
+    pub group: Option<String>,
+}
+
+impl Default for Face {
+    fn default() -> Self {
+        Self {
+            vertices: vec![],
+            group: None,
+        }
+    }
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+
 #[derive(Debug)]
 struct Data {
     pub ignored: usize,
     pub vertices: Vec<Point>,
-    pub faces: Vec<(Option<String>, Vec<usize>)>,
+    pub faces: Vec<Face>,
 }
 
 impl Data {
@@ -105,12 +128,19 @@ fn parse_face(
         return Err(ParseError(err_msg.clone()));
     }
 
-    let mut faces = vec![];
+    let mut face = Face {
+        vertices: vec![],
+        group: current_group.clone(),
+    };
     for vertex in line_vec.iter().skip(1) {
-        faces.push(vertex.parse::<usize>().map_err(err_fn)?);
+        let vertex_index = vertex.parse::<usize>().map_err(err_fn)?;
+        face.vertices.push(FaceVertex {
+            vertex_index,
+            normal_index: None,
+        });
     }
 
-    data.faces.push((current_group.clone(), faces));
+    data.faces.push(face);
 
     Ok(data)
 }
@@ -148,14 +178,14 @@ fn parse_data(s: &str) -> Result<Data, ParseError> {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn mk_triangles(indexes: &[usize], vertices: &[Point]) -> Vec<Object> {
+fn mk_triangles(indexes: &[FaceVertex], vertices: &[Point]) -> Vec<Object> {
     let mut triangles = vec![];
 
     for i in 1..indexes.len() - 1 {
         triangles.push(Object::new_triangle(
-            vertices[indexes[0]],
-            vertices[indexes[i]],
-            vertices[indexes[i + 1]],
+            vertices[indexes[0].vertex_index],
+            vertices[indexes[i].vertex_index],
+            vertices[indexes[i + 1].vertex_index],
         ));
     }
 
@@ -182,7 +212,11 @@ pub fn parse_str(s: &str) -> Result<Object, ParseError> {
     let mut anonymous = vec![];
     let mut named = HashMap::new();
 
-    for (group_name, face_indexes) in data.faces {
+    for Face {
+        group: group_name,
+        vertices: face_indexes,
+    } in data.faces
+    {
         let triangles = mk_triangles(&face_indexes, &data.vertices);
         let group = mk_group(triangles);
 
@@ -310,8 +344,46 @@ mod tests {
             assert_eq!(data.vertices[4], Point::new(1.0, 1.0, 0.0));
 
             assert_eq!(data.faces.len(), 2);
-            assert_eq!(data.faces[0], (None, vec![1, 2, 3]));
-            assert_eq!(data.faces[1], (None, vec![1, 3, 4]));
+            assert_eq!(
+                data.faces[0],
+                Face {
+                    group: None,
+                    vertices: vec![
+                        FaceVertex {
+                            vertex_index: 1,
+                            normal_index: None
+                        },
+                        FaceVertex {
+                            vertex_index: 2,
+                            normal_index: None
+                        },
+                        FaceVertex {
+                            vertex_index: 3,
+                            normal_index: None
+                        }
+                    ]
+                }
+            );
+            assert_eq!(
+                data.faces[1],
+                Face {
+                    group: None,
+                    vertices: vec![
+                        FaceVertex {
+                            vertex_index: 1,
+                            normal_index: None
+                        },
+                        FaceVertex {
+                            vertex_index: 3,
+                            normal_index: None
+                        },
+                        FaceVertex {
+                            vertex_index: 4,
+                            normal_index: None
+                        }
+                    ]
+                }
+            );
         }
         {
             let txt = r#"
@@ -339,15 +411,63 @@ mod tests {
             assert_eq!(data.faces.len(), 3);
             assert_eq!(
                 data.faces[0],
-                (Some("FirstGroup".to_string()), vec![1, 2, 3])
+                Face {
+                    group: Some("FirstGroup".to_string()),
+                    vertices: vec![
+                        FaceVertex {
+                            vertex_index: 1,
+                            normal_index: None
+                        },
+                        FaceVertex {
+                            vertex_index: 2,
+                            normal_index: None
+                        },
+                        FaceVertex {
+                            vertex_index: 3,
+                            normal_index: None
+                        }
+                    ]
+                }
             );
             assert_eq!(
                 data.faces[1],
-                (Some("SecondGroup".to_string()), vec![1, 3, 4])
+                Face {
+                    group: Some("SecondGroup".to_string()),
+                    vertices: vec![
+                        FaceVertex {
+                            vertex_index: 1,
+                            normal_index: None
+                        },
+                        FaceVertex {
+                            vertex_index: 3,
+                            normal_index: None
+                        },
+                        FaceVertex {
+                            vertex_index: 4,
+                            normal_index: None
+                        }
+                    ]
+                }
             );
             assert_eq!(
                 data.faces[2],
-                (Some("SecondGroup".to_string()), vec![2, 3, 4])
+                Face {
+                    group: Some("SecondGroup".to_string()),
+                    vertices: vec![
+                        FaceVertex {
+                            vertex_index: 2,
+                            normal_index: None
+                        },
+                        FaceVertex {
+                            vertex_index: 3,
+                            normal_index: None
+                        },
+                        FaceVertex {
+                            vertex_index: 4,
+                            normal_index: None
+                        }
+                    ]
+                }
             );
         }
     }
@@ -367,7 +487,7 @@ mod tests {
 
             let data = parse_data(&txt).unwrap();
 
-            let face_indexes = &data.faces[0].1;
+            let face_indexes = &data.faces[0].vertices;
             let triangles = mk_triangles(face_indexes, &data.vertices);
 
             assert_eq!(triangles.len(), 3);
