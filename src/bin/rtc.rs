@@ -36,6 +36,13 @@ fn main() {
                 .takes_value(true),
         )
         .arg(
+            Arg::with_name("fov")
+                .long("fov")
+                .value_name("FOV")
+                .help("Sets the field of view")
+                .takes_value(true),
+        )
+        .arg(
             Arg::with_name("sequential")
                 .short("s")
                 .long("sequential")
@@ -51,21 +58,23 @@ fn main() {
         .get_matches();
 
     let factor = clap::value_t!(matches.value_of("factor"), usize).unwrap_or(1);
+    let fov = clap::value_t!(matches.value_of("fov"), f64).unwrap_or(PI / 2.0);
     let parallel = if matches.is_present("sequential") {
         ParallelRendering::False
     } else {
         ParallelRendering::True
     };
     let path_str = matches.value_of("INPUT").unwrap();
-    let path = std::path::Path::new(&path_str);
 
+    let path = std::path::Path::new(&path_str);
     let ext = match path.extension() {
         Some(ext) => ext,
         None => todo!(),
     };
 
-    println!("Using factor: {}", factor);
-    println!("Using input file: {}", path_str);
+    println!("Factor: {}", factor);
+    println!("FoV: {}", fov);
+    println!("Input file: {}", path_str);
     println!("Parallel rendering: {}", parallel);
 
     let (world, camera) = match ext.to_str() {
@@ -85,7 +94,6 @@ fn main() {
 
             let width = 500;
             let height = 500;
-            let fov = PI / 2.0;
 
             let camera = Camera::new()
                 .with_size(width, height)
