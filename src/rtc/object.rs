@@ -142,12 +142,8 @@ impl Object {
     }
 
     pub fn with_transformation(mut self, transformation: Matrix) -> Self {
-        self.transformation = transformation;
-        self.transformation_inverse = self.transformation.invert();
-        self.transformation_inverse_transpose = self.transformation_inverse.transpose();
-        self.bounding_box = self.bounds().transform(&self.transformation);
-
-        self
+        self.transformation = Matrix::id();
+        self.transform(&transformation)
     }
 
     pub fn intersects(&self, ray: &Ray, push: &mut impl IntersectionPusher) {
