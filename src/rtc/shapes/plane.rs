@@ -127,11 +127,11 @@ mod tests {
     fn a_plane_has_a_bounding_box() {
         let p = Object::new_plane();
         assert_eq!(
-            p.bounds().min(),
+            p.shape_bounds().min(),
             Point::new(f64::NEG_INFINITY, 0.0, f64::NEG_INFINITY)
         );
         assert_eq!(
-            p.bounds().max(),
+            p.shape_bounds().max(),
             Point::new(f64::INFINITY, 0.0, f64::INFINITY)
         );
     }

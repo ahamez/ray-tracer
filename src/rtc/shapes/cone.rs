@@ -244,11 +244,11 @@ pub mod tests {
     fn an_unbounded_cone_has_a_bounding_box() {
         let c = Object::new_cone(f64::NEG_INFINITY, f64::INFINITY, false);
         assert_eq!(
-            c.bounds().min(),
+            c.shape_bounds().min(),
             Point::new(f64::NEG_INFINITY, f64::NEG_INFINITY, f64::NEG_INFINITY)
         );
         assert_eq!(
-            c.bounds().max(),
+            c.shape_bounds().max(),
             Point::new(f64::INFINITY, f64::INFINITY, f64::INFINITY)
         );
     }
@@ -256,8 +256,8 @@ pub mod tests {
     #[test]
     fn a_bounded_cone_has_a_bounding_box() {
         let c = Object::new_cone(-5.0, 3.0, false);
-        assert_eq!(c.bounds().min(), Point::new(-5.0, -5.0, -5.0));
-        assert_eq!(c.bounds().max(), Point::new(3.0, 3.0, 3.0));
+        assert_eq!(c.shape_bounds().min(), Point::new(-5.0, -5.0, -5.0));
+        assert_eq!(c.shape_bounds().max(), Point::new(3.0, 3.0, 3.0));
     }
 }
 

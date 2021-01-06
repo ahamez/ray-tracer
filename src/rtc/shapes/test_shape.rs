@@ -104,8 +104,8 @@ mod tests {
     #[test]
     fn a_test_shape_has_a_bounding_box() {
         let t = Object::new_test_shape();
-        assert_eq!(t.bounds().min(), Point::new(-1.0, -1.0, -1.0));
-        assert_eq!(t.bounds().max(), Point::new(1.0, 1.0, 1.0));
+        assert_eq!(t.shape_bounds().min(), Point::new(-1.0, -1.0, -1.0));
+        assert_eq!(t.shape_bounds().max(), Point::new(1.0, 1.0, 1.0));
     }
 }
 

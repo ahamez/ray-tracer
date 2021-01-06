@@ -157,7 +157,7 @@ impl Object {
         self.transformation = transformation;
         self.transformation_inverse = self.transformation.invert();
         self.transformation_inverse_transpose = self.transformation_inverse.transpose();
-        self.bounding_box = self.bounds().transform(&self.transformation);
+        self.bounding_box = self.shape_bounds().transform(&self.transformation);
 
         self
     }
@@ -206,7 +206,7 @@ impl Object {
         &self.transformation_inverse
     }
 
-    pub fn bounds(&self) -> BoundingBox {
+    pub fn shape_bounds(&self) -> BoundingBox {
         self.shape.bounds()
     }
 

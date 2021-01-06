@@ -287,8 +287,8 @@ pub mod tests {
     #[test]
     fn a_sphere_has_a_bounding_box() {
         let s = Object::new_sphere();
-        assert_eq!(s.bounds().min(), Point::new(-1.0, -1.0, -1.0));
-        assert_eq!(s.bounds().max(), Point::new(1.0, 1.0, 1.0));
+        assert_eq!(s.shape_bounds().min(), Point::new(-1.0, -1.0, -1.0));
+        assert_eq!(s.shape_bounds().max(), Point::new(1.0, 1.0, 1.0));
     }
 
     #[test]

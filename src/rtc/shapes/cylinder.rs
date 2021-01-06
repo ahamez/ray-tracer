@@ -289,15 +289,18 @@ pub mod tests {
     #[test]
     fn an_unbounded_cylinder_has_a_bounding_box() {
         let c = Object::new_cylinder(f64::NEG_INFINITY, f64::INFINITY, false);
-        assert_eq!(c.bounds().min(), Point::new(-1.0, f64::NEG_INFINITY, -1.0));
-        assert_eq!(c.bounds().max(), Point::new(1.0, f64::INFINITY, 1.0));
+        assert_eq!(
+            c.shape_bounds().min(),
+            Point::new(-1.0, f64::NEG_INFINITY, -1.0)
+        );
+        assert_eq!(c.shape_bounds().max(), Point::new(1.0, f64::INFINITY, 1.0));
     }
 
     #[test]
     fn a_bounded_cylinder_has_a_bounding_box() {
         let c = Object::new_cylinder(-5.0, 3.0, false);
-        assert_eq!(c.bounds().min(), Point::new(-1.0, -5.0, -1.0));
-        assert_eq!(c.bounds().max(), Point::new(1.0, 3.0, 1.0));
+        assert_eq!(c.shape_bounds().min(), Point::new(-1.0, -5.0, -1.0));
+        assert_eq!(c.shape_bounds().max(), Point::new(1.0, 3.0, 1.0));
     }
 }
 

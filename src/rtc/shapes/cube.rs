@@ -243,8 +243,8 @@ pub mod tests {
     #[test]
     fn a_cube_has_a_bounding_box() {
         let c = Object::new_cube();
-        assert_eq!(c.bounds().min(), Point::new(-1.0, -1.0, -1.0));
-        assert_eq!(c.bounds().max(), Point::new(1.0, 1.0, 1.0));
+        assert_eq!(c.shape_bounds().min(), Point::new(-1.0, -1.0, -1.0));
+        assert_eq!(c.shape_bounds().max(), Point::new(1.0, 1.0, 1.0));
     }
 }
 
