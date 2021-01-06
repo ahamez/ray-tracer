@@ -59,23 +59,6 @@ impl Group {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-impl Transform for Group {
-    fn transform(&self, transformation: &Matrix) -> Self {
-        eprintln!("{:p}", self);
-        let mut children = vec![];
-        for child in &self.children {
-            children.push(Arc::new(child.transform(transformation)))
-        }
-
-        Self {
-            children,
-            ..self.clone()
-        }
-    }
-}
-
-/* ---------------------------------------------------------------------------------------------- */
-
 #[derive(Clone, Debug)]
 pub enum GroupBuilder {
     Leaf(Object),
