@@ -93,10 +93,10 @@ impl GroupBuilder {
             GroupBuilder::Leaf(o) => o.transform(transform),
             GroupBuilder::Node(group, children) => {
                 let child_transform = *transform * *group.transformation();
-                let mut new_children = vec![];
-                for c in children {
-                    new_children.push(Arc::new(GroupBuilder::rec(&c, &child_transform)));
-                }
+                let new_children = children
+                    .iter()
+                    .map(|child| Arc::new(GroupBuilder::rec(&child, &child_transform)))
+                    .collect();
 
                 group
                     .clone()
