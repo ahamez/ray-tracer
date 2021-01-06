@@ -6,7 +6,7 @@ use ray_tracer::{
     primitive::{Point, Tuple, Vector},
     rtc::{view_transform, Camera, Color, Light, ParallelRendering, Transform, World},
 };
-use std::{f64::consts::PI, sync::Arc};
+use std::{f64::consts::PI, sync::Arc, time::Instant};
 
 /* ---------------------------------------------------------------------------------------------- */
 
@@ -141,6 +141,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("FoV: {}", fov);
     println!("Parallel rendering: {}", parallel);
 
+    let construction_start = Instant::now();
     let (world, camera) = match ext.to_str() {
         Some("yml") => yaml::parse(&path),
         Some("obj") => {
@@ -181,9 +182,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some(_) => panic!(),
         None => panic!(),
     };
-
     let camera = camera.with_size(camera.h_size() * factor, camera.v_size() * factor);
+    let construction_duration = construction_start.elapsed();
+
+    println!("Time elapsed in construction: {:?}", construction_duration);
+
+    let rendering_start = Instant::now();
     let canvas = camera.render(&world, parallel);
+    let rendering_duration = rendering_start.elapsed();
+    println!("Time elapsed in rendering: {:?}", rendering_duration);
 
     println!("Computed intersections: {}", world.nb_intersections());
 
