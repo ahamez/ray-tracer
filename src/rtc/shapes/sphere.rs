@@ -218,7 +218,7 @@ pub mod tests {
     fn normal_on_a_translated_sphere() {
         let s = Object::new_sphere().translate(0.0, 1.0, 0.0);
         let dummy_intersection =
-            Intersection::new(std::f64::INFINITY, Arc::new(Object::new_dummy()));
+            Intersection::new(std::f64::INFINITY, Arc::new(Object::new_test_shape()));
         assert_eq!(
             s.normal_at(&Point::new(0.0, 1.70711, -0.70711), &dummy_intersection),
             Vector::new(0.0, 0.70711, -0.70711)
@@ -231,7 +231,7 @@ pub mod tests {
             .rotate_z(std::f64::consts::PI / 5.0)
             .scale(1.0, 0.5, 1.0);
         let dummy_intersection =
-            Intersection::new(std::f64::INFINITY, Arc::new(Object::new_dummy()));
+            Intersection::new(std::f64::INFINITY, Arc::new(Object::new_test_shape()));
 
         assert_eq!(
             s.normal_at(

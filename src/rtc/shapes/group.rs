@@ -151,7 +151,7 @@ mod tests {
         pub fn new() -> Self {
             Self {
                 xs: vec![],
-                object: Arc::new(Object::new_dummy()),
+                object: Arc::new(Object::new_test_shape()),
             }
         }
     }

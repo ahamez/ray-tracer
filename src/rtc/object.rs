@@ -58,7 +58,7 @@ impl Object {
         }
     }
 
-    pub fn new_dummy() -> Self {
+    fn new_dummy() -> Self {
         Object {
             shape: Shape::Dummy(),
             ..Default::default()
@@ -365,7 +365,7 @@ mod tests {
         let group_s = group_g2.shape().as_group().unwrap().children()[0].clone();
 
         let dummy_intersection =
-            Intersection::new(std::f64::INFINITY, Arc::new(Object::new_dummy()));
+            Intersection::new(std::f64::INFINITY, Arc::new(Object::new_test_shape()));
 
         assert_eq!(
             group_s.normal_at(&Point::new(1.7321, 1.1547, -5.5774), &dummy_intersection),

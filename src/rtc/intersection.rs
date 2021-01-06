@@ -509,7 +509,7 @@ mod tests {
 
     #[test]
     fn an_intersection_can_encapsulates_u_and_v() {
-        let object = Arc::new(Object::new_dummy());
+        let object = Arc::new(Object::new_test_shape());
         let i = Intersection::new(3.5, object).with_u_and_v(0.2, 0.4);
 
         assert_eq!(i.u(), 0.2);
