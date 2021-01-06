@@ -72,6 +72,13 @@ impl Shape {
         }
     }
 
+    pub fn divide(self, threshold: usize) -> Self {
+        match self {
+            Shape::Group(g) => Shape::Group(g.divide(threshold)),
+            _ => self,
+        }
+    }
+
     pub fn skip_world_to_local(&self) -> bool {
         // Skip world to local conversion for groups, since the transformation matrix
         // has been propagated to children at build time via GroupBuilder.

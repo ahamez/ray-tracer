@@ -217,6 +217,13 @@ impl Object {
     pub fn bounding_box(&self) -> BoundingBox {
         self.bounding_box
     }
+
+    pub fn divide(self, threshold: usize) -> Self {
+        Self {
+            shape: self.shape.divide(threshold),
+            ..self
+        }
+    }
 }
 
 /* ---------------------------------------------------------------------------------------------- */

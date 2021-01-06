@@ -47,6 +47,56 @@ impl Group {
         self.bounding_box
     }
 
+    fn partition(&self) -> Self {
+        let mut left_children = vec![];
+        let mut right_children = vec![];
+        let mut children = vec![];
+
+        let (left_bbox, right_bbox) = self.bounding_box.split();
+        for child in &self.children {
+            if left_bbox.contains(&child.bounding_box()) {
+                left_children.push(child.clone());
+            } else if right_bbox.contains(&child.bounding_box()) {
+                right_children.push(child.clone());
+            } else {
+                // All children that are neither contained in the left nor right
+                // sub bounding box staty at this level.
+                children.push(child.clone());
+            }
+        }
+
+        if !left_children.is_empty() {
+            let left_child = Arc::new(Object::new_group(left_children));
+            children.push(left_child);
+        }
+
+        if !right_children.is_empty() {
+            let right_child = Arc::new(Object::new_group(right_children));
+            children.push(right_child);
+        }
+
+        Self {
+            children,
+            ..self.clone()
+        }
+    }
+
+    pub fn divide(self, threshold: usize) -> Self {
+        let g: Self = if self.children.len() <= threshold {
+            self
+        } else {
+            self.partition()
+        };
+
+        let children = g
+            .children
+            .into_iter()
+            .map(|child| Arc::new((*child).clone().divide(threshold)))
+            .collect();
+
+        Self { children, ..g }
+    }
+
     fn mk_bounding_box(children: &[Arc<Object>]) -> BoundingBox {
         let mut bbox = BoundingBox::new();
         for child in children {
@@ -405,6 +455,24 @@ mod tests {
             .unwrap();
 
         assert!(ts.ray().is_some());
+    }
+
+    #[test]
+    fn partitioning_a_group_s_children() {
+        let s1 = Arc::new(Object::new_sphere().translate(-2.0, 0.0, 0.0));
+        let s2 = Arc::new(Object::new_sphere().translate(2.0, 0.0, 0.0));
+        let s3 = Arc::new(Object::new_sphere());
+
+        let g = Object::new_group(vec![s1.clone(), s2.clone(), s3.clone()]);
+
+        let g = g.shape().as_group().unwrap().partition();
+        let g_children = g.children();
+
+        assert_eq!(g_children[0], s3);
+        // left child
+        assert_eq!(g_children[1].shape().as_group().unwrap().children()[0], s1);
+        // right child
+        assert_eq!(g_children[2].shape().as_group().unwrap().children()[0], s2);
     }
 }
 
