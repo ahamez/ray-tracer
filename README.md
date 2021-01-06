@@ -21,8 +21,6 @@ My main objective is to be fluent in Rust 🗣🦀. So, if some seasoned rustace
 
 ![Fresnel](/samples/fresnel.png?raw=true "Fresnel")
 
-![Hexagon](/samples/hexagon.png?raw=true "Hexagon")
-
 ![Plane](/samples/ch09_plane.png?raw=true "Plane")
 
 ![Pattern](/samples/ch10_pattern.png?raw=true "Pattern")
@@ -36,5 +34,7 @@ My main objective is to be fluent in Rust 🗣🦀. So, if some seasoned rustace
 ![Cylinder](/samples/ch13_cylinder.png?raw=true "Cylinder")
 
 ![Cone](/samples/ch13_cone.png?raw=true "Cone")
+
+![Hexagon](/samples/ch14_hexagon.png?raw=true "Hexagon")
 
 ![Triangle](/samples/ch15_triangle.png?raw=true "Triangle")

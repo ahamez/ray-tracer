@@ -64,5 +64,5 @@ fn main() {
         .with_transformation(&view_transform(&from, &to, &up));
 
     let canvas = camera.render(&world, ParallelRendering::True);
-    canvas.export("hexagon.png").unwrap();
+    canvas.export("ch14_hexagon.png").unwrap();
 }
