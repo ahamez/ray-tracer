@@ -108,14 +108,6 @@ impl GroupBuilder {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-impl From<Object> for GroupBuilder {
-    fn from(object: Object) -> Self {
-        GroupBuilder::from_object(&object)
-    }
-}
-
-/* ---------------------------------------------------------------------------------------------- */
-
 #[cfg(test)]
 mod tests {
     use super::*;
