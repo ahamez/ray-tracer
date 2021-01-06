@@ -1,6 +1,7 @@
 /* ---------------------------------------------------------------------------------------------- */
 
 use crate::{
+    float::ApproxEq,
     primitive::{Matrix, Point, Tuple},
     rtc::{Ray, Transform},
 };
@@ -125,14 +126,14 @@ impl BoundingBox {
         let (mut x0, mut y0, mut z0) = (self.min.x(), self.min.y(), self.min.z());
         let (mut x1, mut y1, mut z1) = (self.max.x(), self.max.y(), self.max.z());
 
-        if greatest == dx {
-            x0 = x0 + dx / 2.0;
+        if greatest.approx_eq(dx) {
+            x0 += dx / 2.0;
             x1 = x0;
-        } else if greatest == dy {
-            y0 = y0 + dy / 2.0;
+        } else if greatest.approx_eq(dy) {
+            y0 += dy / 2.0;
             y1 = y0;
         } else {
-            z0 = z0 + dz / 2.0;
+            z0 += dz / 2.0;
             z1 = z0;
         }
 
