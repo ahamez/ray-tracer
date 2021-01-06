@@ -82,7 +82,7 @@ pub fn view_transform(from: &Point, to: &Point, up: &Vector) -> Matrix {
     let true_up = left * forward;
 
     let orientation = {
-        let mut m = Matrix::new(4);
+        let mut m = Matrix::new();
 
         m[0][0] = left.x();
         m[0][1] = left.y();
@@ -400,7 +400,7 @@ mod tests {
         let to = Point::new(4.0, -2.0, 8.0);
         let up = Vector::new(1.0, 1.0, 0.0);
 
-        let mut transform = Matrix::new(4);
+        let mut transform = Matrix::new();
 
         transform[0][0] = -0.50709;
         transform[0][1] = 0.50709;

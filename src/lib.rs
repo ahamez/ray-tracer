@@ -13,6 +13,8 @@ pub mod primitive {
     pub use vector::Vector;
 
     mod matrix;
+    mod matrix2;
+    mod matrix3;
     mod point;
     mod tuple;
     mod vector;
