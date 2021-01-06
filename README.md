@@ -17,9 +17,6 @@ My main objective is to be fluent in Rust 🗣🦀. So, if some seasoned rustace
 
 ![Shadow Glamour Shot](/samples/render/shadow-glamour-shot.png?raw=true "Shadow Glamour Shot")
 
-![Reflect-Refract](/samples/render/reflect-refract.png?raw=true "Reflect Refract")
-
-![Fresnel](/samples/render/fresnel.png?raw=true "Fresnel")
 
 ![Plane](/samples/render/ch09_plane.png?raw=true "Plane")
 
@@ -28,6 +25,10 @@ My main objective is to be fluent in Rust 🗣🦀. So, if some seasoned rustace
 ![Reflection](/samples/render/ch11_reflection.png?raw=true "Reflection")
 
 ![Refraction](/samples/render/ch11_refraction.png?raw=true "Refraction")
+
+![Fresnel](/samples/render/ch11_fresnel.png?raw=true "Fresnel")
+
+![Reflect-Refract](/samples/render/ch11_reflect-refract.png?raw=true "Reflect Refract")
 
 ![Cube](/samples/render/ch12_cube.png?raw=true "Cube")
 
