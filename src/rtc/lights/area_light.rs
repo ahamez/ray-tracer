@@ -1,12 +1,11 @@
 /* ---------------------------------------------------------------------------------------------- */
 
-use rand::rngs::SmallRng;
-use rand::{Rng, SeedableRng};
-
 use crate::{
     primitive::{Point, Vector},
     rtc::{Color, World},
 };
+use rand::rngs::SmallRng;
+use rand::{Rng, SeedableRng};
 
 /* ---------------------------------------------------------------------------------------------- */
 
@@ -67,6 +66,7 @@ impl AreaLight {
 
     pub fn intensity_at(&self, world: &World, point: &Point) -> f64 {
         let mut rng = SmallRng::from_entropy();
+
         self.intensity_at_impl(world, point, || rng.gen())
     }
 

@@ -139,17 +139,20 @@ impl Object {
 
     pub fn with_material(mut self, material: Material) -> Self {
         self.material = material;
+
         self
     }
 
     pub fn with_shadow(mut self, has_shadow: bool) -> Self {
         self.has_shadow = has_shadow;
+
         self
     }
 
     pub fn with_shape(mut self, shape: Shape) -> Self {
         self.shape = shape;
         self.bounding_box = self.shape.bounds();
+
         self
     }
 
@@ -167,6 +170,7 @@ impl Object {
             self.shape.intersects(ray, push)
         } else {
             let transformed_ray = ray.transform(&self.transformation_inverse);
+
             self.shape.intersects(&transformed_ray, push)
         }
     }

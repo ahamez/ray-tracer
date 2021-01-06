@@ -72,6 +72,7 @@ impl std::ops::Index<usize> for Canvas {
 
     fn index(&self, row: usize) -> &[Color] {
         let start = row * self.width;
+
         &self.pixels[start..start + self.width]
     }
 }
@@ -79,6 +80,7 @@ impl std::ops::Index<usize> for Canvas {
 impl std::ops::IndexMut<usize> for Canvas {
     fn index_mut(&mut self, row: usize) -> &mut [Color] {
         let start = row * self.width;
+
         &mut self.pixels[start..start + self.width]
     }
 }

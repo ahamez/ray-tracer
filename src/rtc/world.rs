@@ -1,14 +1,12 @@
 /* ---------------------------------------------------------------------------------------------- */
 
-use std::sync::Arc;
-
-use atomic_counter::{AtomicCounter, RelaxedCounter};
-
 use crate::{
     float::ApproxEq,
     primitive::Point,
     rtc::{Color, IntersectionState, Intersections, Light, Object, Ray},
 };
+use atomic_counter::{AtomicCounter, RelaxedCounter};
+use std::sync::Arc;
 
 /* ---------------------------------------------------------------------------------------------- */
 
@@ -38,11 +36,13 @@ impl World {
 
     pub fn with_objects(mut self, objects: Vec<Arc<Object>>) -> Self {
         self.objects = objects;
+
         self
     }
 
     pub fn with_lights(mut self, lights: Vec<Light>) -> Self {
         self.lights = lights;
+
         self
     }
 

@@ -32,11 +32,13 @@ impl BoundingBox {
 
     pub fn with_min(mut self, point: Point) -> Self {
         self.min = point;
+
         self
     }
 
     pub fn with_max(mut self, point: Point) -> Self {
         self.max = point;
+
         self
     }
 

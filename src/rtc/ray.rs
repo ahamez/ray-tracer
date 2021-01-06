@@ -1,11 +1,10 @@
 /* ---------------------------------------------------------------------------------------------- */
 
-use std::sync::Arc;
-
 use crate::{
     primitive::{Matrix, Point, Vector},
     rtc::{Intersection, IntersectionPusher, Intersections, Object, Transform},
 };
+use std::sync::Arc;
 
 /* ---------------------------------------------------------------------------------------------- */
 

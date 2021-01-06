@@ -1,12 +1,11 @@
 /* ---------------------------------------------------------------------------------------------- */
 
-use std::{cmp::Ordering, sync::Arc};
-
 use crate::{
     float::EPSILON,
     primitive::{Point, Vector},
     rtc::{Object, Ray},
 };
+use std::{cmp::Ordering, sync::Arc};
 
 /* ---------------------------------------------------------------------------------------------- */
 
@@ -125,6 +124,7 @@ impl std::ops::Index<usize> for Intersections {
 
     fn index(&self, i: usize) -> &Intersection {
         let &Intersections(vec) = &self;
+
         &vec[i]
     }
 }

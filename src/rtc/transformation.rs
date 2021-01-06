@@ -9,6 +9,7 @@ pub fn translation(x: f64, y: f64, z: f64) -> Matrix {
     res[0][3] = x;
     res[1][3] = y;
     res[2][3] = z;
+
     res
 }
 
@@ -19,6 +20,7 @@ pub fn scaling(x: f64, y: f64, z: f64) -> Matrix {
     res[0][0] = x;
     res[1][1] = y;
     res[2][2] = z;
+
     res
 }
 
@@ -30,6 +32,7 @@ pub fn rotation_x(angle: f64) -> Matrix {
     res[1][2] = -f64::sin(angle);
     res[2][1] = f64::sin(angle);
     res[2][2] = f64::cos(angle);
+
     res
 }
 
@@ -41,6 +44,7 @@ pub fn rotation_y(angle: f64) -> Matrix {
     res[0][2] = f64::sin(angle);
     res[2][0] = -f64::sin(angle);
     res[2][2] = f64::cos(angle);
+
     res
 }
 
@@ -52,6 +56,7 @@ pub fn rotation_z(angle: f64) -> Matrix {
     res[0][1] = -f64::sin(angle);
     res[1][0] = f64::sin(angle);
     res[1][1] = f64::cos(angle);
+
     res
 }
 
@@ -65,6 +70,7 @@ pub fn shearing(xy: f64, xz: f64, yx: f64, yz: f64, zx: f64, zy: f64) -> Matrix 
     res[1][2] = yz;
     res[2][0] = zx;
     res[2][1] = zy;
+
     res
 }
 
@@ -115,48 +121,42 @@ pub trait Transform {
     where
         Self: Sized,
     {
-        let transformation = translation(x, y, z);
-        self.transform(&transformation)
+        self.transform(&translation(x, y, z))
     }
 
     fn scale(&self, x: f64, y: f64, z: f64) -> Self
     where
         Self: Sized,
     {
-        let transformation = scaling(x, y, z);
-        self.transform(&transformation)
+        self.transform(&scaling(x, y, z))
     }
 
     fn rotate_x(&self, angle: f64) -> Self
     where
         Self: Sized,
     {
-        let transformation = rotation_x(angle);
-        self.transform(&transformation)
+        self.transform(&rotation_x(angle))
     }
 
     fn rotate_y(&self, angle: f64) -> Self
     where
         Self: Sized,
     {
-        let transformation = rotation_y(angle);
-        self.transform(&transformation)
+        self.transform(&rotation_y(angle))
     }
 
     fn rotate_z(&self, angle: f64) -> Self
     where
         Self: Sized,
     {
-        let transformation = rotation_z(angle);
-        self.transform(&transformation)
+        self.transform(&rotation_z(angle))
     }
 
     fn shear(&self, xy: f64, xz: f64, yx: f64, yz: f64, zx: f64, zy: f64) -> Self
     where
         Self: Sized,
     {
-        let transformation = shearing(xy, xz, yx, yz, zx, zy);
-        self.transform(&transformation)
+        self.transform(&shearing(xy, xz, yx, yz, zx, zy))
     }
 }
 

@@ -29,46 +29,55 @@ impl Material {
 
     pub fn with_ambient(mut self, ambient: f64) -> Material {
         self.ambient = ambient;
+
         self
     }
 
     pub fn with_color(mut self, color: Color) -> Material {
         self.pattern = Pattern::new_plain(color);
+
         self
     }
 
     pub fn with_diffuse(mut self, diffuse: f64) -> Material {
         self.diffuse = diffuse;
+
         self
     }
 
     pub fn with_pattern(mut self, pattern: Pattern) -> Material {
         self.pattern = pattern;
+
         self
     }
 
     pub fn with_reflective(mut self, reflective: f64) -> Material {
         self.reflective = reflective;
+
         self
     }
 
     pub fn with_refractive_index(mut self, index: f64) -> Material {
         self.refractive_index = index;
+
         self
     }
 
     pub fn with_shininess(mut self, index: f64) -> Material {
         self.shininess = index;
+
         self
     }
 
     pub fn with_specular(mut self, specular: f64) -> Material {
         self.specular = specular;
+
         self
     }
 
     pub fn with_transparency(mut self, transparency: f64) -> Material {
         self.transparency = transparency;
+
         self
     }
 
