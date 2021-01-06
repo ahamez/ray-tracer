@@ -1,0 +1,205 @@
+# ======================================================
+# group.yml
+#
+# This file describes the scene illustrated at the start
+# of chapter 14, "Groups", in "The Ray Tracer
+# Challenge"
+#
+# This scene description assumes:
+#
+# 1. Your ray tracer supports multiple light sources.
+#    If it does not, you can omit the extra light
+#    sources and bump up the existing light's intensity
+#    to [1, 1, 1].
+# 2. Child objects in a group inherit their default
+#    material from the parent group. If you haven't
+#    implemented this optional feature, you'll need
+#    arrange other means of texturing the child
+#    elements (or accept that all elements of the
+#    scene will be white).
+#
+# by Jamis Buck <jamis@jamisbuck.org>
+# ======================================================
+
+# ======================================================
+# the camera
+# ======================================================
+
+- add: camera
+  width: 300
+  height: 100
+  field-of-view: 0.9
+  from: [0, 0, -9]
+  to: [0, 0, 0]
+  up: [0, 1, 0]
+
+# ======================================================
+# light sources
+# ======================================================
+
+- add: light
+  at: [ 10000, 10000, -10000 ]
+  intensity: [ 0.25, 0.25, 0.25 ]
+- add: light
+  at: [ -10000, 10000, -10000 ]
+  intensity: [ 0.25, 0.25, 0.25 ]
+- add: light
+  at: [ 10000, -10000, -10000 ]
+  intensity: [ 0.25, 0.25, 0.25 ]
+- add: light
+  at: [ -10000, -10000, -10000 ]
+  intensity: [ 0.25, 0.25, 0.25 ]
+
+# ======================================================
+# These describe groups that will be reused within
+# the scene. (You can think of these as functions that
+# return a new instance of the given shape each time they
+# are referenced.)
+# ======================================================
+
+- define: leg
+  value:
+    add: group
+    children:
+      - add: sphere
+        transform:
+          - [ scale, 0.25, 0.25, 0.25 ]
+          - [ translate, 0, 0, -1 ]
+      - add: cylinder
+        min: 0
+        max: 1
+        closed: false
+        transform:
+          - [ scale, 0.25, 1, 0.25 ]
+          - [ rotate-z, -1.5708 ]
+          - [ rotate-y, -0.5236 ]
+          - [ translate, 0, 0, -1 ]
+
+- define: cap
+  value:
+    add: group
+    children:
+      - add: cone
+        min: -1
+        max: 0
+        closed: false
+        transform:
+          - [ scale, 0.24606, 1.37002, 0.24606 ]
+          - [ rotate-x, -0.7854 ]
+      - add: cone
+        min: -1
+        max: 0
+        closed: false
+        transform:
+          - [ scale, 0.24606, 1.37002, 0.24606 ]
+          - [ rotate-x, -0.7854 ]
+          - [ rotate-y, 1.0472 ]
+      - add: cone
+        min: -1
+        max: 0
+        closed: false
+        transform:
+          - [ scale, 0.24606, 1.37002, 0.24606 ]
+          - [ rotate-x, -0.7854 ]
+          - [ rotate-y, 2.0944 ]
+      - add: cone
+        min: -1
+        max: 0
+        closed: false
+        transform:
+          - [ scale, 0.24606, 1.37002, 0.24606 ]
+          - [ rotate-x, -0.7854 ]
+          - [ rotate-y, 3.1416 ]
+      - add: cone
+        min: -1
+        max: 0
+        closed: false
+        transform:
+          - [ scale, 0.24606, 1.37002, 0.24606 ]
+          - [ rotate-x, -0.7854 ]
+          - [ rotate-y, 4.1888 ]
+      - add: cone
+        min: -1
+        max: 0
+        closed: false
+        transform:
+          - [ scale, 0.24606, 1.37002, 0.24606 ]
+          - [ rotate-x, -0.7854 ]
+          - [ rotate-y, 5.236 ]
+
+- define: wacky
+  value:
+    add: group
+    children:
+      - add: leg
+      - add: leg
+        transform:
+          - [ rotate-y, 1.0472 ]
+      - add: leg
+        transform:
+          - [ rotate-y, 2.0944 ]
+      - add: leg
+        transform:
+          - [ rotate-y, 3.1416 ]
+      - add: leg
+        transform:
+          - [ rotate-y, 4.1888 ]
+      - add: leg
+        transform:
+          - [ rotate-y, 5.236 ]
+      - add: cap
+        transform:
+          - [ translate, 0, 1, 0 ]
+      - add: cap
+        transform:
+          - [ translate, 0, 1, 0 ]
+          - [ rotate-x, 3.1416 ]
+
+# ======================================================
+# Construct the scene itself
+# ======================================================
+
+# a white backdrop
+- add: plane
+  transform:
+    - [ rotate-x, 1.5708 ]
+    - [ translate, 0, 0, 100 ]
+  material:
+    color: [ 1, 1, 1 ]
+    ambient: 1
+    diffuse: 0
+    specular: 0
+
+- add: wacky
+  transform:
+    - [ rotate-y, 0.1745 ]
+    - [ rotate-x, 0.4363 ]
+    - [ translate, -2.8, 0, 0 ]
+  material:
+    color: [ 0.9, 0.2, 0.4 ]
+    ambient: 0.2
+    diffuse: 0.8
+    specular: 0.7
+    shininess: 20
+
+- add: wacky
+  transform:
+    - [ rotate-y, 0.1745 ]
+  material:
+    color: [ 0.2, 0.9, 0.6 ]
+    ambient: 0.2
+    diffuse: 0.8
+    specular: 0.7
+    shininess: 20
+
+- add: wacky
+  transform:
+    - [ rotate-y, -0.1745 ]
+    - [ rotate-x, -0.4363 ]
+    - [ translate, 2.8, 0, 0 ]
+  material:
+    color: [ 0.2, 0.3, 1.0 ]
+    ambient: 0.2
+    diffuse: 0.8
+    specular: 0.7
+    shininess: 20

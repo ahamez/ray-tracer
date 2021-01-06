@@ -13,28 +13,28 @@ My main objective is to be fluent in Rust 🗣🦀. So, if some seasoned rustace
 
 ## Some samples
 
-![Cover](/samples/cover.png?raw=true "Cover")
+![Cover](/samples/render/cover.png?raw=true "Cover")
 
-![Shadow Glamour Shot](/samples/shadow-glamour-shot.png?raw=true "Shadow Glamour Shot")
+![Shadow Glamour Shot](/samples/render/shadow-glamour-shot.png?raw=true "Shadow Glamour Shot")
 
-![Reflect-Refract](/samples/reflect-refract.png?raw=true "Reflect Refract")
+![Reflect-Refract](/samples/render/reflect-refract.png?raw=true "Reflect Refract")
 
-![Fresnel](/samples/fresnel.png?raw=true "Fresnel")
+![Fresnel](/samples/render/fresnel.png?raw=true "Fresnel")
 
-![Plane](/samples/ch09_plane.png?raw=true "Plane")
+![Plane](/samples/render/ch09_plane.png?raw=true "Plane")
 
-![Pattern](/samples/ch10_pattern.png?raw=true "Pattern")
+![Pattern](/samples/render/ch10_pattern.png?raw=true "Pattern")
 
-![Reflection](/samples/ch11_reflection.png?raw=true "Reflection")
+![Reflection](/samples/render/ch11_reflection.png?raw=true "Reflection")
 
-![Refraction](/samples/ch11_refraction.png?raw=true "Refraction")
+![Refraction](/samples/render/ch11_refraction.png?raw=true "Refraction")
 
-![Cube](/samples/ch12_cube.png?raw=true "Cube")
+![Cube](/samples/render/ch12_cube.png?raw=true "Cube")
 
-![Cylinder](/samples/ch13_cylinder.png?raw=true "Cylinder")
+![Cylinder](/samples/render/ch13_cylinder.png?raw=true "Cylinder")
 
-![Cone](/samples/ch13_cone.png?raw=true "Cone")
+![Cone](/samples/render/ch13_cone.png?raw=true "Cone")
 
-![Hexagon](/samples/ch14_hexagon.png?raw=true "Hexagon")
+![Hexagon](/samples/render/ch14_hexagon.png?raw=true "Hexagon")
 
-![Triangle](/samples/ch15_triangle.png?raw=true "Triangle")
+![Triangle](/samples/render/ch15_triangle.png?raw=true "Triangle")
