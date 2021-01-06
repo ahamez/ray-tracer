@@ -114,6 +114,36 @@ impl BoundingBox {
             (tmin, tmax)
         }
     }
+
+    pub fn split(&self) -> (BoundingBox, BoundingBox) {
+        let dx = self.max.x() - self.min.x();
+        let dy = self.max.y() - self.min.y();
+        let dz = self.max.z() - self.min.z();
+
+        let greatest = dx.max(dy.max(dz));
+
+        let (mut x0, mut y0, mut z0) = (self.min.x(), self.min.y(), self.min.z());
+        let (mut x1, mut y1, mut z1) = (self.max.x(), self.max.y(), self.max.z());
+
+        if greatest == dx {
+            x0 = x0 + dx / 2.0;
+            x1 = x0;
+        } else if greatest == dy {
+            y0 = y0 + dy / 2.0;
+            y1 = y0;
+        } else {
+            z0 = z0 + dz / 2.0;
+            z1 = z0;
+        }
+
+        let mid_min = Point::new(x0, y0, z0);
+        let mid_max = Point::new(x1, y1, z1);
+
+        (
+            BoundingBox::new().with_min(self.min).with_max(mid_max),
+            BoundingBox::new().with_min(mid_min).with_max(self.max),
+        )
+    }
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -319,6 +349,66 @@ mod tests {
             };
             assert_eq!(bbox.is_intersected(&ray), result);
         }
+    }
+
+    #[test]
+    fn splitting_a_perfect_cube() {
+        let bbox = BoundingBox::new()
+            .with_min(Point::new(-1.0, -4.0, -5.0))
+            .with_max(Point::new(9.0, 6.0, 5.0));
+
+        let (left, right) = bbox.split();
+
+        assert_eq!(left.min, Point::new(-1.0, -4.0, -5.0));
+        assert_eq!(left.max, Point::new(4.0, 6.0, 5.0));
+
+        assert_eq!(right.min, Point::new(4.0, -4.0, -5.0));
+        assert_eq!(right.max, Point::new(9.0, 6.0, 5.0));
+    }
+
+    #[test]
+    fn splitting_a_x_wide_box() {
+        let bbox = BoundingBox::new()
+            .with_min(Point::new(-1.0, -2.0, -3.0))
+            .with_max(Point::new(9.0, 5.5, 3.0));
+
+        let (left, right) = bbox.split();
+
+        assert_eq!(left.min, Point::new(-1.0, -2.0, -3.0));
+        assert_eq!(left.max, Point::new(4.0, 5.5, 3.0));
+
+        assert_eq!(right.min, Point::new(4.0, -2.0, -3.0));
+        assert_eq!(right.max, Point::new(9.0, 5.5, 3.0));
+    }
+
+    #[test]
+    fn splitting_a_y_wide_box() {
+        let bbox = BoundingBox::new()
+            .with_min(Point::new(-1.0, -2.0, -3.0))
+            .with_max(Point::new(5.0, 8.0, 3.0));
+
+        let (left, right) = bbox.split();
+
+        assert_eq!(left.min, Point::new(-1.0, -2.0, -3.0));
+        assert_eq!(left.max, Point::new(5.0, 3.0, 3.0));
+
+        assert_eq!(right.min, Point::new(-1.0, 3.0, -3.0));
+        assert_eq!(right.max, Point::new(5.0, 8.0, 3.0));
+    }
+
+    #[test]
+    fn splitting_a_z_wide_box() {
+        let bbox = BoundingBox::new()
+            .with_min(Point::new(-1.0, -2.0, -3.0))
+            .with_max(Point::new(5.0, 3.0, 7.0));
+
+        let (left, right) = bbox.split();
+
+        assert_eq!(left.min, Point::new(-1.0, -2.0, -3.0));
+        assert_eq!(left.max, Point::new(5.0, 3.0, 2.0));
+
+        assert_eq!(right.min, Point::new(-1.0, -2.0, 2.0));
+        assert_eq!(right.max, Point::new(5.0, 3.0, 7.0));
     }
 }
 
