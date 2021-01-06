@@ -4,7 +4,7 @@ use clap::{App, Arg};
 use ray_tracer::{
     io::{obj, yaml},
     primitive::{Point, Tuple, Vector},
-    rtc::{view_transform, Camera, Color, Light, ParallelRendering, World},
+    rtc::{view_transform, Camera, Color, Light, ParallelRendering, Transform, World},
 };
 use std::{f64::consts::PI, sync::Arc};
 
@@ -38,15 +38,57 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             Arg::with_name("factor")
                 .short("f")
                 .long("factor")
-                .value_name("FACTOR")
+                .value_name("INTEGER")
                 .help("Sets a factor to apply on width/height")
                 .takes_value(true),
         )
         .arg(
             Arg::with_name("fov")
                 .long("fov")
-                .value_name("FOV")
+                .value_name("FLOAT")
                 .help("Sets the field of view")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("rotate-x")
+                .long("rotate-x")
+                .value_name("FLOAT")
+                .help("Rotate along the X axis")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("rotate-y")
+                .long("rotate-y")
+                .value_name("FLOAT")
+                .help("Rotate along the Y axis")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("rotate-z")
+                .long("rotate-z")
+                .value_name("FLOAT")
+                .help("Rotate along the Z axis")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("translate-x")
+                .long("translate-x")
+                .value_name("FLOAT")
+                .help("Rotate along the X axis")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("translate-y")
+                .long("translate-y")
+                .value_name("FLOAT")
+                .help("Rotate along the Y axis")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("translate-z")
+                .long("translate-z")
+                .value_name("FLOAT")
+                .help("Rotate along the Z axis")
                 .takes_value(true),
         )
         .arg(
@@ -66,6 +108,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let factor = clap::value_t!(matches.value_of("factor"), usize).unwrap_or(1);
     let fov = clap::value_t!(matches.value_of("fov"), f64).unwrap_or(PI / 2.0);
+    let rotate_x = clap::value_t!(matches.value_of("rotate-x"), f64).unwrap_or(0.0);
+    let rotate_y = clap::value_t!(matches.value_of("rotate-y"), f64).unwrap_or(0.0);
+    let rotate_z = clap::value_t!(matches.value_of("rotate-z"), f64).unwrap_or(0.0);
+    let translate_x = clap::value_t!(matches.value_of("translate-x"), f64).unwrap_or(0.0);
+    let translate_y = clap::value_t!(matches.value_of("translate-y"), f64).unwrap_or(0.0);
+    let translate_z = clap::value_t!(matches.value_of("translate-z"), f64).unwrap_or(0.0);
     let parallel = if matches.is_present("sequential") {
         ParallelRendering::False
     } else {
@@ -87,15 +135,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (world, camera) = match ext.to_str() {
         Some("yml") => yaml::parse(&path),
         Some("obj") => {
-            let group = Arc::new(obj::parse_file(&path)?);
+            let group = Arc::new(
+                obj::parse_file(&path)?
+                    .translate(translate_x, translate_y, translate_z)
+                    .rotate_x(rotate_x)
+                    .rotate_y(rotate_y)
+                    .rotate_z(rotate_z),
+            );
 
-            let light = Light::new_point_light(Color::white(), Point::new(0.0, -10.0, 20.0));
+            let light = Light::new_point_light(Color::white(), Point::new(20.0, -0.0, 80.0));
 
             let world = World::new()
                 .with_objects(vec![group])
                 .with_lights(vec![light]);
 
-            let from = Point::new(0.0, -13.0, 17.0);
+            let from = Point::new(20.0, 0.0, 80.0);
             let to = Point::new(0.0, 1.0, 0.0);
             let up = Vector::new(0.0, 1.0, 0.0);
 
