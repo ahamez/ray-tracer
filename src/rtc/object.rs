@@ -7,6 +7,7 @@ use crate::{
         BoundingBox, Intersection, IntersectionPusher, Material, Ray, Shape, Transform,
     },
 };
+use std::sync::Arc;
 
 /* ---------------------------------------------------------------------------------------------- */
 
@@ -64,8 +65,18 @@ impl Object {
         }
     }
 
-    pub fn new_group(builder: &GroupBuilder) -> Self {
-        builder.build().transform(&Matrix::id())
+    pub fn new_group(children: Vec<Arc<Object>>) -> Self {
+        let children_group_builders = children
+            .iter()
+            .map(|child| GroupBuilder::from_object(child))
+            .collect();
+        let group_builder = GroupBuilder::Node(Object::new_dummy(), children_group_builders);
+        let object = group_builder.build();
+
+        Object {
+            bounding_box: object.shape.bounds(),
+            ..object
+        }
     }
 
     pub fn new_plane() -> Self {
@@ -142,8 +153,12 @@ impl Object {
     }
 
     pub fn with_transformation(mut self, transformation: Matrix) -> Self {
-        self.transformation = Matrix::id();
-        self.transform(&transformation)
+        self.transformation = transformation;
+        self.transformation_inverse = self.transformation.invert();
+        self.transformation_inverse_transpose = self.transformation_inverse.transpose();
+        self.bounding_box = self.bounds().transform(&self.transformation);
+
+        self
     }
 
     pub fn intersects(&self, ray: &Ray, push: &mut impl IntersectionPusher) {
@@ -218,18 +233,43 @@ impl Default for Object {
 /* ---------------------------------------------------------------------------------------------- */
 
 impl Transform for Object {
-    fn transform(&self, transformation: &Matrix) -> Self {
-        let transformation = *transformation * self.transformation;
-        let transformation_inverse = transformation.invert();
-        let transformation_inverse_transpose = transformation_inverse.transpose();
-        let bounding_box = self.shape.bounds().transform(&transformation);
+    fn transform(&self, new_transformation: &Matrix) -> Self {
+        match self.shape() {
+            Shape::Group(g) => {
+                // Each time a Group is transformed, we convert it back to a GroupBuilder,
+                // which is easier to manipulate. It's not the most efficient, but as this
+                // is only peformed when constructing objects of a world, it has no impact on
+                // the rendering itself.
+                let children_group_builders = g
+                    .children()
+                    .iter()
+                    .map(|child| GroupBuilder::from_object(child))
+                    .collect();
 
-        Object {
-            bounding_box,
-            transformation,
-            transformation_inverse,
-            transformation_inverse_transpose,
-            ..self.clone()
+                // We then create a new top GroupBuilder Node from which the new transformation is
+                // applied.
+                let group_builder = GroupBuilder::Node(
+                    Object::new_dummy().with_transformation(*new_transformation),
+                    children_group_builders,
+                );
+
+                // Convert back to a Group.
+                group_builder.build()
+            }
+            _other_shape => {
+                let transformation = *new_transformation * self.transformation;
+                let transformation_inverse = transformation.invert();
+                let transformation_inverse_transpose = transformation_inverse.transpose();
+                let bounding_box = self.shape.bounds().transform(&transformation);
+
+                Object {
+                    bounding_box,
+                    transformation,
+                    transformation_inverse,
+                    transformation_inverse_transpose,
+                    ..self.clone()
+                }
+            }
         }
     }
 }
@@ -265,17 +305,24 @@ mod tests {
         // With two nested groups with transformations in both
         {
             let s = Object::new_sphere().translate(5.0, 0.0, 0.0);
+            let g2 = Object::new_group(vec![Arc::new(s)])
+                .scale(2.0, 2.0, 2.0)
+                .rotate_y(std::f64::consts::PI / 2.0);
+            let g1 = Object::new_group(vec![Arc::new(g2.clone())]);
 
-            let g2_builder = GroupBuilder::Node(
-                Object::new_dummy().scale(2.0, 2.0, 2.0),
-                vec![GroupBuilder::Leaf(s.clone())],
-            );
+            // Retrieve the s with the baked-in group transform.
+            let group_g2 = g1.shape().as_group().unwrap().children()[0].clone();
+            let group_s = group_g2.shape().as_group().unwrap().children()[0].clone();
 
-            let g1_builder = GroupBuilder::Node(
-                Object::new_dummy().rotate_y(std::f64::consts::PI / 2.0),
-                vec![g2_builder],
+            assert_eq!(
+                group_s.world_to_object(&Point::new(-2.0, 0.0, -10.0)),
+                Point::new(0.0, 0.0, -1.0)
             );
-            let g1 = Object::new_group(&g1_builder);
+        }
+        {
+            let s = Object::new_sphere().translate(5.0, 0.0, 0.0);
+            let g2 = Object::new_group(vec![Arc::new(s)]).scale(2.0, 2.0, 2.0);
+            let g1 = Object::new_group(vec![Arc::new(g2)]).rotate_y(std::f64::consts::PI / 2.0);
 
             // Retrieve the s with the baked-in group transform.
             let group_g2 = g1.shape().as_group().unwrap().children()[0].clone();
@@ -291,17 +338,8 @@ mod tests {
     #[test]
     fn converting_a_normal_from_object_to_world_space() {
         let s = Object::new_sphere().translate(5.0, 0.0, 0.0);
-
-        let g2_builder = GroupBuilder::Node(
-            Object::new_dummy().scale(1.0, 2.0, 3.0),
-            vec![GroupBuilder::Leaf(s.clone())],
-        );
-
-        let g1_builder = GroupBuilder::Node(
-            Object::new_dummy().rotate_y(std::f64::consts::PI / 2.0),
-            vec![g2_builder],
-        );
-        let g1 = Object::new_group(&g1_builder);
+        let g2 = Object::new_group(vec![Arc::new(s)]).scale(1.0, 2.0, 3.0);
+        let g1 = Object::new_group(vec![Arc::new(g2)]).rotate_y(std::f64::consts::PI / 2.0);
 
         // Retrieve the s with the baked-in group transform.
         let group_g2 = g1.shape().as_group().unwrap().children()[0].clone();
@@ -318,17 +356,8 @@ mod tests {
     #[test]
     fn finding_the_normal_on_a_child_object() {
         let s = Object::new_sphere().translate(5.0, 0.0, 0.0);
-
-        let g2_builder = GroupBuilder::Node(
-            Object::new_dummy().scale(1.0, 2.0, 3.0),
-            vec![GroupBuilder::Leaf(s.clone())],
-        );
-
-        let g1_builder = GroupBuilder::Node(
-            Object::new_dummy().rotate_y(std::f64::consts::PI / 2.0),
-            vec![g2_builder],
-        );
-        let g1 = Object::new_group(&g1_builder);
+        let g2 = Object::new_group(vec![Arc::new(s)]).scale(1.0, 2.0, 3.0);
+        let g1 = Object::new_group(vec![Arc::new(g2)]).rotate_y(std::f64::consts::PI / 2.0);
 
         // Retrieve the s with the baked-in group transform.
         let group_g2 = g1.shape().as_group().unwrap().children()[0].clone();

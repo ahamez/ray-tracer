@@ -2,13 +2,14 @@
 
 use crate::{
     primitive::{Point, Tuple, Vector},
-    rtc::{GroupBuilder, Object},
+    rtc::Object,
 };
 use std::{
     collections::HashMap,
     error::Error,
     fmt,
     io::{prelude::*, BufReader},
+    sync::Arc,
 };
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -248,41 +249,29 @@ fn parse_data(s: &str) -> Result<Data> {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn mk_triangles(face: &Face, vertices: &[Point], normals: &[Vector]) -> Vec<Object> {
+fn mk_triangles(face: &Face, vertices: &[Point], normals: &[Vector]) -> Vec<Arc<Object>> {
     let mut triangles = vec![];
 
     for i in 1..face.vertices.len() - 1 {
         if face.has_normals() {
-            triangles.push(Object::new_smooth_triangle(
+            triangles.push(Arc::new(Object::new_smooth_triangle(
                 vertices[face.vertices[0].vertex_index],
                 vertices[face.vertices[i].vertex_index],
                 vertices[face.vertices[i + 1].vertex_index],
                 normals[face.vertices[0].normal_index.expect("Unset normal")],
                 normals[face.vertices[i].normal_index.expect("Unset normal")],
                 normals[face.vertices[i + 1].normal_index.expect("Unset normal")],
-            ));
+            )));
         } else {
-            triangles.push(Object::new_triangle(
+            triangles.push(Arc::new(Object::new_triangle(
                 vertices[face.vertices[0].vertex_index],
                 vertices[face.vertices[i].vertex_index],
                 vertices[face.vertices[i + 1].vertex_index],
-            ));
+            )));
         }
     }
 
     triangles
-}
-
-/* ---------------------------------------------------------------------------------------------- */
-
-fn mk_group(triangles: Vec<Object>) -> GroupBuilder {
-    GroupBuilder::Node(
-        Object::new_dummy(),
-        triangles
-            .iter()
-            .map(|o| GroupBuilder::Leaf(o.clone()))
-            .collect(),
-    )
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -295,33 +284,30 @@ pub fn parse_str(s: &str) -> Result<Object> {
 
     for face in data.faces {
         let triangles = mk_triangles(&face, &data.vertices, &data.normals);
-        let group = mk_group(triangles);
+        let group = Object::new_group(triangles);
 
         match face.group {
-            None => anonymous.push(group),
+            None => anonymous.push(Arc::new(group)),
             Some(name) => match named.get_mut(&name) {
                 None => {
-                    named.insert(name, vec![group]);
+                    named.insert(name, vec![Arc::new(group)]);
                 }
-                Some(entry) => entry.push(group),
+                Some(entry) => entry.push(Arc::new(group)),
             },
         }
     }
 
-    let anonymous_group = GroupBuilder::Node(Object::new_dummy(), anonymous);
+    let anonymous_group = Object::new_group(anonymous);
 
     if named.is_empty() {
-        Ok(Object::new_group(&anonymous_group))
+        Ok(anonymous_group)
     } else {
-        let mut groups = vec![anonymous_group];
+        let mut groups = vec![Arc::new(anonymous_group)];
         for (_, triangles) in named {
-            groups.push(GroupBuilder::Node(Object::new_dummy(), triangles))
+            groups.push(Arc::new(Object::new_group(triangles)))
         }
 
-        Ok(Object::new_group(&GroupBuilder::Node(
-            Object::new_dummy(),
-            groups,
-        )))
+        Ok(Object::new_group(groups))
     }
 }
 

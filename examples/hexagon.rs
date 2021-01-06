@@ -1,32 +1,29 @@
 use ray_tracer::{
     primitive::{Point, Tuple, Vector},
-    rtc::{
-        view_transform, Camera, Color, GroupBuilder, Light, Object, ParallelRendering, Transform,
-        World,
-    },
+    rtc::{view_transform, Camera, Color, Light, Object, ParallelRendering, Transform, World},
 };
 use std::f64::consts::PI;
 use std::sync::Arc;
 
-fn hexagon_corner() -> GroupBuilder {
-    let corner = Object::new_sphere()
-        .scale(0.25, 0.25, 0.25)
-        .translate(0.0, 0.0, -1.0);
-
-    GroupBuilder::Leaf(corner)
+fn hexagon_corner() -> Arc<Object> {
+    Arc::new(
+        Object::new_sphere()
+            .scale(0.25, 0.25, 0.25)
+            .translate(0.0, 0.0, -1.0),
+    )
 }
 
-fn hexagon_edge() -> GroupBuilder {
-    let edge = Object::new_cylinder(0.0, 1.0, false)
-        .scale(0.25, 1.0, 0.25)
-        .rotate_z(-PI / 2.0)
-        .rotate_y(-PI / 6.0)
-        .translate(0.0, 0.0, -1.0);
-
-    GroupBuilder::Leaf(edge)
+fn hexagon_edge() -> Arc<Object> {
+    Arc::new(
+        Object::new_cylinder(0.0, 1.0, false)
+            .scale(0.25, 1.0, 0.25)
+            .rotate_z(-PI / 2.0)
+            .rotate_y(-PI / 6.0)
+            .translate(0.0, 0.0, -1.0),
+    )
 }
 
-fn hexagon_side() -> Vec<GroupBuilder> {
+fn hexagon_side() -> Vec<Arc<Object>> {
     vec![hexagon_corner(), hexagon_edge()]
 }
 
@@ -34,22 +31,15 @@ fn hexagon() -> Object {
     let mut sides = vec![];
 
     for n in 0..=5 {
-        let side = GroupBuilder::Node(
-            Object::new_dummy().rotate_y(n as f64 * PI / 3.0),
-            hexagon_side(),
-        );
-
-        sides.push(side);
+        let side = Object::new_group(hexagon_side()).rotate_y(n as f64 * PI / 3.0);
+        sides.push(Arc::new(side));
     }
 
-    let hex_builder = GroupBuilder::Node(
-        Object::new_dummy()
-            .rotate_x(PI / 3.0)
-            .translate(0.0, 0.75, 0.0),
-        sides,
-    );
+    let hex = Object::new_group(sides)
+        .rotate_x(PI / 3.0)
+        .translate(0.0, 0.75, 0.0);
 
-    Object::new_group(&hex_builder)
+    Object::new_group(vec![Arc::new(hex)])
 }
 
 fn main() {

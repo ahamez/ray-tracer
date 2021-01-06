@@ -60,6 +60,23 @@ impl Group {
 
 /* ---------------------------------------------------------------------------------------------- */
 
+impl Transform for Group {
+    fn transform(&self, transformation: &Matrix) -> Self {
+        eprintln!("{:p}", self);
+        let mut children = vec![];
+        for child in &self.children {
+            children.push(Arc::new(child.transform(transformation)))
+        }
+
+        Self {
+            children,
+            ..self.clone()
+        }
+    }
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+
 #[derive(Clone, Debug)]
 pub enum GroupBuilder {
     Leaf(Object),
@@ -84,9 +101,34 @@ impl GroupBuilder {
                 group
                     .clone()
                     .with_shape(Shape::Group(Group::new(new_children)))
+                    // The group transformation has been applied to all children.
+                    // To make sure it's not propagated again in future usages of this
+                    // newly created group, we set it to an Id transformation which is
+                    // "neutral".
                     .with_transformation(Matrix::id())
             }
         }
+    }
+
+    pub fn from_object(object: &Object) -> Self {
+        match object.shape() {
+            Shape::Group(g) => GroupBuilder::Node(
+                object.clone(),
+                g.children()
+                    .iter()
+                    .map(|child| GroupBuilder::from_object(child))
+                    .collect(),
+            ),
+            _other => GroupBuilder::Leaf(object.clone()),
+        }
+    }
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+
+impl From<Object> for GroupBuilder {
+    fn from(object: Object) -> Self {
+        GroupBuilder::from_object(&object)
     }
 }
 
@@ -128,8 +170,7 @@ mod tests {
 
     #[test]
     fn intersecting_a_ray_with_an_empty_group() {
-        let group_builder = GroupBuilder::Node(Object::new_dummy(), vec![]);
-        let group = Object::new_group(&group_builder);
+        let group = Object::new_group(vec![]);
         let ray = Ray {
             origin: Point::new(0.0, 0.0, 0.0),
             direction: Vector::new(0.0, 0.0, 1.0),
@@ -148,15 +189,12 @@ mod tests {
         let s2 = Object::new_sphere().translate(0.0, 0.0, -3.0);
         let s3 = Object::new_sphere().translate(5.0, 0.0, 0.0);
 
-        let group_builder = GroupBuilder::Node(
-            Object::new_dummy(),
-            vec![
-                GroupBuilder::Leaf(s1.clone()),
-                GroupBuilder::Leaf(s2.clone()),
-                GroupBuilder::Leaf(s3),
-            ],
-        );
-        let group = Object::new_group(&group_builder);
+        let group = Object::new_group(vec![
+            Arc::new(s1.clone()),
+            Arc::new(s2.clone()),
+            Arc::new(s3),
+        ]);
+        // let group = Object::new_group(&group_builder);
 
         let ray = Ray {
             origin: Point::new(0.0, 0.0, -5.0),
@@ -179,17 +217,12 @@ mod tests {
             let s2 = Object::new_sphere().translate(0.0, 0.0, -3.0);
             let s3 = Object::new_sphere().translate(5.0, 0.0, 0.0);
 
-            let group_builder_1 = GroupBuilder::Node(
-                Object::new_dummy(),
-                vec![
-                    GroupBuilder::Leaf(s1.clone()),
-                    GroupBuilder::Leaf(s2.clone()),
-                    GroupBuilder::Leaf(s3),
-                ],
-            );
-
-            let group_builder_2 = GroupBuilder::Node(Object::new_dummy(), vec![group_builder_1]);
-            let group_2 = Object::new_group(&group_builder_2);
+            let group_1 = Object::new_group(vec![
+                Arc::new(s1.clone()),
+                Arc::new(s2.clone()),
+                Arc::new(s3),
+            ]);
+            let group_2 = Object::new_group(vec![Arc::new(group_1)]);
 
             let ray = Ray {
                 origin: Point::new(0.0, 0.0, -5.0),
@@ -204,22 +237,13 @@ mod tests {
             assert_eq!(*xs[2].object(), Arc::new(s1.clone()));
             assert_eq!(*xs[3].object(), Arc::new(s1));
         }
-        // s1 and s2 in different groups
         {
             let s1 = Object::new_sphere();
             let s2 = Object::new_sphere().translate(0.0, 0.0, -3.0);
             let s3 = Object::new_sphere().translate(5.0, 0.0, 0.0);
 
-            let group_builder_1 = GroupBuilder::Node(
-                Object::new_dummy(),
-                vec![GroupBuilder::Leaf(s1.clone()), GroupBuilder::Leaf(s3)],
-            );
-
-            let group_builder_2 = GroupBuilder::Node(
-                Object::new_dummy(),
-                vec![group_builder_1, GroupBuilder::Leaf(s2.clone())],
-            );
-            let group_2 = Object::new_group(&group_builder_2);
+            let group_1 = Object::new_group(vec![Arc::new(s1.clone()), Arc::new(s3)]);
+            let group_2 = Object::new_group(vec![Arc::new(group_1), Arc::new(s2.clone())]);
 
             let ray = Ray {
                 origin: Point::new(0.0, 0.0, -5.0),
@@ -240,11 +264,7 @@ mod tests {
     fn intersecting_a_transformed_group() {
         let s = Object::new_sphere().translate(5.0, 0.0, 0.0);
 
-        let group_builder = GroupBuilder::Node(
-            Object::new_dummy().scale(2.0, 2.0, 2.0),
-            vec![GroupBuilder::Leaf(s.clone())],
-        );
-        let group = Object::new_group(&group_builder);
+        let group = Object::new_group(vec![Arc::new(s)]).scale(2.0, 2.0, 2.0);
 
         let ray = Ray {
             origin: Point::new(10.0, 0.0, -10.0),
@@ -261,14 +281,8 @@ mod tests {
         {
             let s = Object::new_sphere().translate(5.0, 0.0, 0.0);
 
-            let group_builder_1 =
-                GroupBuilder::Node(Object::new_dummy(), vec![GroupBuilder::Leaf(s.clone())]);
-
-            let group_builder_2 = GroupBuilder::Node(
-                Object::new_dummy().scale(2.0, 2.0, 2.0),
-                vec![group_builder_1],
-            );
-            let group_2 = Object::new_group(&group_builder_2);
+            let group_1 = Object::new_group(vec![Arc::new(s)]);
+            let group_2 = Object::new_group(vec![Arc::new(group_1)]).scale(2.0, 2.0, 2.0);
 
             let ray = Ray {
                 origin: Point::new(10.0, 0.0, -10.0),
@@ -282,13 +296,8 @@ mod tests {
         {
             let s = Object::new_sphere().translate(5.0, 0.0, 0.0);
 
-            let group_builder_1 = GroupBuilder::Node(
-                Object::new_dummy().scale(2.0, 2.0, 2.0),
-                vec![GroupBuilder::Leaf(s.clone())],
-            );
-
-            let group_builder_2 = GroupBuilder::Node(Object::new_dummy(), vec![group_builder_1]);
-            let group_2 = Object::new_group(&group_builder_2);
+            let group_1 = Object::new_group(vec![Arc::new(s)]).scale(2.0, 2.0, 2.0);
+            let group_2 = Object::new_group(vec![Arc::new(group_1.clone())]);
 
             let ray = Ray {
                 origin: Point::new(10.0, 0.0, -10.0),
@@ -313,14 +322,9 @@ mod tests {
         // With one group
         {
             let s = Object::new_sphere().translate(5.0, 0.0, 0.0);
-
-            let g2_builder = GroupBuilder::Node(
-                Object::new_dummy()
-                    .scale(2.0, 2.0, 2.0)
-                    .rotate_y(std::f64::consts::PI / 2.0),
-                vec![GroupBuilder::Leaf(s.clone())],
-            );
-            let g2 = Object::new_group(&g2_builder);
+            let g2 = Object::new_group(vec![Arc::new(s)])
+                .scale(2.0, 2.0, 2.0)
+                .rotate_y(std::f64::consts::PI / 2.0);
 
             // Retrieve the s with the baked-in group transform.
             let group_s = g2.shape().as_group().unwrap().children[0].clone();
@@ -329,16 +333,10 @@ mod tests {
         }
         {
             let s = Object::new_sphere().translate(5.0, 0.0, 0.0);
-
-            let g2_builder = GroupBuilder::Node(
-                Object::new_dummy()
-                    .rotate_y(std::f64::consts::PI / 2.0)
-                    .scale(2.0, 2.0, 2.0),
-                vec![GroupBuilder::Leaf(s.clone())],
-            );
-
-            let g1_builder = GroupBuilder::Node(Object::new_dummy(), vec![g2_builder]);
-            let g1 = Object::new_group(&g1_builder);
+            let g2 = Object::new_group(vec![Arc::new(s)])
+                .rotate_y(std::f64::consts::PI / 2.0)
+                .scale(2.0, 2.0, 2.0);
+            let g1 = Object::new_group(vec![Arc::new(g2)]);
 
             // Retrieve the s with the baked-in group transform.
             let group_g2 = g1.shape().as_group().unwrap().children[0].clone();
@@ -349,18 +347,11 @@ mod tests {
         // With three nested groups, only one being transformed
         {
             let s = Object::new_sphere().translate(5.0, 0.0, 0.0);
-
-            let g2_builder = GroupBuilder::Node(
-                Object::new_dummy()
-                    .rotate_y(std::f64::consts::PI / 2.0)
-                    .scale(2.0, 2.0, 2.0),
-                vec![GroupBuilder::Leaf(s.clone())],
-            );
-
-            let g1_builder = GroupBuilder::Node(Object::new_dummy(), vec![g2_builder]);
-
-            let g0_builder = GroupBuilder::Node(Object::new_dummy(), vec![g1_builder]);
-            let g0 = Object::new_group(&g0_builder);
+            let g2 = Object::new_group(vec![Arc::new(s)])
+                .rotate_y(std::f64::consts::PI / 2.0)
+                .scale(2.0, 2.0, 2.0);
+            let g1 = Object::new_group(vec![Arc::new(g2)]);
+            let g0 = Object::new_group(vec![Arc::new(g1)]);
 
             // Retrieve the s with the baked-in group transform.
             let group_g1 = g0.shape().as_group().unwrap().children[0].clone();
@@ -372,17 +363,8 @@ mod tests {
         // With two nested groups with transformations in both
         {
             let s = Object::new_sphere().translate(5.0, 0.0, 0.0);
-
-            let g2_builder = GroupBuilder::Node(
-                Object::new_dummy().scale(2.0, 2.0, 2.0),
-                vec![GroupBuilder::Leaf(s.clone())],
-            );
-
-            let g1_builder = GroupBuilder::Node(
-                Object::new_dummy().rotate_y(std::f64::consts::PI / 2.0),
-                vec![g2_builder],
-            );
-            let g1 = Object::new_group(&g1_builder);
+            let g2 = Object::new_group(vec![Arc::new(s)]).rotate_y(std::f64::consts::PI / 2.0);
+            let g1 = Object::new_group(vec![Arc::new(g2)]).scale(2.0, 2.0, 2.0);
 
             // Retrieve the s with the baked-in group transform.
             let group_g2 = g1.shape().as_group().unwrap().children[0].clone();
@@ -401,11 +383,7 @@ mod tests {
             .scale(0.5, 1.0, 0.5)
             .translate(-4.0, -1.0, 4.0);
 
-        let group_builder = GroupBuilder::Node(
-            Object::new_dummy(),
-            vec![GroupBuilder::Leaf(s), GroupBuilder::Leaf(c)],
-        );
-        let g = Object::new_group(&group_builder);
+        let g = Object::new_group(vec![Arc::new(s), Arc::new(c)]);
 
         assert_eq!(g.bounding_box().min(), Point::new(-4.5, -3.0, -5.0));
         assert_eq!(g.bounding_box().max(), Point::new(4.0, 7.0, 4.5));
@@ -415,8 +393,7 @@ mod tests {
     fn intersecting_a_ray_with_doesnt_test_children_if_bbox_is_missed() {
         let ts = Object::new_test_shape();
 
-        let group_builder = GroupBuilder::Node(Object::new_dummy(), vec![GroupBuilder::Leaf(ts)]);
-        let g = Object::new_group(&group_builder);
+        let g = Object::new_group(vec![Arc::new(ts)]);
 
         let ray = Ray {
             origin: Point::new(0.0, 0.0, -5.0),
@@ -438,8 +415,7 @@ mod tests {
     fn intersecting_a_ray_with_tests_children_if_bbox_is_hit() {
         let ts = Object::new_test_shape();
 
-        let group_builder = GroupBuilder::Node(Object::new_dummy(), vec![GroupBuilder::Leaf(ts)]);
-        let g = Object::new_group(&group_builder);
+        let g = Object::new_group(vec![Arc::new(ts)]);
 
         let ray = Ray {
             origin: Point::new(0.0, 0.0, -5.0),

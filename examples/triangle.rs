@@ -1,8 +1,8 @@
 use ray_tracer::{
     primitive::{Point, Tuple, Vector},
     rtc::{
-        view_transform, Camera, Color, GroupBuilder, Light, Material, Object, ParallelRendering,
-        Pattern, Transform, World,
+        view_transform, Camera, Color, Light, Material, Object, ParallelRendering, Pattern,
+        Transform, World,
     },
 };
 use std::f64::consts::PI;
@@ -48,19 +48,12 @@ fn main() {
     )
     .with_material(Material::new().with_color(Color::blue()));
 
-    let pyramid_group_builder = GroupBuilder::Node(
-        Object::new_dummy()
+    let pyramid = Arc::new(
+        Object::new_group(vec![Arc::new(t1), Arc::new(t2), Arc::new(t3), Arc::new(t4)])
             .scale(2.0, 2.0, 2.0)
             .rotate_y(PI / 5.0)
             .translate(-1.5, 0.0, 0.0),
-        vec![
-            GroupBuilder::Leaf(t1),
-            GroupBuilder::Leaf(t2),
-            GroupBuilder::Leaf(t3),
-            GroupBuilder::Leaf(t4),
-        ],
     );
-    let pyramid_group = Arc::new(Object::new_group(&pyramid_group_builder));
 
     let cube = Arc::new(
         Object::new_cube()
@@ -79,7 +72,7 @@ fn main() {
     let light = Light::new_point_light(Color::white(), Point::new(-20.0, 6.0, -7.0));
 
     let world = World::new()
-        .with_objects(vec![floor, pyramid_group, cube])
+        .with_objects(vec![floor, pyramid, cube])
         .with_lights(vec![light]);
 
     let from = Point::new(3.0, 3.0, -6.0);
