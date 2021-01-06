@@ -149,6 +149,7 @@ impl Object {
 
     pub fn with_shape(mut self, shape: Shape) -> Self {
         self.shape = shape;
+        self.bounding_box = self.shape.bounds();
         self
     }
 
