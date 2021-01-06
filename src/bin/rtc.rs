@@ -43,6 +43,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .takes_value(true),
         )
         .arg(
+            Arg::with_name("bvh-threshold")
+                .long("bvh-threshold")
+                .value_name("INTEGER")
+                .help("The minimal number of shapes to create a sub group. Deactivates BVH is 0.")
+                .takes_value(true),
+        )
+        .arg(
             Arg::with_name("fov")
                 .long("fov")
                 .value_name("FLOAT")
@@ -107,6 +114,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .get_matches();
 
     let factor = clap::value_t!(matches.value_of("factor"), usize).unwrap_or(1);
+    let bvh_threshold = clap::value_t!(matches.value_of("bvh-threshold"), usize).unwrap_or(4);
     let fov = clap::value_t!(matches.value_of("fov"), f64).unwrap_or(PI / 2.0);
     let rotate_x = clap::value_t!(matches.value_of("rotate-x"), f64).unwrap_or(0.0);
     let rotate_y = clap::value_t!(matches.value_of("rotate-y"), f64).unwrap_or(0.0);
@@ -127,29 +135,36 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         None => todo!(),
     };
 
-    println!("Factor: {}", factor);
-    println!("FoV: {}", fov);
     println!("Input file: {}", path_str);
+    println!("Factor: {}", factor);
+    println!("BVH: {}", bvh_threshold != 0);
+    println!("FoV: {}", fov);
     println!("Parallel rendering: {}", parallel);
 
     let (world, camera) = match ext.to_str() {
         Some("yml") => yaml::parse(&path),
         Some("obj") => {
-            let group = Arc::new(
-                obj::parse_file(&path)?
-                    .translate(translate_x, translate_y, translate_z)
-                    .rotate_x(rotate_x)
-                    .rotate_y(rotate_y)
-                    .rotate_z(rotate_z),
-            );
+            let object = obj::parse_file(&path)?
+                .translate(translate_x, translate_y, translate_z)
+                .rotate_x(rotate_x)
+                .rotate_y(rotate_y)
+                .rotate_z(rotate_z);
 
-            let light = Light::new_point_light(Color::white(), Point::new(20.0, -0.0, 80.0));
+            let object = if bvh_threshold != 0 {
+                object.divide(bvh_threshold)
+            } else {
+                object
+            };
+
+            let group = Arc::new(object);
+
+            let light = Light::new_point_light(Color::white(), Point::new(20.0, -0.0, 40.0));
 
             let world = World::new()
                 .with_objects(vec![group])
                 .with_lights(vec![light]);
 
-            let from = Point::new(20.0, 0.0, 80.0);
+            let from = Point::new(20.0, -10.0, 40.0);
             let to = Point::new(0.0, 1.0, 0.0);
             let up = Vector::new(0.0, 1.0, 0.0);
 
