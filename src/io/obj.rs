@@ -250,7 +250,7 @@ fn parse_data(s: &str) -> Result<Data> {
 /* ---------------------------------------------------------------------------------------------- */
 
 fn mk_triangles(face: &Face, vertices: &[Point], normals: &[Vector]) -> Vec<Arc<Object>> {
-    let mut triangles = vec![];
+    let mut triangles = Vec::with_capacity(face.vertices.len());
 
     for i in 1..face.vertices.len() - 1 {
         if face.has_normals() {
@@ -302,7 +302,8 @@ pub fn parse_str(s: &str) -> Result<Object> {
     if named.is_empty() {
         Ok(anonymous_group)
     } else {
-        let mut groups = vec![Arc::new(anonymous_group)];
+        let mut groups = Vec::with_capacity(named.len());
+        groups.push(Arc::new(anonymous_group));
         for (_, triangles) in named {
             groups.push(Arc::new(Object::new_group(triangles)))
         }
