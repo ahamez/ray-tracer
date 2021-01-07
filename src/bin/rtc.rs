@@ -145,7 +145,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .translate(translate_x, translate_y, translate_z)
                 .rotate_x(rotate_x)
                 .rotate_y(rotate_y)
-                .rotate_z(rotate_z);
+                .rotate_z(rotate_z)
+                .transform();
 
             let object = if bvh_threshold != 0 {
                 object.divide(bvh_threshold)

@@ -255,7 +255,8 @@ mod tests {
             .with_size(201, 101)
             .with_fov(PI / 2.0)
             .translate(0.0, -2.0, 5.0)
-            .rotate_y(PI / 4.0);
+            .rotate_y(PI / 4.0)
+            .transform();
         let r = c.ray_for_pixel(100, 50);
 
         assert_eq!(r.origin, Point::new(0.0, 2.0, -5.0));

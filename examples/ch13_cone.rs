@@ -34,7 +34,8 @@ fn main() {
                     .with_reflective(0.0),
             )
             .rotate_z(PI / 2.0)
-            .translate(-15.0, 0.0, 0.0),
+            .translate(-15.0, 0.0, 0.0)
+            .transform(),
     );
 
     let wall_right = Arc::new(
@@ -48,7 +49,8 @@ fn main() {
                     .with_reflective(0.0),
             )
             .rotate_x(PI / 2.0)
-            .translate(0.0, 0.0, 15.0),
+            .translate(0.0, 0.0, 15.0)
+            .transform(),
     );
 
     let cone_x = Arc::new(
@@ -61,7 +63,8 @@ fn main() {
                     .with_reflective(0.1),
             )
             .rotate_z(PI / 2.0)
-            .translate(0.0, 2.0, 2.0),
+            .translate(0.0, 2.0, 2.0)
+            .transform(),
     );
 
     let cone_y = Arc::new(
@@ -73,7 +76,8 @@ fn main() {
                     .with_specular(0.5)
                     .with_reflective(0.1),
             )
-            .translate(-3.0, 2.0, 0.0),
+            .translate(-3.0, 2.0, 0.0)
+            .transform(),
     );
 
     let cone_z = Arc::new(
@@ -86,7 +90,8 @@ fn main() {
                     .with_reflective(0.1),
             )
             .rotate_x(PI / 2.0)
-            .translate(3.0, 3.0, 2.0),
+            .translate(3.0, 3.0, 2.0)
+            .transform(),
     );
 
     let light = Light::new_point_light(Color::white(), Point::new(-5.0, 10.0, -10.0));

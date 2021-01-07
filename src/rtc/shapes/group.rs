@@ -210,8 +210,8 @@ mod tests {
     #[test]
     fn intersecting_a_ray_with_an_non_empty_group() {
         let s1 = Object::new_sphere();
-        let s2 = Object::new_sphere().translate(0.0, 0.0, -3.0);
-        let s3 = Object::new_sphere().translate(5.0, 0.0, 0.0);
+        let s2 = Object::new_sphere().translate(0.0, 0.0, -3.0).transform();
+        let s3 = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
 
         let group = Object::new_group(vec![
             Arc::new(s1.clone()),
@@ -238,8 +238,8 @@ mod tests {
     fn intersecting_a_ray_with_a_nested_non_empty_group() {
         {
             let s1 = Object::new_sphere();
-            let s2 = Object::new_sphere().translate(0.0, 0.0, -3.0);
-            let s3 = Object::new_sphere().translate(5.0, 0.0, 0.0);
+            let s2 = Object::new_sphere().translate(0.0, 0.0, -3.0).transform();
+            let s3 = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
 
             let group_1 = Object::new_group(vec![
                 Arc::new(s1.clone()),
@@ -263,8 +263,8 @@ mod tests {
         }
         {
             let s1 = Object::new_sphere();
-            let s2 = Object::new_sphere().translate(0.0, 0.0, -3.0);
-            let s3 = Object::new_sphere().translate(5.0, 0.0, 0.0);
+            let s2 = Object::new_sphere().translate(0.0, 0.0, -3.0).transform();
+            let s3 = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
 
             let group_1 = Object::new_group(vec![Arc::new(s1.clone()), Arc::new(s3)]);
             let group_2 = Object::new_group(vec![Arc::new(group_1), Arc::new(s2.clone())]);
@@ -286,9 +286,11 @@ mod tests {
 
     #[test]
     fn intersecting_a_transformed_group() {
-        let s = Object::new_sphere().translate(5.0, 0.0, 0.0);
+        let s = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
 
-        let group = Object::new_group(vec![Arc::new(s)]).scale(2.0, 2.0, 2.0);
+        let group = Object::new_group(vec![Arc::new(s)])
+            .scale(2.0, 2.0, 2.0)
+            .transform();
 
         let ray = Ray {
             origin: Point::new(10.0, 0.0, -10.0),
@@ -303,10 +305,12 @@ mod tests {
     #[test]
     fn intersecting_a_nested_transformed_group() {
         {
-            let s = Object::new_sphere().translate(5.0, 0.0, 0.0);
+            let s = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
 
             let group_1 = Object::new_group(vec![Arc::new(s)]);
-            let group_2 = Object::new_group(vec![Arc::new(group_1)]).scale(2.0, 2.0, 2.0);
+            let group_2 = Object::new_group(vec![Arc::new(group_1)])
+                .scale(2.0, 2.0, 2.0)
+                .transform();
 
             let ray = Ray {
                 origin: Point::new(10.0, 0.0, -10.0),
@@ -318,9 +322,11 @@ mod tests {
             assert_eq!(xs.len(), 2);
         }
         {
-            let s = Object::new_sphere().translate(5.0, 0.0, 0.0);
+            let s = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
 
-            let group_1 = Object::new_group(vec![Arc::new(s)]).scale(2.0, 2.0, 2.0);
+            let group_1 = Object::new_group(vec![Arc::new(s)])
+                .scale(2.0, 2.0, 2.0)
+                .transform();
             let group_2 = Object::new_group(vec![Arc::new(group_1.clone())]);
 
             let ray = Ray {
@@ -339,16 +345,18 @@ mod tests {
         let s = Object::new_sphere()
             .translate(5.0, 0.0, 0.0)
             .scale(2.0, 2.0, 2.0)
-            .rotate_y(std::f64::consts::PI / 2.0);
+            .rotate_y(std::f64::consts::PI / 2.0)
+            .transform();
 
         let expected_transformation = s.transformation();
 
         // With one group
         {
-            let s = Object::new_sphere().translate(5.0, 0.0, 0.0);
+            let s = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
             let g2 = Object::new_group(vec![Arc::new(s)])
                 .scale(2.0, 2.0, 2.0)
-                .rotate_y(std::f64::consts::PI / 2.0);
+                .rotate_y(std::f64::consts::PI / 2.0)
+                .transform();
 
             // Retrieve the s with the baked-in group transform.
             let group_s = g2.shape().as_group().unwrap().children[0].clone();
@@ -356,10 +364,11 @@ mod tests {
             assert_eq!(group_s.transformation(), expected_transformation);
         }
         {
-            let s = Object::new_sphere().translate(5.0, 0.0, 0.0);
+            let s = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
             let g2 = Object::new_group(vec![Arc::new(s)])
                 .rotate_y(std::f64::consts::PI / 2.0)
-                .scale(2.0, 2.0, 2.0);
+                .scale(2.0, 2.0, 2.0)
+                .transform();
             let g1 = Object::new_group(vec![Arc::new(g2)]);
 
             // Retrieve the s with the baked-in group transform.
@@ -370,10 +379,11 @@ mod tests {
         }
         // With three nested groups, only one being transformed
         {
-            let s = Object::new_sphere().translate(5.0, 0.0, 0.0);
+            let s = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
             let g2 = Object::new_group(vec![Arc::new(s)])
                 .rotate_y(std::f64::consts::PI / 2.0)
-                .scale(2.0, 2.0, 2.0);
+                .scale(2.0, 2.0, 2.0)
+                .transform();
             let g1 = Object::new_group(vec![Arc::new(g2)]);
             let g0 = Object::new_group(vec![Arc::new(g1)]);
 
@@ -386,9 +396,13 @@ mod tests {
         }
         // With two nested groups with transformations in both
         {
-            let s = Object::new_sphere().translate(5.0, 0.0, 0.0);
-            let g2 = Object::new_group(vec![Arc::new(s)]).rotate_y(std::f64::consts::PI / 2.0);
-            let g1 = Object::new_group(vec![Arc::new(g2)]).scale(2.0, 2.0, 2.0);
+            let s = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
+            let g2 = Object::new_group(vec![Arc::new(s)])
+                .rotate_y(std::f64::consts::PI / 2.0)
+                .transform();
+            let g1 = Object::new_group(vec![Arc::new(g2)])
+                .scale(2.0, 2.0, 2.0)
+                .transform();
 
             // Retrieve the s with the baked-in group transform.
             let group_g2 = g1.shape().as_group().unwrap().children[0].clone();
@@ -402,10 +416,12 @@ mod tests {
     fn a_group_has_a_bounding_box_that_contains_its_children() {
         let s = Object::new_sphere()
             .scale(2.0, 2.0, 2.0)
-            .translate(2.0, 5.0, -3.0);
+            .translate(2.0, 5.0, -3.0)
+            .transform();
         let c = Object::new_cylinder(-2.0, 2.0, true)
             .scale(0.5, 1.0, 0.5)
-            .translate(-4.0, -1.0, 4.0);
+            .translate(-4.0, -1.0, 4.0)
+            .transform();
 
         let g = Object::new_group(vec![Arc::new(s), Arc::new(c)]);
 
@@ -459,8 +475,8 @@ mod tests {
 
     #[test]
     fn partitioning_a_group_s_children() {
-        let s1 = Arc::new(Object::new_sphere().translate(-2.0, 0.0, 0.0));
-        let s2 = Arc::new(Object::new_sphere().translate(2.0, 0.0, 0.0));
+        let s1 = Arc::new(Object::new_sphere().translate(-2.0, 0.0, 0.0).transform());
+        let s2 = Arc::new(Object::new_sphere().translate(2.0, 0.0, 0.0).transform());
         let s3 = Arc::new(Object::new_sphere());
 
         let g = Object::new_group(vec![s1.clone(), s2.clone(), s3.clone()]);

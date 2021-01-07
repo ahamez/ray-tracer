@@ -96,7 +96,7 @@ mod tests {
             direction: Vector::new(0.0, 1.0, 0.0),
         };
 
-        let r1 = r0.translate(3.0, 4.0, 5.0);
+        let r1 = r0.translate(3.0, 4.0, 5.0).transform();
 
         assert_eq!(r1.origin, Point::new(4.0, 6.0, 8.0));
         assert_eq!(r1.direction, Vector::new(0.0, 1.0, 0.0));
@@ -109,7 +109,7 @@ mod tests {
             direction: Vector::new(0.0, 1.0, 0.0),
         };
 
-        let r1 = r0.scale(2.0, 3.0, 4.0);
+        let r1 = r0.scale(2.0, 3.0, 4.0).transform();
 
         assert_eq!(r1.origin, Point::new(2.0, 6.0, 12.0));
         assert_eq!(r1.direction, Vector::new(0.0, 3.0, 0.0));

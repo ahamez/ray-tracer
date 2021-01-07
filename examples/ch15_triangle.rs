@@ -52,7 +52,8 @@ fn main() {
         Object::new_group(vec![Arc::new(t1), Arc::new(t2), Arc::new(t3), Arc::new(t4)])
             .scale(2.0, 2.0, 2.0)
             .rotate_y(PI / 5.0)
-            .translate(-1.5, 0.0, 0.0),
+            .translate(-1.5, 0.0, 0.0)
+            .transform(),
     );
 
     let cube = Arc::new(
@@ -66,7 +67,8 @@ fn main() {
                     .with_shininess(100.0),
             )
             .scale(100.0, 100.0, 0.00001)
-            .translate(0.0, 1.0, 4.0),
+            .translate(0.0, 1.0, 4.0)
+            .transform(),
     );
 
     let light = Light::new_point_light(Color::white(), Point::new(-20.0, 6.0, -7.0));

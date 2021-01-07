@@ -284,7 +284,8 @@ mod tests {
 
         let bbox2 = bbox1
             .rotate_y(std::f64::consts::PI / 4.0)
-            .rotate_x(std::f64::consts::PI / 4.0);
+            .rotate_x(std::f64::consts::PI / 4.0)
+            .transform();
 
         assert_eq!(bbox2.min, Point::new(-1.4142135, -1.7071067, -1.7071067));
         assert_eq!(bbox2.max, Point::new(1.4142135, 1.7071067, 1.7071067));

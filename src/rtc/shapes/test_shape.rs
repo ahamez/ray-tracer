@@ -88,7 +88,7 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let s = Object::new_test_shape().scale(2.0, 2.0, 2.0);
+        let s = Object::new_test_shape().scale(2.0, 2.0, 2.0).transform();
 
         let mut push = Push { xs: vec![] };
         s.intersects(&ray, &mut push);

@@ -9,7 +9,8 @@ fn hexagon_corner() -> Arc<Object> {
     Arc::new(
         Object::new_sphere()
             .scale(0.25, 0.25, 0.25)
-            .translate(0.0, 0.0, -1.0),
+            .translate(0.0, 0.0, -1.0)
+            .transform(),
     )
 }
 
@@ -19,7 +20,8 @@ fn hexagon_edge() -> Arc<Object> {
             .scale(0.25, 1.0, 0.25)
             .rotate_z(-PI / 2.0)
             .rotate_y(-PI / 6.0)
-            .translate(0.0, 0.0, -1.0),
+            .translate(0.0, 0.0, -1.0)
+            .transform(),
     )
 }
 
@@ -31,13 +33,16 @@ fn hexagon() -> Object {
     let mut sides = vec![];
 
     for n in 0..=5 {
-        let side = Object::new_group(hexagon_side()).rotate_y(n as f64 * PI / 3.0);
+        let side = Object::new_group(hexagon_side())
+            .rotate_y(n as f64 * PI / 3.0)
+            .transform();
         sides.push(Arc::new(side));
     }
 
     let hex = Object::new_group(sides)
         .rotate_x(PI / 3.0)
-        .translate(0.0, 0.75, 0.0);
+        .translate(0.0, 0.75, 0.0)
+        .transform();
 
     Object::new_group(vec![Arc::new(hex)])
 }

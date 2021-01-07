@@ -209,7 +209,7 @@ pub mod tests {
                             .with_specular(0.2),
                     ),
                 ),
-                Arc::new(Object::new_sphere().scale(0.5, 0.5, 0.5)),
+                Arc::new(Object::new_sphere().scale(0.5, 0.5, 0.5).transform()),
             ],
             lights: vec![Light::new_point_light(
                 Color::white(),
@@ -284,7 +284,7 @@ pub mod tests {
     #[test]
     fn shade_hit_is_given_an_intesection_in_shadow() {
         let s1 = Arc::new(Object::new_sphere());
-        let s2 = Arc::new(Object::new_sphere().translate(0.0, 0.0, 10.0));
+        let s2 = Arc::new(Object::new_sphere().translate(0.0, 0.0, 10.0).transform());
 
         let w = World {
             lights: vec![Light::new_point_light(
@@ -346,7 +346,8 @@ pub mod tests {
         let inner = Arc::new(
             Object::new_sphere()
                 .with_material(Material::new().with_ambient(1.0))
-                .scale(0.5, 0.5, 0.5),
+                .scale(0.5, 0.5, 0.5)
+                .transform(),
         );
 
         let w = World {
@@ -408,7 +409,8 @@ pub mod tests {
         let object = Arc::new(
             Object::new_plane()
                 .with_material(Material::new().with_reflective(0.5))
-                .translate(0.0, -1.0, 0.0),
+                .translate(0.0, -1.0, 0.0)
+                .transform(),
         );
         w.objects.push(object.clone());
 
@@ -436,7 +438,8 @@ pub mod tests {
         let object = Arc::new(
             Object::new_plane()
                 .with_material(Material::new().with_reflective(0.5))
-                .translate(0.0, -1.0, 0.0),
+                .translate(0.0, -1.0, 0.0)
+                .transform(),
         );
 
         w.objects.push(object.clone());
@@ -467,12 +470,14 @@ pub mod tests {
                 Arc::new(
                     Object::new_plane()
                         .with_material(Material::new().with_reflective(1.0))
-                        .translate(0.0, -1.0, 0.0),
+                        .translate(0.0, -1.0, 0.0)
+                        .transform(),
                 ),
                 Arc::new(
                     Object::new_plane()
                         .with_material(Material::new().with_reflective(1.0))
-                        .translate(0.0, 1.0, 0.0),
+                        .translate(0.0, 1.0, 0.0)
+                        .transform(),
                 ),
             ],
             ..Default::default()
@@ -616,7 +621,8 @@ pub mod tests {
                         .with_transparency(0.5)
                         .with_refractive_index(1.5),
                 )
-                .translate(0.0, -1.0, 0.0),
+                .translate(0.0, -1.0, 0.0)
+                .transform(),
         );
         w.objects.push(floor.clone());
 
@@ -627,7 +633,8 @@ pub mod tests {
                         .with_color(Color::new(1.0, 0.0, 0.0))
                         .with_ambient(0.5),
                 )
-                .translate(0.0, -3.5, -0.5),
+                .translate(0.0, -3.5, -0.5)
+                .transform(),
         );
         w.objects.push(ball);
 
@@ -658,7 +665,8 @@ pub mod tests {
                         .with_refractive_index(1.5)
                         .with_reflective(0.5),
                 )
-                .translate(0.0, -1.0, 0.0),
+                .translate(0.0, -1.0, 0.0)
+                .transform(),
         );
         w.objects.push(floor.clone());
 
@@ -669,7 +677,8 @@ pub mod tests {
                         .with_color(Color::new(1.0, 0.0, 0.0))
                         .with_ambient(0.5),
                 )
-                .translate(0.0, -3.5, -0.5),
+                .translate(0.0, -3.5, -0.5)
+                .transform(),
         );
         w.objects.push(ball);
 

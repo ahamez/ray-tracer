@@ -412,7 +412,7 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let object = Arc::new(Object::new_sphere().translate(0.0, 0.0, 1.0));
+        let object = Arc::new(Object::new_sphere().translate(0.0, 0.0, 1.0).transform());
 
         let i = Intersection::new(5.0, object);
 
@@ -446,7 +446,7 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let object = Arc::new(glassy_sphere().translate(0.0, 0.0, 1.0));
+        let object = Arc::new(glassy_sphere().translate(0.0, 0.0, 1.0).transform());
 
         let i = Intersection::new(5.0, object);
 

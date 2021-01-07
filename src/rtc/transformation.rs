@@ -114,49 +114,121 @@ pub fn view_transform(from: &Point, to: &Point, up: &Vector) -> Matrix {
 
 /* ---------------------------------------------------------------------------------------------- */
 
+pub struct TransformationBuilder<T> {
+    pub transformation: Matrix,
+    pub x: T,
+}
+
+impl<T> TransformationBuilder<T>
+where
+    T: Transform,
+{
+    pub fn transform(self) -> T {
+        self.x.transform(&self.transformation)
+    }
+
+    pub fn translate(mut self, x: f64, y: f64, z: f64) -> Self {
+        self.transformation = translation(x, y, z) * self.transformation;
+        self
+    }
+
+    pub fn scale(mut self, x: f64, y: f64, z: f64) -> Self {
+        self.transformation = scaling(x, y, z) * self.transformation;
+        self
+    }
+
+    pub fn rotate_x(mut self, angle: f64) -> Self {
+        self.transformation = rotation_x(angle) * self.transformation;
+        self
+    }
+
+    pub fn rotate_y(mut self, angle: f64) -> Self {
+        self.transformation = rotation_y(angle) * self.transformation;
+        self
+    }
+
+    pub fn rotate_z(mut self, angle: f64) -> Self {
+        self.transformation = rotation_z(angle) * self.transformation;
+        self
+    }
+
+    pub fn shear(mut self, xy: f64, xz: f64, yx: f64, yz: f64, zx: f64, zy: f64) -> Self {
+        self.transformation = shearing(xy, xz, yx, yz, zx, zy) * self.transformation;
+        self
+    }
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+
 pub trait Transform {
     fn transform(self, transformation: &Matrix) -> Self;
 
-    fn translate(self, x: f64, y: f64, z: f64) -> Self
+    fn translate(self, x: f64, y: f64, z: f64) -> TransformationBuilder<Self>
     where
         Self: Sized,
     {
-        self.transform(&translation(x, y, z))
+        TransformationBuilder {
+            transformation: translation(x, y, z),
+            x: self,
+        }
     }
 
-    fn scale(self, x: f64, y: f64, z: f64) -> Self
+    fn scale(self, x: f64, y: f64, z: f64) -> TransformationBuilder<Self>
     where
         Self: Sized,
     {
-        self.transform(&scaling(x, y, z))
+        TransformationBuilder {
+            transformation: scaling(x, y, z),
+            x: self,
+        }
     }
 
-    fn rotate_x(self, angle: f64) -> Self
+    fn rotate_x(self, angle: f64) -> TransformationBuilder<Self>
     where
         Self: Sized,
     {
-        self.transform(&rotation_x(angle))
+        TransformationBuilder {
+            transformation: rotation_x(angle),
+            x: self,
+        }
     }
 
-    fn rotate_y(self, angle: f64) -> Self
+    fn rotate_y(self, angle: f64) -> TransformationBuilder<Self>
     where
         Self: Sized,
     {
-        self.transform(&rotation_y(angle))
+        TransformationBuilder {
+            transformation: rotation_y(angle),
+            x: self,
+        }
     }
 
-    fn rotate_z(self, angle: f64) -> Self
+    fn rotate_z(self, angle: f64) -> TransformationBuilder<Self>
     where
         Self: Sized,
     {
-        self.transform(&rotation_z(angle))
+        TransformationBuilder {
+            transformation: rotation_z(angle),
+            x: self,
+        }
     }
 
-    fn shear(self, xy: f64, xz: f64, yx: f64, yz: f64, zx: f64, zy: f64) -> Self
+    fn shear(
+        self,
+        xy: f64,
+        xz: f64,
+        yx: f64,
+        yz: f64,
+        zx: f64,
+        zy: f64,
+    ) -> TransformationBuilder<Self>
     where
         Self: Sized,
     {
-        self.transform(&shearing(xy, xz, yx, yz, zx, zy))
+        TransformationBuilder {
+            transformation: shearing(xy, xz, yx, yz, zx, zy),
+            x: self,
+        }
     }
 }
 
@@ -189,7 +261,7 @@ mod tests {
         {
             let p = Point::new(-3.0, 4.0, 5.0);
             let expected = Point::new(2.0, 1.0, 7.0);
-            assert_eq!(p.translate(5.0, -3.0, 2.0), expected);
+            assert_eq!(p.translate(5.0, -3.0, 2.0).transform(), expected);
         }
     }
 
@@ -212,7 +284,7 @@ mod tests {
         {
             let p = Point::new(-4.0, 6.0, 8.0);
             let expected = Point::new(-8.0, 18.0, 32.0);
-            assert_eq!(p.scale(2.0, 3.0, 4.0), expected);
+            assert_eq!(p.scale(2.0, 3.0, 4.0).transform(), expected);
         }
         {
             // Same as a reflection along x axis.
@@ -259,24 +331,24 @@ mod tests {
             let p = Point::new(0.0, 1.0, 0.0);
 
             assert_eq!(
-                p.rotate_x(PI / 4.0),
+                p.rotate_x(PI / 4.0).transform(),
                 Point::new(0.0, f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0)
             );
-            assert_eq!(p.rotate_x(PI / 2.0), Point::new(0.0, 0.0, 1.0));
+            assert_eq!(p.rotate_x(PI / 2.0).transform(), Point::new(0.0, 0.0, 1.0));
         }
         {
             let p = Vector::new(0.0, 1.0, 0.0);
 
             assert_eq!(
-                p.rotate_x(PI / 4.0),
+                p.rotate_x(PI / 4.0).transform(),
                 Vector::new(0.0, f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0)
             );
-            assert_eq!(p.rotate_x(PI / 2.0), Vector::new(0.0, 0.0, 1.0));
+            assert_eq!(p.rotate_x(PI / 2.0).transform(), Vector::new(0.0, 0.0, 1.0));
         }
         {
             let p = Point::new(0.0, 1.0, 0.0);
             assert_eq!(
-                p.rotate_x(-PI / 4.0),
+                p.rotate_x(-PI / 4.0).transform(),
                 Point::new(0.0, f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0)
             );
         }
@@ -284,35 +356,38 @@ mod tests {
         {
             let p = Point::new(0.0, 0.0, 1.0);
             assert_eq!(
-                p.rotate_y(PI / 4.0),
+                p.rotate_y(PI / 4.0).transform(),
                 Point::new(f64::sqrt(2.0) / 2.0, 0.0, f64::sqrt(2.0) / 2.0)
             );
-            assert_eq!(p.rotate_y(PI / 2.0), Point::new(1.0, 0.0, 0.0));
+            assert_eq!(p.rotate_y(PI / 2.0).transform(), Point::new(1.0, 0.0, 0.0));
         }
         {
             let p = Vector::new(0.0, 0.0, 1.0);
             assert_eq!(
-                p.rotate_y(PI / 4.0),
+                p.rotate_y(PI / 4.0).transform(),
                 Vector::new(f64::sqrt(2.0) / 2.0, 0.0, f64::sqrt(2.0) / 2.0)
             );
-            assert_eq!(p.rotate_y(PI / 2.0), Vector::new(1.0, 0.0, 0.0));
+            assert_eq!(p.rotate_y(PI / 2.0).transform(), Vector::new(1.0, 0.0, 0.0));
         }
         // Z axis
         {
             let p = Point::new(0.0, 1.0, 0.0);
             assert_eq!(
-                p.rotate_z(PI / 4.0),
+                p.rotate_z(PI / 4.0).transform(),
                 Point::new(-f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0, 0.0)
             );
-            assert_eq!(p.rotate_z(PI / 2.0), Point::new(-1.0, 0.0, 0.0));
+            assert_eq!(p.rotate_z(PI / 2.0).transform(), Point::new(-1.0, 0.0, 0.0));
         }
         {
             let p = Vector::new(0.0, 1.0, 0.0);
             assert_eq!(
-                p.rotate_z(PI / 4.0),
+                p.rotate_z(PI / 4.0).transform(),
                 Vector::new(-f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0, 0.0)
             );
-            assert_eq!(p.rotate_z(PI / 2.0), Vector::new(-1.0, 0.0, 0.0));
+            assert_eq!(
+                p.rotate_z(PI / 2.0).transform(),
+                Vector::new(-1.0, 0.0, 0.0)
+            );
         }
     }
 
@@ -320,27 +395,27 @@ mod tests {
     fn shearing() {
         let p = Point::new(2.0, 3.0, 4.0);
         assert_eq!(
-            p.shear(1.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+            p.shear(1.0, 0.0, 0.0, 0.0, 0.0, 0.0).transform(),
             Point::new(5.0, 3.0, 4.0)
         );
         assert_eq!(
-            p.shear(0.0, 1.0, 0.0, 0.0, 0.0, 0.0),
+            p.shear(0.0, 1.0, 0.0, 0.0, 0.0, 0.0).transform(),
             Point::new(6.0, 3.0, 4.0)
         );
         assert_eq!(
-            p.shear(0.0, 0.0, 1.0, 0.0, 0.0, 0.0),
+            p.shear(0.0, 0.0, 1.0, 0.0, 0.0, 0.0).transform(),
             Point::new(2.0, 5.0, 4.0)
         );
         assert_eq!(
-            p.shear(0.0, 0.0, 0.0, 1.0, 0.0, 0.0),
+            p.shear(0.0, 0.0, 0.0, 1.0, 0.0, 0.0).transform(),
             Point::new(2.0, 7.0, 4.0)
         );
         assert_eq!(
-            p.shear(0.0, 0.0, 0.0, 0.0, 1.0, 0.0),
+            p.shear(0.0, 0.0, 0.0, 0.0, 1.0, 0.0).transform(),
             Point::new(2.0, 3.0, 6.0)
         );
         assert_eq!(
-            p.shear(0.0, 0.0, 0.0, 0.0, 0.0, 1.0),
+            p.shear(0.0, 0.0, 0.0, 0.0, 0.0, 1.0).transform(),
             Point::new(2.0, 3.0, 7.0)
         );
     }
@@ -349,9 +424,9 @@ mod tests {
     fn chaining() {
         {
             let p0 = Point::new(1.0, 0.0, 1.0);
-            let p1 = p0.rotate_x(PI / 2.0);
-            let p2 = p1.scale(5.0, 5.0, 5.0);
-            let p3 = p2.translate(10.0, 5.0, 7.0);
+            let p1 = p0.rotate_x(PI / 2.0).transform();
+            let p2 = p1.scale(5.0, 5.0, 5.0).transform();
+            let p3 = p2.translate(10.0, 5.0, 7.0).transform();
 
             assert_eq!(p1, Point::new(1.0, -1.0, 0.0));
             assert_eq!(p2, Point::new(5.0, -5.0, 0.0));
@@ -361,7 +436,8 @@ mod tests {
             let p = Point::new(1.0, 0.0, 1.0)
                 .rotate_x(PI / 2.0)
                 .scale(5.0, 5.0, 5.0)
-                .translate(10.0, 5.0, 7.0);
+                .translate(10.0, 5.0, 7.0)
+                .transform();
 
             assert_eq!(p, Point::new(15.0, 0.0, 7.0));
         }

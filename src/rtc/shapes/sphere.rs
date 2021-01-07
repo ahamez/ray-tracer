@@ -216,7 +216,7 @@ pub mod tests {
 
     #[test]
     fn normal_on_a_translated_sphere() {
-        let s = Object::new_sphere().translate(0.0, 1.0, 0.0);
+        let s = Object::new_sphere().translate(0.0, 1.0, 0.0).transform();
         let dummy_intersection =
             Intersection::new(std::f64::INFINITY, Arc::new(Object::new_test_shape()));
         assert_eq!(
@@ -229,7 +229,8 @@ pub mod tests {
     fn normal_on_a_transformed_sphere() {
         let s = Object::new_sphere()
             .rotate_z(std::f64::consts::PI / 5.0)
-            .scale(1.0, 0.5, 1.0);
+            .scale(1.0, 0.5, 1.0)
+            .transform();
         let dummy_intersection =
             Intersection::new(std::f64::INFINITY, Arc::new(Object::new_test_shape()));
 
@@ -244,22 +245,28 @@ pub mod tests {
 
     #[test]
     fn finding_n1_and_n2_at_various_intersections() {
-        let a = Arc::new(glassy_sphere().scale(2.0, 2.0, 2.0));
+        let a = Arc::new(glassy_sphere().scale(2.0, 2.0, 2.0).transform());
         let b = Arc::new(
-            glassy_sphere().translate(0.0, 0.0, -0.25).with_material(
-                glassy_sphere()
-                    .material()
-                    .clone()
-                    .with_refractive_index(2.0),
-            ),
+            glassy_sphere()
+                .translate(0.0, 0.0, -0.25)
+                .transform()
+                .with_material(
+                    glassy_sphere()
+                        .material()
+                        .clone()
+                        .with_refractive_index(2.0),
+                ),
         );
         let c = Arc::new(
-            glassy_sphere().translate(0.0, 0.0, 0.25).with_material(
-                glassy_sphere()
-                    .material()
-                    .clone()
-                    .with_refractive_index(2.5),
-            ),
+            glassy_sphere()
+                .translate(0.0, 0.0, 0.25)
+                .transform()
+                .with_material(
+                    glassy_sphere()
+                        .material()
+                        .clone()
+                        .with_refractive_index(2.5),
+                ),
         );
 
         let ray = Ray {
@@ -295,7 +302,8 @@ pub mod tests {
     fn querying_a_shape_s_bounding_box_in_its_parent_space() {
         let s = Object::new_sphere()
             .scale(0.5, 2.0, 4.0)
-            .translate(1.0, -3.0, 5.0);
+            .translate(1.0, -3.0, 5.0)
+            .transform();
 
         assert_eq!(s.bounding_box().min(), Point::new(0.5, -5.0, 1.0));
         assert_eq!(s.bounding_box().max(), Point::new(1.5, -1.0, 9.0));

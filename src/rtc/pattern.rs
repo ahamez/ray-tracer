@@ -277,7 +277,7 @@ mod tests {
 
     #[test]
     fn stripes_with_an_object_transformation() {
-        let object = Object::new_sphere().scale(2.0, 2.0, 2.0);
+        let object = Object::new_sphere().scale(2.0, 2.0, 2.0).transform();
         let pattern = Pattern::new_stripe(vec![Color::white(), Color::black()]);
 
         assert_eq!(
@@ -289,8 +289,9 @@ mod tests {
     #[test]
     fn stripes_with_a_pattern_transformation() {
         let object = Object::new_sphere();
-        let pattern =
-            Pattern::new_stripe(vec![Color::white(), Color::black()]).scale(2.0, 2.0, 2.0);
+        let pattern = Pattern::new_stripe(vec![Color::white(), Color::black()])
+            .scale(2.0, 2.0, 2.0)
+            .transform();
 
         assert_eq!(
             pattern.pattern_at_object(&object, &Point::new(2.5, 0.0, 0.0)),
@@ -300,9 +301,10 @@ mod tests {
 
     #[test]
     fn stripes_with_both_an_object_and_a_pattern_transformation() {
-        let object = Object::new_sphere().scale(2.0, 2.0, 2.0);
-        let pattern =
-            Pattern::new_stripe(vec![Color::white(), Color::black()]).scale(2.0, 2.0, 2.0);
+        let object = Object::new_sphere().scale(2.0, 2.0, 2.0).transform();
+        let pattern = Pattern::new_stripe(vec![Color::white(), Color::black()])
+            .scale(2.0, 2.0, 2.0)
+            .transform();
 
         assert_eq!(
             pattern.pattern_at_object(&object, &Point::new(1.5, 0.0, 0.0)),

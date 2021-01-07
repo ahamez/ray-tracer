@@ -298,7 +298,8 @@ mod tests {
             let s = Object::new_sphere()
                 .translate(5.0, 0.0, 0.0)
                 .scale(2.0, 2.0, 2.0)
-                .rotate_y(std::f64::consts::PI / 2.0);
+                .rotate_y(std::f64::consts::PI / 2.0)
+                .transform();
 
             assert_eq!(
                 s.world_to_object(&Point::new(-2.0, 0.0, -10.0)),
@@ -307,10 +308,11 @@ mod tests {
         }
         // With two nested groups with transformations in both
         {
-            let s = Object::new_sphere().translate(5.0, 0.0, 0.0);
+            let s = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
             let g2 = Object::new_group(vec![Arc::new(s)])
                 .scale(2.0, 2.0, 2.0)
-                .rotate_y(std::f64::consts::PI / 2.0);
+                .rotate_y(std::f64::consts::PI / 2.0)
+                .transform();
             let g1 = Object::new_group(vec![Arc::new(g2.clone())]);
 
             // Retrieve the s with the baked-in group transform.
@@ -323,9 +325,13 @@ mod tests {
             );
         }
         {
-            let s = Object::new_sphere().translate(5.0, 0.0, 0.0);
-            let g2 = Object::new_group(vec![Arc::new(s)]).scale(2.0, 2.0, 2.0);
-            let g1 = Object::new_group(vec![Arc::new(g2)]).rotate_y(std::f64::consts::PI / 2.0);
+            let s = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
+            let g2 = Object::new_group(vec![Arc::new(s)])
+                .scale(2.0, 2.0, 2.0)
+                .transform();
+            let g1 = Object::new_group(vec![Arc::new(g2)])
+                .rotate_y(std::f64::consts::PI / 2.0)
+                .transform();
 
             // Retrieve the s with the baked-in group transform.
             let group_g2 = g1.shape().as_group().unwrap().children()[0].clone();
@@ -340,9 +346,13 @@ mod tests {
 
     #[test]
     fn converting_a_normal_from_object_to_world_space() {
-        let s = Object::new_sphere().translate(5.0, 0.0, 0.0);
-        let g2 = Object::new_group(vec![Arc::new(s)]).scale(1.0, 2.0, 3.0);
-        let g1 = Object::new_group(vec![Arc::new(g2)]).rotate_y(std::f64::consts::PI / 2.0);
+        let s = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
+        let g2 = Object::new_group(vec![Arc::new(s)])
+            .scale(1.0, 2.0, 3.0)
+            .transform();
+        let g1 = Object::new_group(vec![Arc::new(g2)])
+            .rotate_y(std::f64::consts::PI / 2.0)
+            .transform();
 
         // Retrieve the s with the baked-in group transform.
         let group_g2 = g1.shape().as_group().unwrap().children()[0].clone();
@@ -358,9 +368,13 @@ mod tests {
 
     #[test]
     fn finding_the_normal_on_a_child_object() {
-        let s = Object::new_sphere().translate(5.0, 0.0, 0.0);
-        let g2 = Object::new_group(vec![Arc::new(s)]).scale(1.0, 2.0, 3.0);
-        let g1 = Object::new_group(vec![Arc::new(g2)]).rotate_y(std::f64::consts::PI / 2.0);
+        let s = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
+        let g2 = Object::new_group(vec![Arc::new(s)])
+            .scale(1.0, 2.0, 3.0)
+            .transform();
+        let g1 = Object::new_group(vec![Arc::new(g2)])
+            .rotate_y(std::f64::consts::PI / 2.0)
+            .transform();
 
         // Retrieve the s with the baked-in group transform.
         let group_g2 = g1.shape().as_group().unwrap().children()[0].clone();
