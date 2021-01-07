@@ -37,6 +37,16 @@ impl std::fmt::Display for ParallelRendering {
     }
 }
 
+impl From<bool> for ParallelRendering {
+    fn from(b: bool) -> Self {
+        if b {
+            ParallelRendering::False
+        } else {
+            ParallelRendering::True
+        }
+    }
+}
+
 /* ---------------------------------------------------------------------------------------------- */
 
 impl Camera {

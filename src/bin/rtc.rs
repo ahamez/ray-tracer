@@ -122,11 +122,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let translate_x = clap::value_t!(matches.value_of("translate-x"), f64).unwrap_or(0.0);
     let translate_y = clap::value_t!(matches.value_of("translate-y"), f64).unwrap_or(0.0);
     let translate_z = clap::value_t!(matches.value_of("translate-z"), f64).unwrap_or(0.0);
-    let parallel = if matches.is_present("sequential") {
-        ParallelRendering::False
-    } else {
-        ParallelRendering::True
-    };
+    let parallel: ParallelRendering = matches.is_present("sequential").into();
     let path_str = matches.value_of("INPUT").unwrap();
 
     let path = std::path::Path::new(&path_str);
