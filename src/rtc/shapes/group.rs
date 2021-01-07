@@ -79,7 +79,7 @@ impl Group {
     }
 
     pub fn divide(self, threshold: usize) -> Self {
-        let g: Self = if self.children.len() <= threshold {
+        let g = if self.children.len() <= threshold {
             self
         } else {
             self.partition()
