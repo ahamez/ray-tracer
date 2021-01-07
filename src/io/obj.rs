@@ -289,7 +289,7 @@ fn parse_data(s: &str) -> Result<Data> {
         line_number += 1;
     }
 
-    Ok(data.normalize())
+    Ok(data)
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -322,7 +322,7 @@ fn mk_triangles(face: &Face, vertices: &[Point], normals: &[Vector]) -> Vec<Arc<
 /* ---------------------------------------------------------------------------------------------- */
 
 pub fn parse_str(s: &str) -> Result<Object> {
-    let data = parse_data(s)?;
+    let data = parse_data(s)?.normalize();
 
     let mut anonymous = vec![];
     let mut named = HashMap::new();
