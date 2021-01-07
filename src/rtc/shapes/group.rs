@@ -66,12 +66,16 @@ impl Group {
         }
 
         if !left_children.is_empty() {
-            let left_child = Arc::new(Object::new_group(left_children));
+            let left_child_object =
+                Object::new_dummy().with_shape(Shape::Group(Group::new(left_children)));
+            let left_child = Arc::new(left_child_object);
             children.push(left_child);
         }
 
         if !right_children.is_empty() {
-            let right_child = Arc::new(Object::new_group(right_children));
+            let right_child_object =
+                Object::new_dummy().with_shape(Shape::Group(Group::new(right_children)));
+            let right_child = Arc::new(right_child_object);
             children.push(right_child);
         }
 

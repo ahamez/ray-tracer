@@ -58,7 +58,7 @@ impl Object {
         }
     }
 
-    fn new_dummy() -> Self {
+    pub(in crate::rtc) fn new_dummy() -> Self {
         Object {
             shape: Shape::Dummy(),
             ..Default::default()
