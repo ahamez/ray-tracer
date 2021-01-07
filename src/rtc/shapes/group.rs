@@ -48,9 +48,9 @@ impl Group {
     }
 
     fn partition(self) -> Self {
-        let mut left_children = vec![];
-        let mut right_children = vec![];
-        let mut children = vec![];
+        let mut left_children = Vec::with_capacity(self.children.len());
+        let mut right_children = Vec::with_capacity(self.children.len());
+        let mut children = Vec::with_capacity(self.children.len());
 
         let (left_bbox, right_bbox) = self.bounding_box.split();
         for child in self.children {
