@@ -82,7 +82,6 @@ impl Shape {
     pub fn skip_world_to_local(&self) -> bool {
         // Skip world to local conversion for groups, since the transformation matrix
         // has been propagated to children at build time via GroupBuilder.
-        // TODO. Dispatch this to shapes to further decouple from concrete types.
         matches!(self, Shape::Group(_))
     }
 
