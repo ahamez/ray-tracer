@@ -119,7 +119,8 @@ impl Object {
         }
     }
 
-    pub fn new_test_shape() -> Self {
+    #[allow(dead_code)] // Actually used by tests
+    pub(in crate::rtc) fn new_test_shape() -> Self {
         Object {
             shape: Shape::TestShape(TestShape::new()),
             ..Default::default()

@@ -1,6 +1,6 @@
 mod float {
-    pub use approx_eq::ApproxEq;
-    pub use epsilon::EPSILON;
+    pub(crate) use approx_eq::ApproxEq;
+    pub(crate) use epsilon::EPSILON;
 
     mod approx_eq;
     mod epsilon;
@@ -31,14 +31,13 @@ pub mod rtc {
     pub use camera::ParallelRendering;
     pub use canvas::Canvas;
     pub use color::Color;
-    pub use intersection::{Intersection, IntersectionPusher, IntersectionState, Intersections};
+    use intersection::{Intersection, IntersectionPusher, IntersectionState, Intersections};
     pub use light::Light;
     pub use material::Material;
     pub use object::Object;
     pub use pattern::Pattern;
-    pub use ray::Ray;
-    pub use scene::Scene;
-    pub use shape::Shape;
+    use ray::Ray;
+    use shape::Shape;
     pub use transformation::*;
     pub use world::World;
 
@@ -53,7 +52,7 @@ pub mod rtc {
     mod pattern;
     mod ray;
     mod shape;
-    mod transformation;
+    pub mod transformation;
     pub mod world;
 
     mod lights {
