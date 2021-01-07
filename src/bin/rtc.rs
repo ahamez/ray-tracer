@@ -143,10 +143,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some("yml") => yaml::parse(&path),
         Some("obj") => {
             let object = obj::parse_file(&path)?
-                .translate(translate_x, translate_y, translate_z)
                 .rotate_x(rotate_x)
                 .rotate_y(rotate_y)
                 .rotate_z(rotate_z)
+                .translate(translate_x, translate_y, translate_z)
                 .transform();
 
             let object = if bvh_threshold != 0 {
