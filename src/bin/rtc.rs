@@ -1,6 +1,6 @@
 /* ---------------------------------------------------------------------------------------------- */
 
-use clap::{App, Arg};
+use clap::{App, AppSettings, Arg};
 use ray_tracer::{
     io::{obj, yaml},
     primitive::{Point, Tuple, Vector},
@@ -34,6 +34,7 @@ fn output_path(path: &std::path::Path) -> Result<String, Box<dyn std::error::Err
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = App::new("Ray Tracer")
+        .setting(AppSettings::AllowNegativeNumbers)
         .arg(
             Arg::with_name("factor")
                 .short("f")
