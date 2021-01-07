@@ -125,8 +125,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .rotate_x(rotate_x)
                 .rotate_y(rotate_y)
                 .rotate_z(rotate_z)
-                .translate(0.0, 1.0, 0.0)
                 .transform();
+
+            let bbox = object.bounding_box();
+            dbg!(bbox);
+            // Translate the object to touch the floor at 0.0.
+            let object = object.translate(0.0, -bbox.min().y(), 0.0).transform();
 
             let object = if bvh_threshold != 0 {
                 object.divide(bvh_threshold)
