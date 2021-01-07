@@ -52,7 +52,6 @@ pub mod rtc {
     mod object;
     mod pattern;
     mod ray;
-    mod scene;
     mod shape;
     mod transformation;
     pub mod world;
