@@ -268,9 +268,10 @@ impl Transform for Object {
                 // Convert back to a Group.
                 group_builder.build()
             }
-            _other_shape => self
-                .clone()
-                .with_transformation(*new_transformation * self.transformation),
+            _other_shape => {
+                let new_transformation = *new_transformation * self.transformation;
+                self.with_transformation(new_transformation)
+            }
         }
     }
 }

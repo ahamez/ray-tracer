@@ -47,21 +47,21 @@ impl Group {
         self.bounding_box
     }
 
-    fn partition(&self) -> Self {
+    fn partition(self) -> Self {
         let mut left_children = vec![];
         let mut right_children = vec![];
         let mut children = vec![];
 
         let (left_bbox, right_bbox) = self.bounding_box.split();
-        for child in &self.children {
+        for child in self.children {
             if left_bbox.contains(&child.bounding_box()) {
-                left_children.push(child.clone());
+                left_children.push(child);
             } else if right_bbox.contains(&child.bounding_box()) {
-                right_children.push(child.clone());
+                right_children.push(child);
             } else {
                 // All children that are neither contained in the left nor right
-                // sub bounding box staty at this level.
-                children.push(child.clone());
+                // sub bounding box stay at this level.
+                children.push(child);
             }
         }
 
@@ -75,10 +75,7 @@ impl Group {
             children.push(right_child);
         }
 
-        Self {
-            children,
-            ..self.clone()
-        }
+        Self { children, ..self }
     }
 
     pub fn divide(self, threshold: usize) -> Self {
@@ -116,22 +113,21 @@ pub enum GroupBuilder {
 }
 
 impl GroupBuilder {
-    pub fn build(&self) -> Object {
+    pub fn build(self) -> Object {
         GroupBuilder::rec(self, &Matrix::id())
     }
 
-    fn rec(gb: &Self, transform: &Matrix) -> Object {
+    fn rec(gb: Self, transform: &Matrix) -> Object {
         match gb {
-            GroupBuilder::Leaf(o) => o.clone().transform(transform),
+            GroupBuilder::Leaf(o) => o.transform(transform),
             GroupBuilder::Node(group, children) => {
                 let child_transform = *transform * *group.transformation();
                 let new_children = children
-                    .iter()
-                    .map(|child| Arc::new(GroupBuilder::rec(&child, &child_transform)))
+                    .into_iter()
+                    .map(|child| Arc::new(GroupBuilder::rec(child, &child_transform)))
                     .collect();
 
                 group
-                    .clone()
                     .with_shape(Shape::Group(Group::new(new_children)))
                     // The group transformation has been applied to all children.
                     // To make sure it's not propagated again in future usages of this
@@ -465,7 +461,7 @@ mod tests {
 
         let g = Object::new_group(vec![s1.clone(), s2.clone(), s3.clone()]);
 
-        let g = g.shape().as_group().unwrap().partition();
+        let g = g.shape().as_group().unwrap().clone().partition();
         let g_children = g.children();
 
         assert_eq!(g_children[0], s3);
