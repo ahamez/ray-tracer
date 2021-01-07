@@ -4,7 +4,10 @@ use clap::{App, AppSettings, Arg};
 use ray_tracer::{
     io::{obj, yaml},
     primitive::{Point, Tuple, Vector},
-    rtc::{view_transform, Camera, Color, Light, ParallelRendering, Transform, World},
+    rtc::{
+        view_transform, Camera, Color, Light, Material, Object, ParallelRendering, Pattern,
+        Transform, World,
+    },
 };
 use std::{f64::consts::PI, sync::Arc, time::Instant};
 
@@ -79,27 +82,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("translate-x")
-                .long("translate-x")
-                .value_name("FLOAT")
-                .help("Rotate along the X axis")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::with_name("translate-y")
-                .long("translate-y")
-                .value_name("FLOAT")
-                .help("Rotate along the Y axis")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::with_name("translate-z")
-                .long("translate-z")
-                .value_name("FLOAT")
-                .help("Rotate along the Z axis")
-                .takes_value(true),
-        )
-        .arg(
             Arg::with_name("sequential")
                 .short("s")
                 .long("sequential")
@@ -116,13 +98,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let factor = clap::value_t!(matches.value_of("factor"), usize).unwrap_or(1);
     let bvh_threshold = clap::value_t!(matches.value_of("bvh-threshold"), usize).unwrap_or(4);
-    let fov = clap::value_t!(matches.value_of("fov"), f64).unwrap_or(PI / 2.0);
+    let fov = clap::value_t!(matches.value_of("fov"), f64).unwrap_or(1.0);
     let rotate_x = clap::value_t!(matches.value_of("rotate-x"), f64).unwrap_or(0.0);
     let rotate_y = clap::value_t!(matches.value_of("rotate-y"), f64).unwrap_or(0.0);
     let rotate_z = clap::value_t!(matches.value_of("rotate-z"), f64).unwrap_or(0.0);
-    let translate_x = clap::value_t!(matches.value_of("translate-x"), f64).unwrap_or(0.0);
-    let translate_y = clap::value_t!(matches.value_of("translate-y"), f64).unwrap_or(0.0);
-    let translate_z = clap::value_t!(matches.value_of("translate-z"), f64).unwrap_or(0.0);
     let parallel: ParallelRendering = matches.is_present("sequential").into();
     let path_str = matches.value_of("INPUT").unwrap();
 
@@ -146,7 +125,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .rotate_x(rotate_x)
                 .rotate_y(rotate_y)
                 .rotate_z(rotate_z)
-                .translate(translate_x, translate_y, translate_z)
+                .translate(0.0, 1.0, 0.0)
                 .transform();
 
             let object = if bvh_threshold != 0 {
@@ -155,16 +134,54 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 object
             };
 
+            let floor = Arc::new(
+                Object::new_plane().with_material(
+                    Material::new()
+                        .with_pattern(Pattern::new_checker(
+                            Color::white(),
+                            Color::new(0.5, 0.5, 0.5),
+                        ))
+                        .with_reflective(0.0),
+                ),
+            );
+
+            let wall_left = Arc::new(
+                Object::new_plane()
+                    .with_material(
+                        Material::new()
+                            .with_pattern(Pattern::new_checker(
+                                Color::white(),
+                                Color::new(0.5, 0.5, 0.5),
+                            ))
+                            .with_reflective(0.0),
+                    )
+                    .rotate_z(PI / 2.0)
+                    .translate(-7.0, 0.0, 0.0)
+                    .transform(),
+            );
+
+            let wall_right = Arc::new(
+                Object::new_plane()
+                    .with_material(Material::new().with_pattern(Pattern::new_checker(
+                        Color::white(),
+                        Color::new(0.5, 0.5, 0.5),
+                    )))
+                    .rotate_x(PI / 2.0)
+                    .translate(0.0, 0.0, 7.0)
+                    .transform(),
+            );
+
             let group = Arc::new(object);
 
-            let light = Light::new_point_light(Color::white(), Point::new(0.0, 2.0, -3.0));
+            let light =
+                Light::new_point_light(Color::new(0.9, 0.9, 0.9), Point::new(-5.0, 25.0, -15.0));
 
             let world = World::new()
-                .with_objects(vec![group])
+                .with_objects(vec![group, wall_left, wall_right, floor])
                 .with_lights(vec![light]);
 
-            let from = Point::new(0.0, 0.0, -2.0);
-            let to = Point::new(0.0, 0.0, 0.0);
+            let from = Point::new(1.0, 1.0, -3.0);
+            let to = Point::new(0.0, 1.0, 0.0);
             let up = Vector::new(0.0, 1.0, 0.0);
 
             let width = 100;
