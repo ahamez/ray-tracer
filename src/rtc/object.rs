@@ -268,20 +268,9 @@ impl Transform for Object {
                 // Convert back to a Group.
                 group_builder.build()
             }
-            _other_shape => {
-                let transformation = *new_transformation * self.transformation;
-                let transformation_inverse = transformation.invert();
-                let transformation_inverse_transpose = transformation_inverse.transpose();
-                let bounding_box = self.shape.bounds().transform(&transformation);
-
-                Object {
-                    bounding_box,
-                    transformation,
-                    transformation_inverse,
-                    transformation_inverse_transpose,
-                    ..self.clone()
-                }
-            }
+            _other_shape => self
+                .clone()
+                .with_transformation(*new_transformation * self.transformation),
         }
     }
 }
