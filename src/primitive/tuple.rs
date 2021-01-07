@@ -20,8 +20,8 @@ impl<T> Transform for T
 where
     T: Tuple + Copy,
 {
-    fn transform(&self, transformation: &Matrix) -> Self {
-        *transformation * *self
+    fn transform(self, transformation: &Matrix) -> Self {
+        *transformation * self
     }
 }
 

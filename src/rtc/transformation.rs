@@ -115,44 +115,44 @@ pub fn view_transform(from: &Point, to: &Point, up: &Vector) -> Matrix {
 /* ---------------------------------------------------------------------------------------------- */
 
 pub trait Transform {
-    fn transform(&self, transformation: &Matrix) -> Self;
+    fn transform(self, transformation: &Matrix) -> Self;
 
-    fn translate(&self, x: f64, y: f64, z: f64) -> Self
+    fn translate(self, x: f64, y: f64, z: f64) -> Self
     where
         Self: Sized,
     {
         self.transform(&translation(x, y, z))
     }
 
-    fn scale(&self, x: f64, y: f64, z: f64) -> Self
+    fn scale(self, x: f64, y: f64, z: f64) -> Self
     where
         Self: Sized,
     {
         self.transform(&scaling(x, y, z))
     }
 
-    fn rotate_x(&self, angle: f64) -> Self
+    fn rotate_x(self, angle: f64) -> Self
     where
         Self: Sized,
     {
         self.transform(&rotation_x(angle))
     }
 
-    fn rotate_y(&self, angle: f64) -> Self
+    fn rotate_y(self, angle: f64) -> Self
     where
         Self: Sized,
     {
         self.transform(&rotation_y(angle))
     }
 
-    fn rotate_z(&self, angle: f64) -> Self
+    fn rotate_z(self, angle: f64) -> Self
     where
         Self: Sized,
     {
         self.transform(&rotation_z(angle))
     }
 
-    fn shear(&self, xy: f64, xz: f64, yx: f64, yz: f64, zx: f64, zy: f64) -> Self
+    fn shear(self, xy: f64, xz: f64, yx: f64, yz: f64, zx: f64, zy: f64) -> Self
     where
         Self: Sized,
     {

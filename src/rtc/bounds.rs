@@ -171,7 +171,7 @@ impl std::ops::Add for BoundingBox {
 /* ---------------------------------------------------------------------------------------------- */
 
 impl Transform for BoundingBox {
-    fn transform(&self, matrix: &Matrix) -> Self {
+    fn transform(self, matrix: &Matrix) -> Self {
         let p1 = self.min;
         let p2 = Point::new(self.min.x(), self.min.y(), self.max.z());
         let p3 = Point::new(self.min.x(), self.max.y(), self.min.z());

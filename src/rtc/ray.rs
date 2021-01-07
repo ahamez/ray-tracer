@@ -61,7 +61,7 @@ impl Ray {
 /* ---------------------------------------------------------------------------------------------- */
 
 impl Transform for Ray {
-    fn transform(&self, transformation: &Matrix) -> Ray {
+    fn transform(self, transformation: &Matrix) -> Ray {
         Ray {
             origin: *transformation * self.origin,
             direction: *transformation * self.direction,

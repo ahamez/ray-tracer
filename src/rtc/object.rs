@@ -245,7 +245,7 @@ impl Default for Object {
 /* ---------------------------------------------------------------------------------------------- */
 
 impl Transform for Object {
-    fn transform(&self, new_transformation: &Matrix) -> Self {
+    fn transform(self, new_transformation: &Matrix) -> Self {
         match self.shape() {
             Shape::Group(g) => {
                 // Each time a Group is transformed, we convert it back to a GroupBuilder,

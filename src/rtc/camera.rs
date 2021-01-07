@@ -88,11 +88,8 @@ impl Camera {
     }
 
     fn ray_for_pixel(&self, px: usize, py: usize) -> Ray {
-        let px = px as f64;
-        let py = py as f64;
-
-        let x_offset = (px + 0.5) * self.pixel_size;
-        let y_offset = (py + 0.5) * self.pixel_size;
+        let x_offset = (px as f64 + 0.5) * self.pixel_size;
+        let y_offset = (py as f64 + 0.5) * self.pixel_size;
 
         let world_x = self.half_width - x_offset;
         let world_y = self.half_height - y_offset;
@@ -189,12 +186,12 @@ impl Default for Camera {
 /* ---------------------------------------------------------------------------------------------- */
 
 impl Transform for Camera {
-    fn transform(&self, transformation: &Matrix) -> Self {
+    fn transform(self, transformation: &Matrix) -> Self {
         let new_transformation = *transformation * self.transformation;
         Camera {
             transformation: new_transformation,
             transformation_inverse: new_transformation.invert(),
-            ..*self
+            ..self
         }
     }
 }

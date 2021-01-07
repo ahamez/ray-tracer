@@ -97,13 +97,13 @@ impl Default for Pattern {
 /* ---------------------------------------------------------------------------------------------- */
 
 impl Transform for Pattern {
-    fn transform(&self, transformation: &Matrix) -> Self {
+    fn transform(self, transformation: &Matrix) -> Self {
         let new_transformation = *transformation * self.transformation;
 
         Pattern {
             transformation: new_transformation,
             transformation_inverse: new_transformation.invert(),
-            ..self.clone()
+            ..self
         }
     }
 }
