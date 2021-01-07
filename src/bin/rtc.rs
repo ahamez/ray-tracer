@@ -157,18 +157,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             let group = Arc::new(object);
 
-            let light = Light::new_point_light(Color::white(), Point::new(20.0, -0.0, 40.0));
+            let light = Light::new_point_light(Color::white(), Point::new(0.0, 2.0, -3.0));
 
             let world = World::new()
                 .with_objects(vec![group])
                 .with_lights(vec![light]);
 
-            let from = Point::new(20.0, -10.0, 40.0);
-            let to = Point::new(0.0, 1.0, 0.0);
+            let from = Point::new(0.0, 0.0, -2.0);
+            let to = Point::new(0.0, 0.0, 0.0);
             let up = Vector::new(0.0, 1.0, 0.0);
 
-            let width = 500;
-            let height = 500;
+            let width = 100;
+            let height = 100;
 
             let camera = Camera::new()
                 .with_size(width, height)

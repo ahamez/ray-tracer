@@ -7,6 +7,7 @@ use crate::{
 use std::{
     collections::HashMap,
     error::Error,
+    f64::{INFINITY, NEG_INFINITY},
     fmt,
     io::{prelude::*, BufReader},
     sync::Arc,
@@ -102,6 +103,50 @@ struct Data {
 impl Data {
     pub fn new() -> Self {
         Default::default()
+    }
+
+    pub fn normalize(mut self) -> Self {
+        let (bbox_min, bbox_max) = self.bounding_box();
+
+        let sx = bbox_max.x() - bbox_min.x();
+        let sy = bbox_max.y() - bbox_min.y();
+        let sz = bbox_max.z() - bbox_min.z();
+
+        let scale = sx.max(sy.max(sz)) / 2.0;
+
+        for vertex in self.vertices.iter_mut() {
+            *vertex = Point::new(
+                (vertex.x() - (bbox_min.x() + sx / 2.0)) / scale,
+                (vertex.y() - (bbox_min.y() + sy / 2.0)) / scale,
+                (vertex.z() - (bbox_min.z() + sz / 2.0)) / scale,
+            );
+        }
+
+        self
+    }
+
+    fn bounding_box(&self) -> (Point, Point) {
+        let mut x_min = INFINITY;
+        let mut y_min = INFINITY;
+        let mut z_min = INFINITY;
+        let mut x_max = NEG_INFINITY;
+        let mut y_max = NEG_INFINITY;
+        let mut z_max = NEG_INFINITY;
+
+        for vertex in self.vertices.iter() {
+            x_min = x_min.min(vertex.x());
+            y_min = y_min.min(vertex.y());
+            z_min = z_min.min(vertex.z());
+
+            x_max = x_max.max(vertex.x());
+            y_max = y_max.max(vertex.y());
+            z_max = z_max.max(vertex.z());
+        }
+
+        (
+            Point::new(x_min, y_min, z_min),
+            Point::new(x_max, y_max, z_max),
+        )
     }
 }
 
@@ -244,7 +289,7 @@ fn parse_data(s: &str) -> Result<Data> {
         line_number += 1;
     }
 
-    Ok(data)
+    Ok(data.normalize())
 }
 
 /* ---------------------------------------------------------------------------------------------- */
