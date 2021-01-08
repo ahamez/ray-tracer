@@ -2,13 +2,13 @@
 
 use crate::{
     primitive::{Matrix, Point, Tuple},
-    rtc::{Canvas, Ray, Transform, World},
+    rtc::{Canvas, Color, Ray, Transform, World},
 };
 use rayon::prelude::*;
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct Camera {
     h_size: usize,
     v_size: usize,
@@ -18,6 +18,7 @@ pub struct Camera {
     pixel_size: f64,
     half_width: f64,
     half_height: f64,
+    anti_aliasing_offsets: Vec<f64>,
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -97,9 +98,21 @@ impl Camera {
         self
     }
 
-    fn ray_for_pixel(&self, px: usize, py: usize) -> Ray {
-        let x_offset = (px as f64 + 0.5) * self.pixel_size;
-        let y_offset = (py as f64 + 0.5) * self.pixel_size;
+    pub fn with_anti_aliasing(mut self, level: usize) -> Self {
+        self.anti_aliasing_offsets = match level {
+            2 => vec![-0.5, 0.5],
+            3 => vec![-0.5, 0.0, 0.5],
+            4 => vec![-0.5, -0.25, 0.25, 0.5],
+            5 => vec![-0.5, -0.25, 0.0, 0.25, 0.5],
+            _ => vec![0.5],
+        };
+
+        self
+    }
+
+    fn ray_for_pixel(&self, px: usize, py: usize, x_offset: f64, y_offset: f64) -> Ray {
+        let x_offset = (px as f64 + x_offset) * self.pixel_size;
+        let y_offset = (py as f64 + y_offset) * self.pixel_size;
 
         let world_x = self.half_width - x_offset;
         let world_y = self.half_height - y_offset;
@@ -111,6 +124,19 @@ impl Camera {
         let direction = (pixel - origin).normalize();
 
         Ray { origin, direction }
+    }
+
+    fn color_at(&self, world: &World, col: usize, row: usize) -> Color {
+        let mut color = Color::black();
+
+        for x_offset in self.anti_aliasing_offsets.iter() {
+            for y_offset in self.anti_aliasing_offsets.iter() {
+                let ray = self.ray_for_pixel(col, row, *x_offset, *y_offset);
+                color = color + world.color_at(&ray);
+            }
+        }
+
+        color / (self.anti_aliasing_offsets.len() * self.anti_aliasing_offsets.len()) as f64
     }
 
     pub fn render(&self, world: &World, parallel: ParallelRendering) -> Canvas {
@@ -125,10 +151,7 @@ impl Camera {
 
         for row in 0..self.v_size {
             for col in 0..self.h_size {
-                let ray = self.ray_for_pixel(col, row);
-                let color = world.color_at(&ray);
-
-                image[row][col] = color;
+                image[row][col] = self.color_at(&world, col, row);
             }
         }
 
@@ -146,10 +169,8 @@ impl Camera {
             .for_each(|(i, band)| {
                 for row in 0..BAND_SIZE {
                     for col in 0..self.h_size {
-                        let ray = self.ray_for_pixel(col, row + i * BAND_SIZE);
-                        let color = world.color_at(&ray);
-
-                        band[row * self.h_size + col] = color;
+                        band[row * self.h_size + col] =
+                            self.color_at(&world, col, row + i * BAND_SIZE);
                     }
                 }
             });
@@ -189,6 +210,7 @@ impl Default for Camera {
             pixel_size,
             half_width,
             half_height,
+            anti_aliasing_offsets: vec![0.5],
         }
     }
 }
@@ -234,7 +256,7 @@ mod tests {
     #[test]
     fn constructing_a_ray_through_the_center_of_the_canvas() {
         let c = Camera::new().with_size(201, 101).with_fov(PI / 2.0);
-        let r = c.ray_for_pixel(100, 50);
+        let r = c.ray_for_pixel(100, 50, 0.5, 0.5);
 
         assert_eq!(r.origin, Point::new(0.0, 0.0, 0.0));
         assert_eq!(r.direction, Vector::new(0.0, 0.0, -1.0));
@@ -243,7 +265,7 @@ mod tests {
     #[test]
     fn constructing_a_ray_through_a_corner_of_the_canvas() {
         let c = Camera::new().with_size(201, 101).with_fov(PI / 2.0);
-        let r = c.ray_for_pixel(0, 0);
+        let r = c.ray_for_pixel(0, 0, 0.5, 0.5);
 
         assert_eq!(r.origin, Point::new(0.0, 0.0, 0.0));
         assert_eq!(r.direction, Vector::new(0.66519, 0.33259, -0.66851));
@@ -257,7 +279,7 @@ mod tests {
             .translate(0.0, -2.0, 5.0)
             .rotate_y(PI / 4.0)
             .transform();
-        let r = c.ray_for_pixel(100, 50);
+        let r = c.ray_for_pixel(100, 50, 0.5, 0.5);
 
         assert_eq!(r.origin, Point::new(0.0, 2.0, -5.0));
         assert_eq!(

@@ -54,6 +54,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .takes_value(true),
         )
         .arg(
+            Arg::with_name("aa-level")
+                .long("aa-level")
+                .value_name("INTEGER")
+                .help("The antialiasing level. From 1 to 5. Default to 1.")
+                .takes_value(true),
+        )
+        .arg(
             Arg::with_name("fov")
                 .long("fov")
                 .value_name("FLOAT")
@@ -104,6 +111,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let factor = clap::value_t!(matches.value_of("factor"), usize).unwrap_or(1);
     let bvh_threshold = clap::value_t!(matches.value_of("bvh-threshold"), usize).unwrap_or(4);
+    let aa_level = clap::value_t!(matches.value_of("aa-level"), usize).unwrap_or(1);
     let fov = clap::value_t!(matches.value_of("fov"), f64).unwrap_or(1.0);
     let rotate_x = clap::value_t!(matches.value_of("rotate-x"), f64).unwrap_or(0.0);
     let rotate_y = clap::value_t!(matches.value_of("rotate-y"), f64).unwrap_or(0.0);
@@ -217,13 +225,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some(_) => panic!(),
         None => panic!(),
     };
-    let camera = camera.with_size(camera.h_size() * factor, camera.v_size() * factor);
+
+    let camera_h_size = camera.h_size();
+    let camera_v_size = camera.v_size();
+
+    let camera = camera.with_size(camera_h_size * factor, camera_v_size * factor);
     let construction_duration = construction_start.elapsed();
 
     println!("Time elapsed in construction: {:?}", construction_duration);
 
     let rendering_start = Instant::now();
-    let canvas = camera.render(&world, parallel);
+    let canvas = camera.with_anti_aliasing(aa_level).render(&world, parallel);
     let rendering_duration = rendering_start.elapsed();
     println!("Time elapsed in rendering: {:?}", rendering_duration);
 
