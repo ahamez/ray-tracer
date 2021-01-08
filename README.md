@@ -42,3 +42,5 @@ My main objective is to be fluent in Rust 🗣🦀. So, if some seasoned rustace
 ![Lunar lander](/samples/render/lunar_lander.png?raw=true "Lunar Lander")
 
 ![Armadillo](/samples/render/armadillo_small.png?raw=true "Armadillo")
+
+![Astronaut](/samples/render/astronaut.png?raw=true "Astronaut")
