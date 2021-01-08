@@ -89,6 +89,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .takes_value(false),
         )
         .arg(
+            Arg::with_name("soft-shadows")
+                .long("soft-shadows")
+                .help("Use soft shadows (takes much more time)")
+                .takes_value(false),
+        )
+        .arg(
             Arg::with_name("INPUT")
                 .help("Sets the input YAML or OBJ file to use")
                 .required(true)
@@ -103,6 +109,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let rotate_y = clap::value_t!(matches.value_of("rotate-y"), f64).unwrap_or(0.0);
     let rotate_z = clap::value_t!(matches.value_of("rotate-z"), f64).unwrap_or(0.0);
     let parallel: ParallelRendering = matches.is_present("sequential").into();
+    let soft_shadows = matches.is_present("soft-shadows");
     let path_str = matches.value_of("INPUT").unwrap();
 
     let path = std::path::Path::new(&path_str);
@@ -176,8 +183,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             let group = Arc::new(object);
 
-            let light =
-                Light::new_point_light(Color::new(0.9, 0.9, 0.9), Point::new(-5.0, 25.0, -15.0));
+            let light = if soft_shadows {
+                Light::new_area_light(
+                    Color::new(0.9, 0.9, 0.9),
+                    Point::new(-5.0, 25.0, -15.0),
+                    Vector::new(2.0, 0.0, 0.0),
+                    8,
+                    Vector::new(2.0, 0.0, 0.0),
+                    8,
+                )
+            } else {
+                Light::new_point_light(Color::new(0.9, 0.9, 0.9), Point::new(-5.0, 25.0, -15.0))
+            };
 
             let world = World::new()
                 .with_objects(vec![group, wall_left, wall_right, floor])
