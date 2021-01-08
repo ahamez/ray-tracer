@@ -17,7 +17,6 @@ My main objective is to be fluent in Rust 🗣🦀. So, if some seasoned rustace
 
 ![Shadow Glamour Shot](/samples/render/shadow-glamour-shot.png?raw=true "Shadow Glamour Shot")
 
-
 ![Plane](/samples/render/ch09_plane.png?raw=true "Plane")
 
 ![Pattern](/samples/render/ch10_pattern.png?raw=true "Pattern")
@@ -39,3 +38,7 @@ My main objective is to be fluent in Rust 🗣🦀. So, if some seasoned rustace
 ![Hexagon](/samples/render/ch14_hexagon.png?raw=true "Hexagon")
 
 ![Triangle](/samples/render/ch15_triangle.png?raw=true "Triangle")
+
+![Lunar lander](/samples/render/lunar_lander.png?raw=true "Lunar Lander")
+
+![Armadillo](/samples/render/armadillo_small.png?raw=true "Armadillo")
