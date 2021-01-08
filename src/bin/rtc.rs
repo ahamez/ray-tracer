@@ -128,7 +128,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .transform();
 
             let bbox = object.bounding_box();
-            dbg!(bbox);
             // Translate the object to touch the floor at 0.0.
             let object = object.translate(0.0, -bbox.min().y(), 0.0).transform();
 
