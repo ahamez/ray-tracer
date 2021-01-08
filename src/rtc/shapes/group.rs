@@ -148,7 +148,16 @@ impl GroupBuilder {
                 object.clone(),
                 g.children()
                     .iter()
-                    .map(|child| GroupBuilder::from_object(child))
+                    .filter_map(|child| match child.shape() {
+                        Shape::Group(g) => {
+                            if g.children().is_empty() {
+                                None
+                            } else {
+                                Some(GroupBuilder::from_object(child))
+                            }
+                        }
+                        _ => Some(GroupBuilder::from_object(child)),
+                    })
                     .collect(),
             ),
             _other => GroupBuilder::Leaf(object.clone()),

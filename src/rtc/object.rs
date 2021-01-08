@@ -68,7 +68,17 @@ impl Object {
     pub fn new_group(children: Vec<Arc<Object>>) -> Self {
         let children_group_builders = children
             .iter()
-            .map(|child| GroupBuilder::from_object(child))
+            .filter_map(|child| match child.shape() {
+                Shape::Group(g) => {
+                    if g.children().is_empty() {
+                        None
+                    } else {
+                        Some(GroupBuilder::from_object(child))
+                    }
+                }
+
+                _ => Some(GroupBuilder::from_object(child)),
+            })
             .collect();
         let group_builder = GroupBuilder::Node(Object::new_dummy(), children_group_builders);
         let object = group_builder.build();

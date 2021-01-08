@@ -342,16 +342,13 @@ pub fn parse_str(s: &str) -> Result<Object> {
         }
     }
 
-    let empty_anonymous = anonymous.is_empty();
     let anonymous_group = Object::new_group(anonymous);
 
     if named.is_empty() {
         Ok(anonymous_group)
     } else {
         let mut groups = Vec::with_capacity(named.len());
-        if !empty_anonymous {
-            groups.push(Arc::new(anonymous_group));
-        }
+        groups.push(Arc::new(anonymous_group));
         for (_, triangles) in named {
             if triangles.is_empty() {
                 panic!();
