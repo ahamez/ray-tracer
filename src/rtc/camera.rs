@@ -101,10 +101,10 @@ impl Camera {
 
     pub fn with_anti_aliasing(mut self, level: usize) -> Self {
         self.anti_aliasing_offsets = match level {
-            2 => vec![-0.5, 0.5],
-            3 => vec![-0.5, 0.0, 0.5],
-            4 => vec![-0.5, -0.25, 0.25, 0.5],
-            5 => vec![-0.5, -0.25, 0.0, 0.25, 0.5],
+            2 => vec![-0.25, 0.25],
+            3 => vec![-0.25, 0.0, 0.25],
+            4 => vec![-0.25, -0.12, 0.12, 0.25],
+            5 => vec![-0.25, -0.12, 0.0, 0.12, 0.25],
             _ => vec![0.5],
         };
 
