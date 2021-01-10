@@ -58,7 +58,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             Arg::with_name("bvh-threshold")
                 .long("bvh-threshold")
                 .value_name("INTEGER")
-                .help("The minimal number of shapes to create a sub group. Deactivates BVH is 0.")
+                .help("The minimal number of shapes to create a sub group. Deactivates BVH if 0.")
                 .takes_value(true),
         )
         .arg(
