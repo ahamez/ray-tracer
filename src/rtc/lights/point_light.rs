@@ -4,10 +4,11 @@ use crate::{
     primitive::Point,
     rtc::{Color, World},
 };
+use serde::{Deserialize, Serialize};
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct PointLight {
     intensity: Color,
     position: [Point; 1],

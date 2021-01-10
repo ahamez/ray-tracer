@@ -7,10 +7,11 @@ use crate::{
         Color, World,
     },
 };
+use serde::{Deserialize, Serialize};
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum LightType {
     AreaLight(AreaLight),
     PointLight(PointLight),
@@ -18,7 +19,7 @@ pub enum LightType {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Light {
     light: LightType,
 }

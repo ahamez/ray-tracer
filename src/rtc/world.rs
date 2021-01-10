@@ -6,16 +6,17 @@ use crate::{
     rtc::{Color, IntersectionState, Intersections, Light, Object, Ray},
 };
 use atomic_counter::{AtomicCounter, RelaxedCounter};
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Debug)]
-
+#[derive(Serialize, Deserialize, Debug)]
 pub struct World {
     objects: Vec<Arc<Object>>,
     lights: Vec<Light>,
     recursion_limit: u8,
+    #[serde(skip)]
     nb_intersections: RelaxedCounter,
 }
 

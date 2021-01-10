@@ -4,10 +4,11 @@ use crate::{
     float::ApproxEq,
     primitive::{matrix3::Matrix3, tuple::Tuple},
 };
+use serde::{Deserialize, Serialize};
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct Matrix {
     data: [[f64; 4]; 4],
 }

@@ -4,10 +4,11 @@ use crate::{
     float::ApproxEq,
     primitive::{tuple::Tuple, vector::Vector},
 };
+use serde::{Deserialize, Serialize};
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct Point {
     x: f64,
     y: f64,

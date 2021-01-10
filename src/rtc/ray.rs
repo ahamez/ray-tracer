@@ -4,11 +4,12 @@ use crate::{
     primitive::{Matrix, Point, Vector},
     rtc::{Intersection, IntersectionPusher, Intersections, Object, Transform},
 };
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Ray {
     pub origin: Point,
     pub direction: Vector,

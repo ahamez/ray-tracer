@@ -4,13 +4,14 @@ use crate::{
     primitive::{Point, Tuple, Vector},
     rtc::{BoundingBox, IntersectionPusher, Ray},
 };
+use serde::{Deserialize, Serialize};
 
 /* ---------------------------------------------------------------------------------------------- */
 
 // We assume a sphere is always at Position{0, 0 , 0}, thus the absence of coordinates.
 // Intersection with rays will be computed reversing the sphere's transformation (which
 // includes the translation).
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Sphere {}
 
 /* ---------------------------------------------------------------------------------------------- */

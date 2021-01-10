@@ -7,11 +7,12 @@ use crate::{
         BoundingBox, Intersection, IntersectionPusher, Material, Ray, Shape, Transform,
     },
 };
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Object {
     bounding_box: BoundingBox,
     has_shadow: bool,

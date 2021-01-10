@@ -5,10 +5,11 @@ use crate::{
     primitive::{Matrix, Point, Tuple},
     rtc::{Color, Object, Transform},
 };
+use serde::{Deserialize, Serialize};
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Pattern {
     pattern: Patterns,
     transformation: Matrix,
@@ -110,7 +111,7 @@ impl Transform for Pattern {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 enum Patterns {
     Checker(CheckerPattern),
     Gradient(GradientPattern),
@@ -122,7 +123,7 @@ enum Patterns {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct CheckerPattern {
     c1: Color,
     c2: Color,
@@ -141,7 +142,7 @@ impl CheckerPattern {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GradientPattern {
     from: Color,
     to: Color,
@@ -155,7 +156,7 @@ impl GradientPattern {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct PlainPattern {
     color: Color,
 }
@@ -168,7 +169,7 @@ impl PlainPattern {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct RingPattern {
     colors: Vec<Color>,
 }
@@ -184,7 +185,7 @@ impl RingPattern {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StripePattern {
     colors: Vec<Color>,
 }
@@ -200,7 +201,7 @@ impl StripePattern {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TestPattern {}
 
 impl TestPattern {

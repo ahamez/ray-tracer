@@ -5,10 +5,11 @@ use crate::{
     primitive::{Point, Vector},
     rtc::{Color, Light, Object, Pattern},
 };
+use serde::{Deserialize, Serialize};
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Material {
     pub ambient: f64,
     pub pattern: Pattern,

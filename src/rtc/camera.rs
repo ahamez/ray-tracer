@@ -5,10 +5,11 @@ use crate::{
     rtc::{Canvas, Color, Ray, Transform, World},
 };
 use rayon::prelude::*;
+use serde::{Deserialize, Serialize};
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Camera {
     h_size: usize,
     v_size: usize,

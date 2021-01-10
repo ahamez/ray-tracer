@@ -1,10 +1,11 @@
 /* ---------------------------------------------------------------------------------------------- */
 
 use crate::float::ApproxEq;
+use serde::{Deserialize, Serialize};
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct Color {
     pub r: f64,
     pub g: f64,

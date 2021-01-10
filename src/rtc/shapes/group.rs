@@ -4,11 +4,12 @@ use crate::{
     primitive::{Matrix, Point, Vector},
     rtc::{BoundingBox, IntersectionPusher, Object, Ray, Shape, Transform},
 };
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Group {
     bounding_box: BoundingBox,
     children: Vec<Arc<Object>>,

@@ -4,10 +4,11 @@ use crate::{
     primitive::{Point, Vector},
     rtc::{shapes::Triangle, BoundingBox, Intersection, IntersectionPusher, Ray},
 };
+use serde::{Deserialize, Serialize};
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub struct SmoothTriangle {
     triangle: Triangle,
     n1: Vector,

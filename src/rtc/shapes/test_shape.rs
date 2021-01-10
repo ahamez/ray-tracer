@@ -4,11 +4,12 @@ use crate::{
     primitive::{Point, Tuple, Vector},
     rtc::{BoundingBox, IntersectionPusher, Ray},
 };
+use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct TestShape {
     ray: Arc<Mutex<Option<Ray>>>,
 }

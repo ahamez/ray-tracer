@@ -5,10 +5,11 @@ use crate::{
     primitive::{Matrix, Point, Tuple},
     rtc::{Ray, Transform},
 };
+use serde::{Deserialize, Serialize};
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub struct BoundingBox {
     min: Point,
     max: Point,

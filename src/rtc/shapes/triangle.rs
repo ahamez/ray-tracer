@@ -5,10 +5,11 @@ use crate::{
     primitive::{Point, Vector},
     rtc::{BoundingBox, IntersectionPusher, Ray},
 };
+use serde::{Deserialize, Serialize};
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Triangle {
     p1: Point,
     p2: Point,
