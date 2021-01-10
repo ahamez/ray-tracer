@@ -1,6 +1,7 @@
 /* ---------------------------------------------------------------------------------------------- */
 
 use clap::{App, AppSettings, Arg};
+use flate2::{read::GzDecoder, write::GzEncoder, Compression};
 use ray_tracer::{
     io::{obj, yaml},
     primitive::{Point, Tuple, Vector},
@@ -9,7 +10,14 @@ use ray_tracer::{
         Transform, World,
     },
 };
-use std::{f64::consts::PI, sync::Arc, time::Instant};
+use sha3::{Digest, Sha3_256};
+use std::{
+    f64::consts::PI,
+    fs::File,
+    io::{Read, Write},
+    sync::Arc,
+    time::Instant,
+};
 
 /* ---------------------------------------------------------------------------------------------- */
 
@@ -136,20 +144,54 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (world, camera) = match ext.to_str() {
         Some("yml") => yaml::parse(&path),
         Some("obj") => {
-            let object = obj::parse_file(&path)?
-                .rotate_x(rotate_x)
-                .rotate_y(rotate_y)
-                .rotate_z(rotate_z)
-                .transform();
+            let hash = Sha3_256::new()
+                .chain(path_str)
+                .chain(rotate_x.to_le_bytes())
+                .chain(rotate_y.to_le_bytes())
+                .chain(rotate_z.to_le_bytes())
+                .chain(bvh_threshold.to_le_bytes())
+                .finalize();
 
-            let bbox = object.bounding_box();
-            // Translate the object to touch the floor at 0.0.
-            let object = object.translate(0.0, -bbox.min().y(), 0.0).transform();
+            let cache_path = format!(".rtc_{:x}.gz", hash);
 
-            let object = if bvh_threshold != 0 {
-                object.divide(bvh_threshold)
-            } else {
-                object
+            let object = match File::open(&cache_path) {
+                Err(_) => {
+                    let object = obj::parse_file(&path)?
+                        .rotate_x(rotate_x)
+                        .rotate_y(rotate_y)
+                        .rotate_z(rotate_z)
+                        .transform();
+
+                    let bbox = object.bounding_box();
+                    // Translate the object to touch the floor at 0.0.
+                    let object = object.translate(0.0, -bbox.min().y(), 0.0).transform();
+
+                    let object = if bvh_threshold != 0 {
+                        object.divide(bvh_threshold)
+                    } else {
+                        object
+                    };
+
+                    println!("Writing cached object");
+
+                    let serialized = bincode::serialize(&object)?;
+                    let mut gz = GzEncoder::new(Vec::new(), Compression::default());
+                    gz.write_all(&serialized)?;
+                    let compressed = gz.finish()?;
+                    std::fs::write(&cache_path, &compressed)?;
+
+                    object
+                }
+
+                Ok(_) => {
+                    println!("Using cached object");
+
+                    let compressed = std::fs::read(&cache_path)?;
+                    let mut gz = GzDecoder::new(&compressed[..]);
+                    let mut serialized = vec![];
+                    gz.read_to_end(&mut serialized)?;
+                    bincode::deserialize(&serialized)?
+                }
             };
 
             let floor = Arc::new(
