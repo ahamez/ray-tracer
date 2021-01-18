@@ -18,17 +18,18 @@ pub struct Ray {
 /* ---------------------------------------------------------------------------------------------- */
 
 pub struct RayIntersectionPusher {
-    pub is: Vec<Intersection>,
+    pub intersections: Vec<Intersection>,
     pub object: Arc<Object>,
 }
 
 impl IntersectionPusher for RayIntersectionPusher {
     fn t(&mut self, t: f64) {
-        self.is.push(Intersection::new(t, self.object.clone()));
+        self.intersections
+            .push(Intersection::new(t, self.object.clone()));
     }
 
     fn t_u_v(&mut self, t: f64, u: f64, v: f64) {
-        self.is
+        self.intersections
             .push(Intersection::new(t, self.object.clone()).with_u_and_v(u, v));
     }
 
@@ -49,12 +50,12 @@ impl Ray {
             .iter()
             .fold(Vec::<Intersection>::with_capacity(16), |acc, object| {
                 let mut pusher = RayIntersectionPusher {
-                    is: acc,
+                    intersections: acc,
                     object: object.clone(),
                 };
                 object.intersects(self, &mut pusher);
 
-                pusher.is
+                pusher.intersections
             })
             .into()
     }
