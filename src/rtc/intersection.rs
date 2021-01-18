@@ -119,6 +119,12 @@ impl Intersections {
 
 /* ---------------------------------------------------------------------------------------------- */
 
+impl From<Vec<Intersection>> for Intersections {
+    fn from(is: Vec<Intersection>) -> Self {
+        Self::new(is)
+    }
+}
+
 impl std::ops::Index<usize> for Intersections {
     type Output = Intersection;
 
