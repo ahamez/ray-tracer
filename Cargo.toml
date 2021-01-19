@@ -1,7 +1,7 @@
 [package]
 name = "ray_tracer"
 version = "0.1.0"
-authors = ["Alexandre Hamez <alexandre.hamez@gmail.com>"]
+authors = ["Alexandre Hamez"]
 edition = "2018"
 
 [dependencies]
