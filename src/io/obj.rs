@@ -10,7 +10,6 @@ use std::{
     f64::{INFINITY, NEG_INFINITY},
     fmt,
     io::{prelude::*, BufReader},
-    sync::Arc,
 };
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -294,25 +293,25 @@ fn parse_data(s: &str) -> Result<Data> {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn mk_triangles(face: &Face, vertices: &[Point], normals: &[Vector]) -> Vec<Arc<Object>> {
+fn mk_triangles(face: &Face, vertices: &[Point], normals: &[Vector]) -> Vec<Object> {
     let mut triangles = Vec::with_capacity(face.vertices.len());
 
     for i in 1..face.vertices.len() - 1 {
         if face.has_normals() {
-            triangles.push(Arc::new(Object::new_smooth_triangle(
+            triangles.push(Object::new_smooth_triangle(
                 vertices[face.vertices[0].vertex_index],
                 vertices[face.vertices[i].vertex_index],
                 vertices[face.vertices[i + 1].vertex_index],
                 normals[face.vertices[0].normal_index.expect("Unset normal")],
                 normals[face.vertices[i].normal_index.expect("Unset normal")],
                 normals[face.vertices[i + 1].normal_index.expect("Unset normal")],
-            )));
+            ));
         } else {
-            triangles.push(Arc::new(Object::new_triangle(
+            triangles.push(Object::new_triangle(
                 vertices[face.vertices[0].vertex_index],
                 vertices[face.vertices[i].vertex_index],
                 vertices[face.vertices[i + 1].vertex_index],
-            )));
+            ));
         }
     }
 
@@ -332,12 +331,12 @@ pub fn parse_str(s: &str) -> Result<Object> {
         let group = Object::new_group(triangles);
 
         match face.group {
-            None => anonymous.push(Arc::new(group)),
+            None => anonymous.push(group),
             Some(name) => match named.get_mut(&name) {
                 None => {
-                    named.insert(name, vec![Arc::new(group)]);
+                    named.insert(name, vec![group]);
                 }
-                Some(entry) => entry.push(Arc::new(group)),
+                Some(entry) => entry.push(group),
             },
         }
     }
@@ -348,12 +347,12 @@ pub fn parse_str(s: &str) -> Result<Object> {
         Ok(anonymous_group)
     } else {
         let mut groups = Vec::with_capacity(named.len());
-        groups.push(Arc::new(anonymous_group));
+        groups.push(anonymous_group);
         for (_, triangles) in named {
             if triangles.is_empty() {
                 panic!();
             }
-            groups.push(Arc::new(Object::new_group(triangles)))
+            groups.push(Object::new_group(triangles));
         }
 
         Ok(Object::new_group(groups))

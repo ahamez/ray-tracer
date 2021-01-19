@@ -21,7 +21,7 @@ impl TestShape {
         Default::default()
     }
 
-    pub fn intersects(&self, ray: &Ray, _push: &mut impl IntersectionPusher) {
+    pub fn intersects<'a>(&self, ray: &Ray, _push: &mut impl IntersectionPusher<'a>) {
         let mut reference = self.ray.lock().unwrap();
         *reference = Some(*ray);
     }
@@ -70,14 +70,14 @@ mod tests {
         pub xs: Vec<f64>,
     }
 
-    impl IntersectionPusher for Push {
+    impl IntersectionPusher<'_> for Push {
         fn t(&mut self, t: f64) {
             self.xs.push(t);
         }
         fn t_u_v(&mut self, _t: f64, _u: f64, _v: f64) {
             panic!();
         }
-        fn set_object(&mut self, _object: Arc<Object>) {
+        fn set_object(&mut self, _object: &'_ Object) {
             panic!();
         }
     }

@@ -5,22 +5,22 @@ use crate::{
     primitive::{Point, Vector},
     rtc::{Object, Ray},
 };
-use std::{cmp::Ordering, sync::Arc};
+use std::cmp::Ordering;
 
 /* ---------------------------------------------------------------------------------------------- */
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct Intersection {
+pub struct Intersection<'a> {
     t: f64,
-    object: Arc<Object>,
+    object: &'a Object,
     u: f64, // used by smooth triangles
     v: f64, // used by smooth triangles
 }
 
 /* ---------------------------------------------------------------------------------------------- */
 
-impl Intersection {
-    pub fn new(t: f64, object: Arc<Object>) -> Self {
+impl<'a> Intersection<'a> {
+    pub fn new(t: f64, object: &'a Object) -> Self {
         Self {
             t,
             object,
@@ -40,7 +40,7 @@ impl Intersection {
         self.t
     }
 
-    pub fn object(&self) -> &Arc<Object> {
+    pub fn object(&self) -> &'a Object {
         &self.object
     }
 
@@ -55,7 +55,7 @@ impl Intersection {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-impl std::cmp::PartialOrd for Intersection {
+impl<'a> std::cmp::PartialOrd for Intersection<'a> {
     fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
         Some(self.cmp(&other))
     }
@@ -63,7 +63,7 @@ impl std::cmp::PartialOrd for Intersection {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-impl std::cmp::Ord for Intersection {
+impl<'a> std::cmp::Ord for Intersection<'a> {
     fn cmp(&self, other: &Self) -> Ordering {
         if self.t.is_nan() {
             Ordering::Greater
@@ -81,17 +81,17 @@ impl std::cmp::Ord for Intersection {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-impl std::cmp::Eq for Intersection {}
+impl<'a> std::cmp::Eq for Intersection<'a> {}
 
 /* ---------------------------------------------------------------------------------------------- */
 
 #[derive(Debug)]
-pub struct Intersections(Vec<Intersection>);
+pub struct Intersections<'a>(Vec<Intersection<'a>>);
 
 /* ---------------------------------------------------------------------------------------------- */
 
-impl Intersections {
-    pub fn new(mut is: Vec<Intersection>) -> Self {
+impl<'a> Intersections<'a> {
+    pub fn new(mut is: Vec<Intersection<'a>>) -> Self {
         is.sort_unstable();
         Intersections(is)
     }
@@ -119,16 +119,16 @@ impl Intersections {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-impl From<Vec<Intersection>> for Intersections {
-    fn from(is: Vec<Intersection>) -> Self {
+impl<'a> From<Vec<Intersection<'a>>> for Intersections<'a> {
+    fn from(is: Vec<Intersection<'a>>) -> Self {
         Self::new(is)
     }
 }
 
-impl std::ops::Index<usize> for Intersections {
-    type Output = Intersection;
+impl<'a> std::ops::Index<usize> for Intersections<'a> {
+    type Output = Intersection<'a>;
 
-    fn index(&self, i: usize) -> &Intersection {
+    fn index(&self, i: usize) -> &Intersection<'a> {
         let &Intersections(vec) = &self;
 
         &vec[i]
@@ -138,14 +138,14 @@ impl std::ops::Index<usize> for Intersections {
 /* ---------------------------------------------------------------------------------------------- */
 
 #[derive(Debug)]
-pub struct IntersectionState {
+pub struct IntersectionState<'a> {
     cos_i: f64,
     eye_v: Vector,
     inside: bool,
     n1: f64,
     n2: f64,
     normal_v: Vector,
-    object: Arc<Object>,
+    object: &'a Object,
     over_point: Point,
     point: Point,
     reflect_v: Vector,
@@ -155,11 +155,11 @@ pub struct IntersectionState {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-impl IntersectionState {
-    pub fn new(intersections: &Intersections, intersection_index: usize, ray: &Ray) -> Self {
+impl<'a> IntersectionState<'a> {
+    pub fn new(intersections: &Intersections<'a>, intersection_index: usize, ray: &Ray) -> Self {
         let intersection = &intersections[intersection_index];
 
-        let mut containers = Vec::<&Arc<Object>>::with_capacity(intersections.len());
+        let mut containers = Vec::<&Object>::with_capacity(intersections.len());
 
         let mut n1 = None;
         let mut n2 = None;
@@ -175,14 +175,12 @@ impl IntersectionState {
 
             match containers
                 .iter()
-                .position(|object| Arc::ptr_eq(object, &i.object))
+                .position(|&object| std::ptr::eq(object, i.object))
             {
                 Some(pos) => {
-                    containers.remove(pos);
+                    let _ = containers.remove(pos);
                 }
-                None => {
-                    containers.push(&i.object);
-                }
+                None => containers.push(i.object),
             }
 
             if is_intersection {
@@ -207,14 +205,14 @@ impl IntersectionState {
         let over_point = point + normal_v * EPSILON;
         let under_point = point - normal_v * EPSILON;
 
-        IntersectionState {
+        Self {
             cos_i: normal_v ^ eye_v,
             eye_v,
             inside,
             n1: n1.unwrap_or(1.0),
             n2: n2.unwrap_or(1.0),
             normal_v,
-            object: intersection.object.clone(),
+            object: intersection.object,
             over_point,
             point,
             reflect_v,
@@ -277,10 +275,10 @@ impl IntersectionState {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-pub trait IntersectionPusher {
+pub trait IntersectionPusher<'a> {
     fn t(&mut self, t: f64);
     fn t_u_v(&mut self, t: f64, u: f64, v: f64);
-    fn set_object(&mut self, object: Arc<Object>);
+    fn set_object(&mut self, object: &'a Object);
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -305,19 +303,21 @@ mod tests {
 
     #[test]
     fn an_intersection_encapsulates_t_and_object() {
-        let object = Arc::new(Object::new_sphere());
+        let object = Object::new_sphere();
         let t = 3.5;
-        let i = Intersection::new(t, object.clone());
+        let i = Intersection::new(t, &object);
 
         assert_eq!(i.t, t);
-        assert_eq!(i.object, object);
+        assert_eq!(i.object, &object);
     }
 
     #[test]
     fn sort_intersections() {
-        let i0 = Intersection::new(1.0, Arc::new(Object::new_sphere()));
-        let i1 = Intersection::new(-1.0, Arc::new(Object::new_sphere()));
-        let i2 = Intersection::new(0.0, Arc::new(Object::new_sphere()));
+        let object = Object::new_sphere();
+
+        let i0 = Intersection::new(1.0, &object);
+        let i1 = Intersection::new(-1.0, &object);
+        let i2 = Intersection::new(0.0, &object);
 
         let mut vec = vec![i0.clone(), i1.clone(), i2.clone()];
         vec.sort();
@@ -327,10 +327,10 @@ mod tests {
 
     #[test]
     fn hit_when_all_intersections_have_positive_t() {
-        let object = Arc::new(Object::new_sphere());
+        let object = Object::new_sphere();
 
-        let i0 = Intersection::new(1.0, object.clone());
-        let i1 = Intersection::new(2.0, object);
+        let i0 = Intersection::new(1.0, &object);
+        let i1 = Intersection::new(2.0, &object);
         let is = Intersections::new(vec![i0.clone(), i1]);
 
         let i = is.hit();
@@ -340,10 +340,10 @@ mod tests {
 
     #[test]
     fn hit_when_some_intersections_have_negative_t() {
-        let object = Arc::new(Object::new_sphere());
+        let object = Object::new_sphere();
 
-        let i0 = Intersection::new(-1.0, object.clone());
-        let i1 = Intersection::new(2.0, object);
+        let i0 = Intersection::new(-1.0, &object);
+        let i1 = Intersection::new(2.0, &object);
         let is = Intersections::new(vec![i0, i1.clone()]);
 
         let i = is.hit();
@@ -353,10 +353,10 @@ mod tests {
 
     #[test]
     fn hit_when_all_intersections_have_negative_t() {
-        let object = Arc::new(Object::new_sphere());
+        let object = Object::new_sphere();
 
-        let i0 = Intersection::new(-1.0, object.clone());
-        let i1 = Intersection::new(-1.0, object);
+        let i0 = Intersection::new(-1.0, &object);
+        let i1 = Intersection::new(-1.0, &object);
         let is = Intersections::new(vec![i0.clone(), i1.clone()]);
 
         let i = is.hit();
@@ -366,12 +366,12 @@ mod tests {
 
     #[test]
     fn hit_is_always_the_lowest_nonnegative_intersection() {
-        let object = Arc::new(Object::new_sphere());
+        let object = Object::new_sphere();
 
-        let i0 = Intersection::new(5.0, object.clone());
-        let i1 = Intersection::new(7.0, object.clone());
-        let i2 = Intersection::new(-3.0, object.clone());
-        let i3 = Intersection::new(2.0, object);
+        let i0 = Intersection::new(5.0, &object);
+        let i1 = Intersection::new(7.0, &object);
+        let i2 = Intersection::new(-3.0, &object);
+        let i3 = Intersection::new(2.0, &object);
         let is = Intersections::new(vec![i0, i1, i2, i3.clone()]);
 
         let i = is.hit();
@@ -385,7 +385,8 @@ mod tests {
             origin: Point::new(0.0, 0.0, -5.0),
             direction: Vector::new(0.0, 0.0, 1.0),
         };
-        let i = Intersection::new(4.0, Arc::new(Object::new_sphere()));
+        let object = Object::new_sphere();
+        let i = Intersection::new(4.0, &object);
         let comps = IntersectionState::new(&Intersections::new(vec![i.clone()]), 0, &r);
 
         assert_eq!(comps.t, i.t);
@@ -402,7 +403,8 @@ mod tests {
             origin: Point::new(0.0, 0.0, 0.0),
             direction: Vector::new(0.0, 0.0, 1.0),
         };
-        let i = Intersection::new(1.0, Arc::new(Object::new_sphere()));
+        let object = Object::new_sphere();
+        let i = Intersection::new(1.0, &object);
         let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &r);
 
         assert_eq!(comps.point, Point::new(0.0, 0.0, 1.0));
@@ -418,9 +420,9 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let object = Arc::new(Object::new_sphere().translate(0.0, 0.0, 1.0).transform());
+        let object = Object::new_sphere().translate(0.0, 0.0, 1.0).transform();
 
-        let i = Intersection::new(5.0, object);
+        let i = Intersection::new(5.0, &object);
 
         let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &r);
 
@@ -437,8 +439,8 @@ mod tests {
             origin: Point::new(0.0, 1.0, -1.0),
             direction: Vector::new(0.0, -half_sqrt2, half_sqrt2),
         };
-        let object = Arc::new(Object::new_plane());
-        let i = Intersection::new(sqrt2, object);
+        let object = Object::new_plane();
+        let i = Intersection::new(sqrt2, &object);
 
         let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
 
@@ -452,9 +454,9 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let object = Arc::new(glassy_sphere().translate(0.0, 0.0, 1.0).transform());
+        let object = glassy_sphere().translate(0.0, 0.0, 1.0).transform();
 
-        let i = Intersection::new(5.0, object);
+        let i = Intersection::new(5.0, &object);
 
         let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
 
@@ -463,16 +465,16 @@ mod tests {
     }
 
     #[test]
-    fn the_schlick_apporimixation_under_toal_internal_reflection() {
-        let object = Arc::new(glassy_sphere());
+    fn the_schlick_approximation_under_total_internal_reflection() {
+        let object = glassy_sphere();
         let ray = Ray {
             origin: Point::new(0.0, 0.0, f64::sqrt(2.0) / 2.0),
             direction: Vector::new(0.0, 1.0, 0.0),
         };
 
         let xs = Intersections::new(vec![
-            Intersection::new(-f64::sqrt(2.0) / 2.0, object.clone()),
-            Intersection::new(f64::sqrt(2.0) / 2.0, object),
+            Intersection::new(-f64::sqrt(2.0) / 2.0, &object),
+            Intersection::new(f64::sqrt(2.0) / 2.0, &object),
         ]);
 
         let comps = IntersectionState::new(&xs, 1, &ray);
@@ -482,15 +484,15 @@ mod tests {
 
     #[test]
     fn the_schlick_approximation_with_a_perpendicular_viewing_angle() {
-        let object = Arc::new(glassy_sphere());
+        let object = glassy_sphere();
         let ray = Ray {
             origin: Point::new(0.0, 0.0, 0.0),
             direction: Vector::new(0.0, 1.0, 0.0),
         };
 
         let xs = Intersections::new(vec![
-            Intersection::new(-1.0, object.clone()),
-            Intersection::new(1.0, object),
+            Intersection::new(-1.0, &object),
+            Intersection::new(1.0, &object),
         ]);
 
         let comps = IntersectionState::new(&xs, 1, &ray);
@@ -500,13 +502,13 @@ mod tests {
 
     #[test]
     fn the_schlick_approximation_with_small_angle_and_n2_greater_than_n1() {
-        let object = Arc::new(glassy_sphere());
+        let object = glassy_sphere();
         let ray = Ray {
             origin: Point::new(0.0, 0.99, -2.0),
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let xs = Intersections::new(vec![Intersection::new(1.8589, object)]);
+        let xs = Intersections::new(vec![Intersection::new(1.8589, &object)]);
 
         let comps = IntersectionState::new(&xs, 0, &ray);
 
@@ -515,8 +517,8 @@ mod tests {
 
     #[test]
     fn an_intersection_can_encapsulates_u_and_v() {
-        let object = Arc::new(Object::new_test_shape());
-        let i = Intersection::new(3.5, object).with_u_and_v(0.2, 0.4);
+        let object = Object::new_test_shape();
+        let i = Intersection::new(3.5, &object).with_u_and_v(0.2, 0.4);
 
         assert_eq!(i.u(), 0.2);
         assert_eq!(i.v(), 0.4);

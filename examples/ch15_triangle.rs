@@ -6,18 +6,15 @@ use ray_tracer::{
     },
 };
 use std::f64::consts::PI;
-use std::sync::Arc;
 
 fn main() {
-    let floor = Arc::new(
-        Object::new_plane().with_material(
-            Material::new()
-                .with_pattern(Pattern::new_checker(
-                    Color::white(),
-                    Color::new(0.5, 0.5, 0.5),
-                ))
-                .with_reflective(0.0),
-        ),
+    let floor = Object::new_plane().with_material(
+        Material::new()
+            .with_pattern(Pattern::new_checker(
+                Color::white(),
+                Color::new(0.5, 0.5, 0.5),
+            ))
+            .with_reflective(0.0),
     );
 
     let t1 = Object::new_triangle(
@@ -48,28 +45,24 @@ fn main() {
     )
     .with_material(Material::new().with_color(Color::blue()));
 
-    let pyramid = Arc::new(
-        Object::new_group(vec![Arc::new(t1), Arc::new(t2), Arc::new(t3), Arc::new(t4)])
-            .scale(2.0, 2.0, 2.0)
-            .rotate_y(PI / 5.0)
-            .translate(-1.5, 0.0, 0.0)
-            .transform(),
-    );
+    let pyramid = Object::new_group(vec![t1, t2, t3, t4])
+        .scale(2.0, 2.0, 2.0)
+        .rotate_y(PI / 5.0)
+        .translate(-1.5, 0.0, 0.0)
+        .transform();
 
-    let cube = Arc::new(
-        Object::new_cube()
-            .with_material(
-                Material::new()
-                    .with_reflective(1.0)
-                    .with_ambient(0.0)
-                    .with_diffuse(0.3)
-                    .with_specular(0.1)
-                    .with_shininess(100.0),
-            )
-            .scale(100.0, 100.0, 0.00001)
-            .translate(0.0, 1.0, 4.0)
-            .transform(),
-    );
+    let cube = Object::new_cube()
+        .with_material(
+            Material::new()
+                .with_reflective(1.0)
+                .with_ambient(0.0)
+                .with_diffuse(0.3)
+                .with_specular(0.1)
+                .with_shininess(100.0),
+        )
+        .scale(100.0, 100.0, 0.00001)
+        .translate(0.0, 1.0, 4.0)
+        .transform();
 
     let light = Light::new_point_light(Color::white(), Point::new(-20.0, 6.0, -7.0));
 

@@ -7,13 +7,12 @@ use crate::{
 };
 use atomic_counter::{AtomicCounter, RelaxedCounter};
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
 
 /* ---------------------------------------------------------------------------------------------- */
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct World {
-    objects: Vec<Arc<Object>>,
+    objects: Vec<Object>,
     lights: Vec<Light>,
     recursion_limit: u8,
     #[serde(skip)]
@@ -35,7 +34,7 @@ impl World {
         self
     }
 
-    pub fn with_objects(mut self, objects: Vec<Arc<Object>>) -> Self {
+    pub fn with_objects(mut self, objects: Vec<Object>) -> Self {
         self.objects = objects;
 
         self
@@ -47,7 +46,7 @@ impl World {
         self
     }
 
-    pub fn objects(&self) -> &Vec<Arc<Object>> {
+    pub fn objects(&self) -> &Vec<Object> {
         &self.objects
     }
 
@@ -202,15 +201,13 @@ pub mod tests {
     pub fn default_world() -> World {
         World {
             objects: vec![
-                Arc::new(
-                    Object::new_sphere().with_material(
-                        Material::new()
-                            .with_pattern(Pattern::new_plain(Color::new(0.8, 1.0, 0.6)))
-                            .with_diffuse(0.7)
-                            .with_specular(0.2),
-                    ),
+                Object::new_sphere().with_material(
+                    Material::new()
+                        .with_pattern(Pattern::new_plain(Color::new(0.8, 1.0, 0.6)))
+                        .with_diffuse(0.7)
+                        .with_specular(0.2),
                 ),
-                Arc::new(Object::new_sphere().scale(0.5, 0.5, 0.5).transform()),
+                Object::new_sphere().scale(0.5, 0.5, 0.5).transform(),
             ],
             lights: vec![Light::new_point_light(
                 Color::white(),
@@ -247,7 +244,7 @@ pub mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let object = w.objects[0].clone();
+        let object = &w.objects[0];
         let i = Intersection::new(4.0, object);
 
         let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
@@ -272,7 +269,7 @@ pub mod tests {
         };
 
         let object = w.objects[1].clone();
-        let i = Intersection::new(0.5, object);
+        let i = Intersection::new(0.5, &object);
 
         let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
 
@@ -284,8 +281,8 @@ pub mod tests {
 
     #[test]
     fn shade_hit_is_given_an_intesection_in_shadow() {
-        let s1 = Arc::new(Object::new_sphere());
-        let s2 = Arc::new(Object::new_sphere().translate(0.0, 0.0, 10.0).transform());
+        let s1 = Object::new_sphere();
+        let s2 = Object::new_sphere().translate(0.0, 0.0, 10.0).transform();
 
         let w = World {
             lights: vec![Light::new_point_light(
@@ -301,7 +298,7 @@ pub mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let i = Intersection::new(4.0, s2);
+        let i = Intersection::new(4.0, &s2);
 
         let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
 
@@ -334,22 +331,18 @@ pub mod tests {
 
     #[test]
     fn the_color_with_an_intersection_behind_the_ray() {
-        let outer = Arc::new(
-            Object::new_sphere().with_material(
-                Material::new()
-                    .with_pattern(Pattern::new_plain(Color::new(0.8, 1.0, 0.6)))
-                    .with_diffuse(0.7)
-                    .with_specular(0.2)
-                    .with_ambient(1.0),
-            ),
+        let outer = Object::new_sphere().with_material(
+            Material::new()
+                .with_pattern(Pattern::new_plain(Color::new(0.8, 1.0, 0.6)))
+                .with_diffuse(0.7)
+                .with_specular(0.2)
+                .with_ambient(1.0),
         );
 
-        let inner = Arc::new(
-            Object::new_sphere()
-                .with_material(Material::new().with_ambient(1.0))
-                .scale(0.5, 0.5, 0.5)
-                .transform(),
-        );
+        let inner = Object::new_sphere()
+            .with_material(Material::new().with_ambient(1.0))
+            .scale(0.5, 0.5, 0.5)
+            .transform();
 
         let w = World {
             objects: vec![outer, inner],
@@ -385,7 +378,7 @@ pub mod tests {
     fn the_reflected_color_for_a_nonreflective_material() {
         let w = default_world();
 
-        let obj1 = (*w.objects[1]).clone();
+        let obj1 = w.objects[1].clone();
         let obj1_material = obj1.material().clone();
         let object = obj1.clone().with_material(obj1_material.with_ambient(1.0));
 
@@ -394,7 +387,7 @@ pub mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let i = Intersection::new(1.0, Arc::new(object));
+        let i = Intersection::new(1.0, &object);
 
         let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
 
@@ -407,13 +400,13 @@ pub mod tests {
 
         let mut w = default_world();
 
-        let object = Arc::new(
+        w.objects.push(
             Object::new_plane()
                 .with_material(Material::new().with_reflective(0.5))
                 .translate(0.0, -1.0, 0.0)
                 .transform(),
         );
-        w.objects.push(object.clone());
+        let object = &w.objects.last().unwrap();
 
         let ray = Ray {
             origin: Point::new(0.0, 0.0, -3.0),
@@ -436,21 +429,20 @@ pub mod tests {
 
         let mut w = default_world();
 
-        let object = Arc::new(
+        w.objects.push(
             Object::new_plane()
                 .with_material(Material::new().with_reflective(0.5))
                 .translate(0.0, -1.0, 0.0)
                 .transform(),
         );
-
-        w.objects.push(object.clone());
+        let object = &w.objects.last().unwrap();
 
         let ray = Ray {
             origin: Point::new(0.0, 0.0, -3.0),
             direction: Vector::new(0.0, -sqrt2 / 2.0, sqrt2 / 2.0),
         };
 
-        let i = Intersection::new(sqrt2, object);
+        let i = Intersection::new(sqrt2, &object);
 
         let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
 
@@ -468,18 +460,14 @@ pub mod tests {
                 Point::new(0.0, 0.0, 0.0),
             )],
             objects: vec![
-                Arc::new(
-                    Object::new_plane()
-                        .with_material(Material::new().with_reflective(1.0))
-                        .translate(0.0, -1.0, 0.0)
-                        .transform(),
-                ),
-                Arc::new(
-                    Object::new_plane()
-                        .with_material(Material::new().with_reflective(1.0))
-                        .translate(0.0, 1.0, 0.0)
-                        .transform(),
-                ),
+                Object::new_plane()
+                    .with_material(Material::new().with_reflective(1.0))
+                    .translate(0.0, -1.0, 0.0)
+                    .transform(),
+                Object::new_plane()
+                    .with_material(Material::new().with_reflective(1.0))
+                    .translate(0.0, 1.0, 0.0)
+                    .transform(),
             ],
             ..Default::default()
         };
@@ -497,14 +485,14 @@ pub mod tests {
     #[test]
     fn the_refracted_color_with_an_opaque_surface() {
         let w = default_world();
-        let object = w.objects[0].clone();
+        let object = &w.objects[0].clone();
         let ray = Ray {
             origin: Point::new(0.0, 0.0, -5.0),
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
         let xs = Intersections::new(vec![
-            Intersection::new(4.0, object.clone()),
+            Intersection::new(4.0, object),
             Intersection::new(6.0, object),
         ]);
 
@@ -517,7 +505,7 @@ pub mod tests {
     fn the_refracted_color_at_the_maximum_recursive_depth() {
         let w = default_world();
 
-        let obj0 = (*w.objects[0]).clone();
+        let obj0 = &w.objects[0];
         let obj0_material = obj0.material().clone();
         let object = obj0.clone().with_material(
             obj0_material
@@ -531,8 +519,8 @@ pub mod tests {
         };
 
         let xs = Intersections::new(vec![
-            Intersection::new(4.0, Arc::new(object.clone())),
-            Intersection::new(6.0, Arc::new(object)),
+            Intersection::new(4.0, &object),
+            Intersection::new(6.0, &object),
         ]);
 
         let comps = IntersectionState::new(&xs, 0, &ray);
@@ -544,7 +532,7 @@ pub mod tests {
     fn the_refracted_color_under_total_internal_reflection() {
         let w = default_world();
 
-        let obj0 = (*w.objects[0]).clone();
+        let obj0 = &w.objects[0];
         let obj0_material = obj0.material().clone();
         let object = obj0.clone().with_material(
             obj0_material
@@ -558,8 +546,8 @@ pub mod tests {
         };
 
         let xs = Intersections::new(vec![
-            Intersection::new(-f64::sqrt(2.0) / 2.0, Arc::new(object.clone())),
-            Intersection::new(f64::sqrt(2.0) / 2.0, Arc::new(object)),
+            Intersection::new(-f64::sqrt(2.0) / 2.0, &object),
+            Intersection::new(f64::sqrt(2.0) / 2.0, &object),
         ]);
 
         let comps = IntersectionState::new(&xs, 1, &ray);
@@ -569,38 +557,43 @@ pub mod tests {
 
     #[test]
     fn the_refracted_color_with_a_refracted_ray() {
-        let mut w = default_world();
+        let (a, b) = {
+            let w = default_world();
 
-        let obj0 = (*w.objects[0]).clone();
-        let obj0_material = obj0.material().clone();
-        let a = obj0.clone().with_material(
-            obj0_material
-                .with_ambient(1.0)
-                .with_pattern(Pattern::new_test()),
-        );
-        let a = Arc::new(a);
+            let obj0 = &w.objects[0];
+            let obj0_material = obj0.material().clone();
+            let a = obj0.clone().with_material(
+                obj0_material
+                    .with_ambient(1.0)
+                    .with_pattern(Pattern::new_test()),
+            );
 
-        let obj1 = (*w.objects[1]).clone();
-        let obj1_material = obj1.material().clone();
-        let b = obj1.clone().with_material(
-            obj1_material
-                .with_transparency(1.0)
-                .with_refractive_index(1.5),
-        );
-        let b = Arc::new(b);
+            let obj1 = &w.objects[1];
+            let obj1_material = obj1.material().clone();
+            let b = obj1.clone().with_material(
+                obj1_material
+                    .with_transparency(1.0)
+                    .with_refractive_index(1.5),
+            );
+
+            (a, b)
+        };
 
         let ray = Ray {
             origin: Point::new(0.0, 0.0, 0.1),
             direction: Vector::new(0.0, 1.0, 0.0),
         };
 
-        w.objects = vec![a.clone(), b.clone()];
+        let w = default_world().with_objects(vec![a, b]);
+
+        let a = &w.objects[0];
+        let b = &w.objects[1];
 
         let xs = Intersections::new(vec![
-            Intersection::new(-0.9899, a.clone()),
-            Intersection::new(-0.4899, b.clone()),
-            Intersection::new(0.4899, b),
-            Intersection::new(0.9899, a),
+            Intersection::new(-0.9899, &a),
+            Intersection::new(-0.4899, &b),
+            Intersection::new(0.4899, &b),
+            Intersection::new(0.9899, &a),
         ]);
 
         let comps = IntersectionState::new(&xs, 2, &ray);
@@ -615,28 +608,24 @@ pub mod tests {
     fn shade_hit_with_a_transparent_material() {
         let mut w = default_world();
 
-        let floor = Arc::new(
-            Object::new_plane()
-                .with_material(
-                    Material::new()
-                        .with_transparency(0.5)
-                        .with_refractive_index(1.5),
-                )
-                .translate(0.0, -1.0, 0.0)
-                .transform(),
-        );
+        let floor = Object::new_plane()
+            .with_material(
+                Material::new()
+                    .with_transparency(0.5)
+                    .with_refractive_index(1.5),
+            )
+            .translate(0.0, -1.0, 0.0)
+            .transform();
         w.objects.push(floor.clone());
 
-        let ball = Arc::new(
-            Object::new_sphere()
-                .with_material(
-                    Material::new()
-                        .with_color(Color::new(1.0, 0.0, 0.0))
-                        .with_ambient(0.5),
-                )
-                .translate(0.0, -3.5, -0.5)
-                .transform(),
-        );
+        let ball = Object::new_sphere()
+            .with_material(
+                Material::new()
+                    .with_color(Color::new(1.0, 0.0, 0.0))
+                    .with_ambient(0.5),
+            )
+            .translate(0.0, -3.5, -0.5)
+            .transform();
         w.objects.push(ball);
 
         let ray = Ray {
@@ -644,7 +633,7 @@ pub mod tests {
             direction: Vector::new(0.0, -f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0),
         };
 
-        let xs = Intersections::new(vec![Intersection::new(f64::sqrt(2.0), floor)]);
+        let xs = Intersections::new(vec![Intersection::new(f64::sqrt(2.0), &floor)]);
 
         let comps = IntersectionState::new(&xs, 0, &ray);
 
@@ -658,37 +647,33 @@ pub mod tests {
     fn shade_hit_with_a_reflective_transparent_material() {
         let mut w = default_world();
 
-        let floor = Arc::new(
-            Object::new_plane()
-                .with_material(
-                    Material::new()
-                        .with_transparency(0.5)
-                        .with_refractive_index(1.5)
-                        .with_reflective(0.5),
-                )
-                .translate(0.0, -1.0, 0.0)
-                .transform(),
-        );
+        let floor = Object::new_plane()
+            .with_material(
+                Material::new()
+                    .with_transparency(0.5)
+                    .with_refractive_index(1.5)
+                    .with_reflective(0.5),
+            )
+            .translate(0.0, -1.0, 0.0)
+            .transform();
         w.objects.push(floor.clone());
 
-        let ball = Arc::new(
-            Object::new_sphere()
-                .with_material(
-                    Material::new()
-                        .with_color(Color::new(1.0, 0.0, 0.0))
-                        .with_ambient(0.5),
-                )
-                .translate(0.0, -3.5, -0.5)
-                .transform(),
-        );
-        w.objects.push(ball);
+        let ball = Object::new_sphere()
+            .with_material(
+                Material::new()
+                    .with_color(Color::new(1.0, 0.0, 0.0))
+                    .with_ambient(0.5),
+            )
+            .translate(0.0, -3.5, -0.5)
+            .transform();
+        w.objects.push(ball.clone());
 
         let ray = Ray {
             origin: Point::new(0.0, 0.0, -3.0),
             direction: Vector::new(0.0, -f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0),
         };
 
-        let xs = Intersections::new(vec![Intersection::new(f64::sqrt(2.0), floor)]);
+        let xs = Intersections::new(vec![Intersection::new(f64::sqrt(2.0), &floor)]);
 
         let comps = IntersectionState::new(&xs, 0, &ray);
 

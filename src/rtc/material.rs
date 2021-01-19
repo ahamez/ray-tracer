@@ -149,7 +149,6 @@ impl Default for Material {
 mod tests {
     use super::*;
     use crate::{primitive::Tuple, rtc::World};
-    use std::sync::Arc;
 
     #[test]
     fn lighting_with_the_eye_between_light_and_surface() {
@@ -317,7 +316,7 @@ mod tests {
     fn lighting_uses_light_intensity_to_attenuate_color() {
         let mut objects = crate::rtc::world::tests::default_world().objects().clone();
 
-        let obj0 = (*objects[0]).clone();
+        let obj0 = objects[0].clone();
         let obj0_material = obj0.material().clone();
         let object = obj0.clone().with_material(
             obj0_material
@@ -327,7 +326,7 @@ mod tests {
                 .with_pattern(Pattern::new_plain(Color::white())),
         );
 
-        objects[0] = Arc::new(object.clone());
+        objects[0] = object.clone();
 
         let w = World::new()
             .with_objects(objects)

@@ -28,7 +28,7 @@ pub enum Shape {
 /* ---------------------------------------------------------------------------------------------- */
 
 impl Shape {
-    pub fn intersects(&self, ray: &Ray, push: &mut impl IntersectionPusher) {
+    pub fn intersects<'a>(&'a self, ray: &Ray, push: &mut impl IntersectionPusher<'a>) {
         match self {
             Shape::Cone(c) => c.intersects(&ray, push),
             Shape::Cube() => Cube::intersects(&ray, push),

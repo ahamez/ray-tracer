@@ -8,7 +8,6 @@ use crate::{
     },
 };
 use std::collections::HashMap;
-use std::sync::Arc;
 use yaml_rust::{yaml, Yaml, YamlLoader};
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -353,7 +352,7 @@ where
 
 /* ---------------------------------------------------------------------------------------------- */
 
-fn mk_object(defs: &Definitions, hash: &yaml::Hash, ty: &str) -> Arc<Object> {
+fn mk_object(defs: &Definitions, hash: &yaml::Hash, ty: &str) -> Object {
     let object = match ty {
         "cube" => Object::new_cube(),
         "plane" => Object::new_plane(),
@@ -363,9 +362,7 @@ fn mk_object(defs: &Definitions, hash: &yaml::Hash, ty: &str) -> Arc<Object> {
     .with_material(mk_material(defs, &hash))
     .with_shadow(mk_bool_from_key(&hash, "shadow").unwrap_or(true));
 
-    let object = transform(defs, object, &hash);
-
-    Arc::new(object)
+    transform(defs, object, &hash)
 }
 
 /* ---------------------------------------------------------------------------------------------- */

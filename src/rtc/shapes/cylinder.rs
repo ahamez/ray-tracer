@@ -25,7 +25,7 @@ impl Cylinder {
         Cylinder { min, max, closed }
     }
 
-    pub fn intersects(&self, ray: &Ray, push: &mut impl IntersectionPusher) {
+    pub fn intersects<'a>(&self, ray: &Ray, push: &mut impl IntersectionPusher<'a>) {
         let a = ray.direction.x().powi(2) + ray.direction.z().powi(2);
 
         if a.approx_eq(0.0) {
@@ -65,7 +65,7 @@ impl Cylinder {
         (x.powi(2) + z.powi(2)) <= 1.0
     }
 
-    pub fn intersects_caps(&self, ray: &Ray, push: &mut impl IntersectionPusher) {
+    pub fn intersects_caps<'a>(&self, ray: &Ray, push: &mut impl IntersectionPusher<'a>) {
         if !self.closed || ray.direction.y().approx_eq(0.0) {
             return;
         }
@@ -118,20 +118,19 @@ impl Default for Cylinder {
 pub mod tests {
     use super::*;
     use crate::rtc::{IntersectionPusher, Object};
-    use std::sync::Arc;
 
     struct Push {
         pub xs: Vec<f64>,
     }
 
-    impl IntersectionPusher for Push {
+    impl IntersectionPusher<'_> for Push {
         fn t(&mut self, t: f64) {
             self.xs.push(t);
         }
         fn t_u_v(&mut self, _t: f64, _u: f64, _v: f64) {
             panic!();
         }
-        fn set_object(&mut self, _object: Arc<Object>) {
+        fn set_object(&mut self, _object: &'_ Object) {
             panic!();
         }
     }

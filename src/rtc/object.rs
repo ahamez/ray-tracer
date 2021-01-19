@@ -8,7 +8,6 @@ use crate::{
     },
 };
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
 
 /* ---------------------------------------------------------------------------------------------- */
 
@@ -66,7 +65,7 @@ impl Object {
         }
     }
 
-    pub fn new_group(children: Vec<Arc<Object>>) -> Self {
+    pub fn new_group(children: Vec<Object>) -> Self {
         let children_group_builders = children
             .iter()
             .filter_map(|child| match child.shape() {
@@ -177,7 +176,7 @@ impl Object {
         self
     }
 
-    pub fn intersects(&self, ray: &Ray, push: &mut impl IntersectionPusher) {
+    pub fn intersects<'a>(&'a self, ray: &Ray, push: &mut impl IntersectionPusher<'a>) {
         if self.shape.skip_world_to_local() {
             self.shape.intersects(ray, push)
         } else {
@@ -294,7 +293,6 @@ impl Transform for Object {
 mod tests {
     use super::*;
     use crate::primitive::Tuple;
-    use std::sync::Arc;
 
     #[test]
     fn an_object_default_transformation_is_id() {
@@ -320,11 +318,11 @@ mod tests {
         // With two nested groups with transformations in both
         {
             let s = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
-            let g2 = Object::new_group(vec![Arc::new(s)])
+            let g2 = Object::new_group(vec![s])
                 .scale(2.0, 2.0, 2.0)
                 .rotate_y(std::f64::consts::PI / 2.0)
                 .transform();
-            let g1 = Object::new_group(vec![Arc::new(g2.clone())]);
+            let g1 = Object::new_group(vec![g2.clone()]);
 
             // Retrieve the s with the baked-in group transform.
             let group_g2 = g1.shape().as_group().unwrap().children()[0].clone();
@@ -337,10 +335,8 @@ mod tests {
         }
         {
             let s = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
-            let g2 = Object::new_group(vec![Arc::new(s)])
-                .scale(2.0, 2.0, 2.0)
-                .transform();
-            let g1 = Object::new_group(vec![Arc::new(g2)])
+            let g2 = Object::new_group(vec![s]).scale(2.0, 2.0, 2.0).transform();
+            let g1 = Object::new_group(vec![g2])
                 .rotate_y(std::f64::consts::PI / 2.0)
                 .transform();
 
@@ -358,10 +354,8 @@ mod tests {
     #[test]
     fn converting_a_normal_from_object_to_world_space() {
         let s = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
-        let g2 = Object::new_group(vec![Arc::new(s)])
-            .scale(1.0, 2.0, 3.0)
-            .transform();
-        let g1 = Object::new_group(vec![Arc::new(g2)])
+        let g2 = Object::new_group(vec![s]).scale(1.0, 2.0, 3.0).transform();
+        let g1 = Object::new_group(vec![g2])
             .rotate_y(std::f64::consts::PI / 2.0)
             .transform();
 
@@ -380,10 +374,8 @@ mod tests {
     #[test]
     fn finding_the_normal_on_a_child_object() {
         let s = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
-        let g2 = Object::new_group(vec![Arc::new(s)])
-            .scale(1.0, 2.0, 3.0)
-            .transform();
-        let g1 = Object::new_group(vec![Arc::new(g2)])
+        let g2 = Object::new_group(vec![s]).scale(1.0, 2.0, 3.0).transform();
+        let g1 = Object::new_group(vec![g2])
             .rotate_y(std::f64::consts::PI / 2.0)
             .transform();
 
@@ -391,8 +383,8 @@ mod tests {
         let group_g2 = g1.shape().as_group().unwrap().children()[0].clone();
         let group_s = group_g2.shape().as_group().unwrap().children()[0].clone();
 
-        let dummy_intersection =
-            Intersection::new(std::f64::INFINITY, Arc::new(Object::new_test_shape()));
+        let dummy_object = Object::new_test_shape();
+        let dummy_intersection = Intersection::new(std::f64::INFINITY, &dummy_object);
 
         assert_eq!(
             group_s.normal_at(&Point::new(1.7321, 1.1547, -5.5774), &dummy_intersection),

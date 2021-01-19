@@ -15,7 +15,6 @@ use std::{
     f64::consts::PI,
     fs::File,
     io::{Read, Write},
-    sync::Arc,
     time::Instant,
 };
 
@@ -154,7 +153,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             let cache_path = format!(".rtc_{:x}.gz", hash);
 
-            let object = match File::open(&cache_path) {
+            let group = match File::open(&cache_path) {
                 Err(_) => {
                     let object = obj::parse_file(&path)?
                         .rotate_x(rotate_x)
@@ -194,44 +193,36 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
             };
 
-            let floor = Arc::new(
-                Object::new_plane().with_material(
+            let floor = Object::new_plane().with_material(
+                Material::new()
+                    .with_pattern(Pattern::new_checker(
+                        Color::white(),
+                        Color::new(0.5, 0.5, 0.5),
+                    ))
+                    .with_reflective(0.0),
+            );
+
+            let wall_left = Object::new_plane()
+                .with_material(
                     Material::new()
                         .with_pattern(Pattern::new_checker(
                             Color::white(),
                             Color::new(0.5, 0.5, 0.5),
                         ))
                         .with_reflective(0.0),
-                ),
-            );
+                )
+                .rotate_z(PI / 2.0)
+                .translate(-7.0, 0.0, 0.0)
+                .transform();
 
-            let wall_left = Arc::new(
-                Object::new_plane()
-                    .with_material(
-                        Material::new()
-                            .with_pattern(Pattern::new_checker(
-                                Color::white(),
-                                Color::new(0.5, 0.5, 0.5),
-                            ))
-                            .with_reflective(0.0),
-                    )
-                    .rotate_z(PI / 2.0)
-                    .translate(-7.0, 0.0, 0.0)
-                    .transform(),
-            );
-
-            let wall_right = Arc::new(
-                Object::new_plane()
-                    .with_material(Material::new().with_pattern(Pattern::new_checker(
-                        Color::white(),
-                        Color::new(0.5, 0.5, 0.5),
-                    )))
-                    .rotate_x(PI / 2.0)
-                    .translate(0.0, 0.0, 7.0)
-                    .transform(),
-            );
-
-            let group = Arc::new(object);
+            let wall_right = Object::new_plane()
+                .with_material(Material::new().with_pattern(Pattern::new_checker(
+                    Color::white(),
+                    Color::new(0.5, 0.5, 0.5),
+                )))
+                .rotate_x(PI / 2.0)
+                .translate(0.0, 0.0, 7.0)
+                .transform();
 
             let light = if soft_shadows {
                 Light::new_area_light(

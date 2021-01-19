@@ -15,7 +15,7 @@ pub struct Cube {}
 /* ---------------------------------------------------------------------------------------------- */
 
 impl Cube {
-    pub fn intersects(ray: &Ray, push: &mut impl IntersectionPusher) {
+    pub fn intersects<'a>(ray: &Ray, push: &mut impl IntersectionPusher<'a>) {
         let (xtmin, xtmax) = Cube::check_axis(ray.origin.x(), ray.direction.x());
         let (ytmin, ytmax) = Cube::check_axis(ray.origin.y(), ray.direction.y());
         let (ztmin, ztmax) = Cube::check_axis(ray.origin.z(), ray.direction.z());
@@ -105,20 +105,19 @@ impl Cube {
 pub mod tests {
     use super::*;
     use crate::rtc::{IntersectionPusher, Object};
-    use std::sync::Arc;
 
     struct Push {
         pub xs: Vec<f64>,
     }
 
-    impl IntersectionPusher for Push {
+    impl IntersectionPusher<'_> for Push {
         fn t(&mut self, t: f64) {
             self.xs.push(t);
         }
         fn t_u_v(&mut self, _t: f64, _u: f64, _v: f64) {
             panic!();
         }
-        fn set_object(&mut self, _object: Arc<Object>) {
+        fn set_object(&mut self, _object: &'_ Object) {
             panic!();
         }
     }

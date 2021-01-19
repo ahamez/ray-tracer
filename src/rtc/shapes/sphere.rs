@@ -18,7 +18,7 @@ pub struct Sphere {}
 
 impl Sphere {
     #[allow(clippy::eq_op)]
-    pub fn intersects(ray: &Ray, push: &mut impl IntersectionPusher) {
+    pub fn intersects<'a>(ray: &Ray, push: &mut impl IntersectionPusher<'a>) {
         let sphere_to_ray = ray.origin - Point::new(0.0, 0.0, 0.0);
 
         let a = ray.direction ^ ray.direction;
@@ -53,10 +53,7 @@ impl Sphere {
 
 #[cfg(test)]
 pub mod tests {
-    use std::sync::Arc;
-
     use super::*;
-
     use crate::rtc::{
         scaling, Intersection, IntersectionState, Intersections, Material, Object, Transform,
     };
@@ -65,14 +62,14 @@ pub mod tests {
         pub xs: Vec<f64>,
     }
 
-    impl IntersectionPusher for Push {
+    impl IntersectionPusher<'_> for Push {
         fn t(&mut self, t: f64) {
             self.xs.push(t);
         }
         fn t_u_v(&mut self, _t: f64, _u: f64, _v: f64) {
             panic!();
         }
-        fn set_object(&mut self, _object: Arc<Object>) {
+        fn set_object(&mut self, _object: &'_ Object) {
             panic!();
         }
     }
@@ -218,8 +215,9 @@ pub mod tests {
     #[test]
     fn normal_on_a_translated_sphere() {
         let s = Object::new_sphere().translate(0.0, 1.0, 0.0).transform();
-        let dummy_intersection =
-            Intersection::new(std::f64::INFINITY, Arc::new(Object::new_test_shape()));
+        let dummy_object = Object::new_test_shape();
+
+        let dummy_intersection = Intersection::new(std::f64::INFINITY, &dummy_object);
         assert_eq!(
             s.normal_at(&Point::new(0.0, 1.70711, -0.70711), &dummy_intersection),
             Vector::new(0.0, 0.70711, -0.70711)
@@ -232,8 +230,9 @@ pub mod tests {
             .rotate_z(std::f64::consts::PI / 5.0)
             .scale(1.0, 0.5, 1.0)
             .transform();
-        let dummy_intersection =
-            Intersection::new(std::f64::INFINITY, Arc::new(Object::new_test_shape()));
+
+        let dummy_object = Object::new_test_shape();
+        let dummy_intersection = Intersection::new(std::f64::INFINITY, &dummy_object);
 
         assert_eq!(
             s.normal_at(
@@ -246,29 +245,25 @@ pub mod tests {
 
     #[test]
     fn finding_n1_and_n2_at_various_intersections() {
-        let a = Arc::new(glassy_sphere().scale(2.0, 2.0, 2.0).transform());
-        let b = Arc::new(
-            glassy_sphere()
-                .translate(0.0, 0.0, -0.25)
-                .transform()
-                .with_material(
-                    glassy_sphere()
-                        .material()
-                        .clone()
-                        .with_refractive_index(2.0),
-                ),
-        );
-        let c = Arc::new(
-            glassy_sphere()
-                .translate(0.0, 0.0, 0.25)
-                .transform()
-                .with_material(
-                    glassy_sphere()
-                        .material()
-                        .clone()
-                        .with_refractive_index(2.5),
-                ),
-        );
+        let a = glassy_sphere().scale(2.0, 2.0, 2.0).transform();
+        let b = glassy_sphere()
+            .translate(0.0, 0.0, -0.25)
+            .transform()
+            .with_material(
+                glassy_sphere()
+                    .material()
+                    .clone()
+                    .with_refractive_index(2.0),
+            );
+        let c = glassy_sphere()
+            .translate(0.0, 0.0, 0.25)
+            .transform()
+            .with_material(
+                glassy_sphere()
+                    .material()
+                    .clone()
+                    .with_refractive_index(2.5),
+            );
 
         let ray = Ray {
             origin: Point::new(0.0, 0.0, -4.0),
@@ -276,12 +271,12 @@ pub mod tests {
         };
 
         let xs = Intersections::new(vec![
-            Intersection::new(2.0, a.clone()),
-            Intersection::new(2.75, b.clone()),
-            Intersection::new(3.25, c.clone()),
-            Intersection::new(4.75, b),
-            Intersection::new(5.25, c),
-            Intersection::new(6.0, a),
+            Intersection::new(2.0, &a),
+            Intersection::new(2.75, &b),
+            Intersection::new(3.25, &c),
+            Intersection::new(4.75, &b),
+            Intersection::new(5.25, &c),
+            Intersection::new(6.0, &a),
         ]);
 
         assert_eq!(IntersectionState::new(&xs, 0, &ray).n(), (1.0, 1.5));

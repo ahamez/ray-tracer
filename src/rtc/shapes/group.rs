@@ -5,20 +5,19 @@ use crate::{
     rtc::{BoundingBox, IntersectionPusher, Object, Ray, Shape, Transform},
 };
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
 
 /* ---------------------------------------------------------------------------------------------- */
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Group {
     bounding_box: BoundingBox,
-    children: Vec<Arc<Object>>,
+    children: Vec<Object>,
 }
 
 /* ---------------------------------------------------------------------------------------------- */
 
 impl Group {
-    fn new(children: Vec<Arc<Object>>) -> Self {
+    fn new(children: Vec<Object>) -> Self {
         let bounding_box = Group::mk_bounding_box(&children);
 
         Self {
@@ -27,10 +26,10 @@ impl Group {
         }
     }
 
-    pub fn intersects(&self, ray: &Ray, push: &mut impl IntersectionPusher) {
+    pub fn intersects<'a>(&'a self, ray: &Ray, push: &mut impl IntersectionPusher<'a>) {
         if self.bounds().is_intersected(ray) {
             for child in &self.children {
-                push.set_object(child.clone());
+                push.set_object(child);
                 child.intersects(ray, push);
             }
         }
@@ -40,7 +39,7 @@ impl Group {
         unreachable!()
     }
 
-    pub fn children(&self) -> &Vec<Arc<Object>> {
+    pub fn children(&self) -> &Vec<Object> {
         &self.children
     }
 
@@ -67,16 +66,14 @@ impl Group {
         }
 
         if !left_children.is_empty() {
-            let left_child_object =
+            let left_child =
                 Object::new_dummy().with_shape(Shape::Group(Group::new(left_children)));
-            let left_child = Arc::new(left_child_object);
             children.push(left_child);
         }
 
         if !right_children.is_empty() {
-            let right_child_object =
+            let right_child =
                 Object::new_dummy().with_shape(Shape::Group(Group::new(right_children)));
-            let right_child = Arc::new(right_child_object);
             children.push(right_child);
         }
 
@@ -93,13 +90,13 @@ impl Group {
         let children = g
             .children
             .into_iter()
-            .map(|child| Arc::new((*child).clone().divide(threshold)))
+            .map(|child| child.divide(threshold))
             .collect();
 
         Self { children, ..g }
     }
 
-    fn mk_bounding_box(children: &[Arc<Object>]) -> BoundingBox {
+    fn mk_bounding_box(children: &[Object]) -> BoundingBox {
         let mut bbox = BoundingBox::new();
         for child in children {
             bbox = bbox + child.bounding_box();
@@ -129,7 +126,7 @@ impl GroupBuilder {
                 let child_transform = *transform * *group.transformation();
                 let new_children = children
                     .into_iter()
-                    .map(|child| Arc::new(GroupBuilder::rec(child, &child_transform)))
+                    .map(|child| GroupBuilder::rec(child, &child_transform))
                     .collect();
 
                 group
@@ -176,28 +173,25 @@ mod tests {
         rtc::IntersectionPusher,
     };
 
-    struct Push {
+    struct Push<'a> {
         pub xs: Vec<f64>,
-        pub object: Arc<Object>,
+        pub object: &'a Object,
     }
 
-    impl Push {
-        pub fn new() -> Self {
-            Self {
-                xs: vec![],
-                object: Arc::new(Object::new_test_shape()),
-            }
+    impl<'a> Push<'a> {
+        pub fn new(object: &'a Object) -> Self {
+            Self { xs: vec![], object }
         }
     }
 
-    impl IntersectionPusher for Push {
+    impl<'a> IntersectionPusher<'a> for Push<'a> {
         fn t(&mut self, t: f64) {
             self.xs.push(t);
         }
         fn t_u_v(&mut self, _t: f64, _u: f64, _v: f64) {
             panic!();
         }
-        fn set_object(&mut self, object: Arc<Object>) {
+        fn set_object(&mut self, object: &'a Object) {
             self.object = object
         }
     }
@@ -210,7 +204,8 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let mut push = Push::new();
+        let object = Object::new_dummy();
+        let mut push = Push::new(&object);
 
         group.intersects(&ray, &mut push);
 
@@ -223,25 +218,21 @@ mod tests {
         let s2 = Object::new_sphere().translate(0.0, 0.0, -3.0).transform();
         let s3 = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
 
-        let group = Object::new_group(vec![
-            Arc::new(s1.clone()),
-            Arc::new(s2.clone()),
-            Arc::new(s3),
-        ]);
-        // let group = Object::new_group(&group_builder);
+        let group = Object::new_group(vec![s1.clone(), s2.clone(), s3]);
 
         let ray = Ray {
             origin: Point::new(0.0, 0.0, -5.0),
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let xs = ray.intersects(&(vec![Arc::new(group)][..]));
+        let objects = vec![group];
+        let xs = ray.intersects(&objects[..]);
 
         assert_eq!(xs.len(), 4);
-        assert_eq!(*xs[0].object(), Arc::new(s2.clone()));
-        assert_eq!(*xs[1].object(), Arc::new(s2));
-        assert_eq!(*xs[2].object(), Arc::new(s1.clone()));
-        assert_eq!(*xs[3].object(), Arc::new(s1));
+        assert_eq!(*xs[0].object(), s2.clone());
+        assert_eq!(*xs[1].object(), s2);
+        assert_eq!(*xs[2].object(), s1.clone());
+        assert_eq!(*xs[3].object(), s1);
     }
 
     #[test]
@@ -251,46 +242,44 @@ mod tests {
             let s2 = Object::new_sphere().translate(0.0, 0.0, -3.0).transform();
             let s3 = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
 
-            let group_1 = Object::new_group(vec![
-                Arc::new(s1.clone()),
-                Arc::new(s2.clone()),
-                Arc::new(s3),
-            ]);
-            let group_2 = Object::new_group(vec![Arc::new(group_1)]);
+            let group_1 = Object::new_group(vec![s1.clone(), s2.clone(), s3.clone()]);
+            let group_2 = Object::new_group(vec![group_1]);
 
             let ray = Ray {
                 origin: Point::new(0.0, 0.0, -5.0),
                 direction: Vector::new(0.0, 0.0, 1.0),
             };
 
-            let xs = ray.intersects(&(vec![Arc::new(group_2)][..]));
+            let objects = vec![group_2];
+            let xs = ray.intersects(&objects[..]);
 
             assert_eq!(xs.len(), 4);
-            assert_eq!(*xs[0].object(), Arc::new(s2.clone()));
-            assert_eq!(*xs[1].object(), Arc::new(s2));
-            assert_eq!(*xs[2].object(), Arc::new(s1.clone()));
-            assert_eq!(*xs[3].object(), Arc::new(s1));
+            assert_eq!(*xs[0].object(), s2);
+            assert_eq!(*xs[1].object(), s2);
+            assert_eq!(*xs[2].object(), s1);
+            assert_eq!(*xs[3].object(), s1);
         }
         {
             let s1 = Object::new_sphere();
             let s2 = Object::new_sphere().translate(0.0, 0.0, -3.0).transform();
             let s3 = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
 
-            let group_1 = Object::new_group(vec![Arc::new(s1.clone()), Arc::new(s3)]);
-            let group_2 = Object::new_group(vec![Arc::new(group_1), Arc::new(s2.clone())]);
+            let group_1 = Object::new_group(vec![s1.clone(), s3]);
+            let group_2 = Object::new_group(vec![group_1, s2.clone()]);
 
             let ray = Ray {
                 origin: Point::new(0.0, 0.0, -5.0),
                 direction: Vector::new(0.0, 0.0, 1.0),
             };
 
-            let xs = ray.intersects(&(vec![Arc::new(group_2)][..]));
+            let objects = vec![group_2];
+            let xs = ray.intersects(&objects[..]);
 
             assert_eq!(xs.len(), 4);
-            assert_eq!(*xs[0].object(), Arc::new(s2.clone()));
-            assert_eq!(*xs[1].object(), Arc::new(s2));
-            assert_eq!(*xs[2].object(), Arc::new(s1.clone()));
-            assert_eq!(*xs[3].object(), Arc::new(s1));
+            assert_eq!(*xs[0].object(), s2);
+            assert_eq!(*xs[1].object(), s2);
+            assert_eq!(*xs[2].object(), s1);
+            assert_eq!(*xs[3].object(), s1);
         }
     }
 
@@ -298,16 +287,15 @@ mod tests {
     fn intersecting_a_transformed_group() {
         let s = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
 
-        let group = Object::new_group(vec![Arc::new(s)])
-            .scale(2.0, 2.0, 2.0)
-            .transform();
+        let group = Object::new_group(vec![s]).scale(2.0, 2.0, 2.0).transform();
 
         let ray = Ray {
             origin: Point::new(10.0, 0.0, -10.0),
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let xs = ray.intersects(&(vec![Arc::new(group)][..]));
+        let objects = vec![group];
+        let xs = ray.intersects(&objects[..]);
 
         assert_eq!(xs.len(), 2);
     }
@@ -317,8 +305,8 @@ mod tests {
         {
             let s = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
 
-            let group_1 = Object::new_group(vec![Arc::new(s)]);
-            let group_2 = Object::new_group(vec![Arc::new(group_1)])
+            let group_1 = Object::new_group(vec![s]);
+            let group_2 = Object::new_group(vec![group_1])
                 .scale(2.0, 2.0, 2.0)
                 .transform();
 
@@ -327,24 +315,24 @@ mod tests {
                 direction: Vector::new(0.0, 0.0, 1.0),
             };
 
-            let xs = ray.intersects(&(vec![Arc::new(group_2)][..]));
+            let objects = vec![group_2];
+            let xs = ray.intersects(&objects[..]);
 
             assert_eq!(xs.len(), 2);
         }
         {
             let s = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
 
-            let group_1 = Object::new_group(vec![Arc::new(s)])
-                .scale(2.0, 2.0, 2.0)
-                .transform();
-            let group_2 = Object::new_group(vec![Arc::new(group_1.clone())]);
+            let group_1 = Object::new_group(vec![s]).scale(2.0, 2.0, 2.0).transform();
+            let group_2 = Object::new_group(vec![group_1]);
 
             let ray = Ray {
                 origin: Point::new(10.0, 0.0, -10.0),
                 direction: Vector::new(0.0, 0.0, 1.0),
             };
 
-            let xs = ray.intersects(&(vec![Arc::new(group_2)][..]));
+            let objects = vec![group_2];
+            let xs = ray.intersects(&objects[..]);
 
             assert_eq!(xs.len(), 2);
         }
@@ -363,7 +351,7 @@ mod tests {
         // With one group
         {
             let s = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
-            let g2 = Object::new_group(vec![Arc::new(s)])
+            let g2 = Object::new_group(vec![s])
                 .scale(2.0, 2.0, 2.0)
                 .rotate_y(std::f64::consts::PI / 2.0)
                 .transform();
@@ -375,11 +363,11 @@ mod tests {
         }
         {
             let s = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
-            let g2 = Object::new_group(vec![Arc::new(s)])
+            let g2 = Object::new_group(vec![s])
                 .rotate_y(std::f64::consts::PI / 2.0)
                 .scale(2.0, 2.0, 2.0)
                 .transform();
-            let g1 = Object::new_group(vec![Arc::new(g2)]);
+            let g1 = Object::new_group(vec![g2]);
 
             // Retrieve the s with the baked-in group transform.
             let group_g2 = g1.shape().as_group().unwrap().children[0].clone();
@@ -390,12 +378,12 @@ mod tests {
         // With three nested groups, only one being transformed
         {
             let s = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
-            let g2 = Object::new_group(vec![Arc::new(s)])
+            let g2 = Object::new_group(vec![s])
                 .rotate_y(std::f64::consts::PI / 2.0)
                 .scale(2.0, 2.0, 2.0)
                 .transform();
-            let g1 = Object::new_group(vec![Arc::new(g2)]);
-            let g0 = Object::new_group(vec![Arc::new(g1)]);
+            let g1 = Object::new_group(vec![g2]);
+            let g0 = Object::new_group(vec![g1]);
 
             // Retrieve the s with the baked-in group transform.
             let group_g1 = g0.shape().as_group().unwrap().children[0].clone();
@@ -407,12 +395,10 @@ mod tests {
         // With two nested groups with transformations in both
         {
             let s = Object::new_sphere().translate(5.0, 0.0, 0.0).transform();
-            let g2 = Object::new_group(vec![Arc::new(s)])
+            let g2 = Object::new_group(vec![s])
                 .rotate_y(std::f64::consts::PI / 2.0)
                 .transform();
-            let g1 = Object::new_group(vec![Arc::new(g2)])
-                .scale(2.0, 2.0, 2.0)
-                .transform();
+            let g1 = Object::new_group(vec![g2]).scale(2.0, 2.0, 2.0).transform();
 
             // Retrieve the s with the baked-in group transform.
             let group_g2 = g1.shape().as_group().unwrap().children[0].clone();
@@ -433,7 +419,7 @@ mod tests {
             .translate(-4.0, -1.0, 4.0)
             .transform();
 
-        let g = Object::new_group(vec![Arc::new(s), Arc::new(c)]);
+        let g = Object::new_group(vec![s, c]);
 
         assert_eq!(g.bounding_box().min(), Point::new(-4.5, -3.0, -5.0));
         assert_eq!(g.bounding_box().max(), Point::new(4.0, 7.0, 4.5));
@@ -443,14 +429,15 @@ mod tests {
     fn intersecting_a_ray_with_doesnt_test_children_if_bbox_is_missed() {
         let ts = Object::new_test_shape();
 
-        let g = Object::new_group(vec![Arc::new(ts)]);
+        let g = Object::new_group(vec![ts]);
 
         let ray = Ray {
             origin: Point::new(0.0, 0.0, -5.0),
             direction: Vector::new(0.0, 1.0, 0.0),
         };
 
-        let mut push = Push::new();
+        let object = Object::new_dummy();
+        let mut push = Push::new(&object);
         g.intersects(&ray, &mut push);
 
         let ts = g.shape().as_group().unwrap().children()[0]
@@ -465,14 +452,15 @@ mod tests {
     fn intersecting_a_ray_with_tests_children_if_bbox_is_hit() {
         let ts = Object::new_test_shape();
 
-        let g = Object::new_group(vec![Arc::new(ts)]);
+        let g = Object::new_group(vec![ts]);
 
         let ray = Ray {
             origin: Point::new(0.0, 0.0, -5.0),
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let mut push = Push::new();
+        let object = Object::new_dummy();
+        let mut push = Push::new(&object);
         g.intersects(&ray, &mut push);
 
         let ts = g.shape().as_group().unwrap().children()[0]
@@ -485,9 +473,9 @@ mod tests {
 
     #[test]
     fn partitioning_a_group_s_children() {
-        let s1 = Arc::new(Object::new_sphere().translate(-2.0, 0.0, 0.0).transform());
-        let s2 = Arc::new(Object::new_sphere().translate(2.0, 0.0, 0.0).transform());
-        let s3 = Arc::new(Object::new_sphere());
+        let s1 = Object::new_sphere().translate(-2.0, 0.0, 0.0).transform();
+        let s2 = Object::new_sphere().translate(2.0, 0.0, 0.0).transform();
+        let s3 = Object::new_sphere();
 
         let g = Object::new_group(vec![s1.clone(), s2.clone(), s3.clone()]);
 

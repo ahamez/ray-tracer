@@ -29,7 +29,7 @@ impl SmoothTriangle {
     }
 
     #[allow(clippy::manual_range_contains)]
-    pub fn intersects(&self, ray: &Ray, push: &mut impl IntersectionPusher) {
+    pub fn intersects<'a>(&self, ray: &Ray, push: &mut impl IntersectionPusher<'a>) {
         self.triangle.intersects(ray, push);
     }
 
@@ -77,20 +77,19 @@ pub mod tests {
         rtc::{IntersectionState, Intersections, Object},
     };
     use std::f64::INFINITY;
-    use std::sync::Arc;
 
     struct Push {
         pub xs: Vec<(f64, f64, f64)>,
     }
 
-    impl IntersectionPusher for Push {
+    impl IntersectionPusher<'_> for Push {
         fn t(&mut self, t: f64) {
             self.xs.push((t, INFINITY, INFINITY));
         }
         fn t_u_v(&mut self, t: f64, u: f64, v: f64) {
             self.xs.push((t, u, v));
         }
-        fn set_object(&mut self, _object: Arc<Object>) {
+        fn set_object(&mut self, _object: &'_ Object) {
             panic!();
         }
     }
@@ -136,16 +135,16 @@ pub mod tests {
 
     #[test]
     fn a_smooth_triangle_uses_u_v_to_interpolate_the_normal() {
-        let t = Arc::new(Object::new_smooth_triangle(
+        let t = Object::new_smooth_triangle(
             Point::new(0.0, 1.0, 0.0),
             Point::new(-1.0, 0.0, 0.0),
             Point::new(1.0, 0.0, 0.0),
             Vector::new(0.0, 1.0, 0.0),
             Vector::new(-1.0, 0.0, 0.0),
             Vector::new(1.0, 0.0, 0.0),
-        ));
+        );
 
-        let i = Intersection::new(1.0, t.clone()).with_u_and_v(0.45, 0.25);
+        let i = Intersection::new(1.0, &t).with_u_and_v(0.45, 0.25);
 
         assert_eq!(
             t.normal_at(&Point::zero(), &i),
@@ -155,32 +154,32 @@ pub mod tests {
 
     #[test]
     fn preparing_the_normal_on_a_smooth_triangle() {
-        struct Push {
-            pub is: Vec<Intersection>,
-            pub object: Arc<Object>,
+        struct Push<'a> {
+            pub is: Vec<Intersection<'a>>,
+            pub object: &'a Object,
         }
 
-        impl IntersectionPusher for Push {
+        impl IntersectionPusher<'_> for Push<'_> {
             fn t(&mut self, _t: f64) {
                 panic!();
             }
             fn t_u_v(&mut self, t: f64, u: f64, v: f64) {
                 self.is
-                    .push(Intersection::new(t, self.object.clone()).with_u_and_v(u, v));
+                    .push(Intersection::new(t, self.object).with_u_and_v(u, v));
             }
-            fn set_object(&mut self, _object: Arc<Object>) {
+            fn set_object(&mut self, _object: &'_ Object) {
                 panic!();
             }
         }
 
-        let t = Arc::new(Object::new_smooth_triangle(
+        let t = Object::new_smooth_triangle(
             Point::new(0.0, 1.0, 0.0),
             Point::new(-1.0, 0.0, 0.0),
             Point::new(1.0, 0.0, 0.0),
             Vector::new(0.0, 1.0, 0.0),
             Vector::new(-1.0, 0.0, 0.0),
             Vector::new(1.0, 0.0, 0.0),
-        ));
+        );
 
         let ray = Ray {
             origin: Point::new(-0.2, 0.3, -2.0),
@@ -189,7 +188,7 @@ pub mod tests {
 
         let mut push = Push {
             is: vec![],
-            object: t.clone(),
+            object: &t,
         };
         t.intersects(&ray, &mut push);
 

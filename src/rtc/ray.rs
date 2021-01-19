@@ -5,7 +5,6 @@ use crate::{
     rtc::{Intersection, IntersectionPusher, Intersections, Object, Transform},
 };
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
 
 /* ---------------------------------------------------------------------------------------------- */
 
@@ -17,23 +16,22 @@ pub struct Ray {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-pub struct RayIntersectionPusher {
-    pub intersections: Vec<Intersection>,
-    pub object: Arc<Object>,
+pub struct RayIntersectionPusher<'a> {
+    pub intersections: Vec<Intersection<'a>>,
+    pub object: &'a Object,
 }
 
-impl IntersectionPusher for RayIntersectionPusher {
+impl<'a> IntersectionPusher<'a> for RayIntersectionPusher<'a> {
     fn t(&mut self, t: f64) {
-        self.intersections
-            .push(Intersection::new(t, self.object.clone()));
+        self.intersections.push(Intersection::new(t, self.object));
     }
 
     fn t_u_v(&mut self, t: f64, u: f64, v: f64) {
         self.intersections
-            .push(Intersection::new(t, self.object.clone()).with_u_and_v(u, v));
+            .push(Intersection::new(t, self.object).with_u_and_v(u, v));
     }
 
-    fn set_object(&mut self, object: Arc<Object>) {
+    fn set_object(&mut self, object: &'a Object) {
         self.object = object;
     }
 }
@@ -45,13 +43,13 @@ impl Ray {
         self.origin + self.direction * t
     }
 
-    pub fn intersects(&self, objects: &[Arc<Object>]) -> Intersections {
+    pub fn intersects<'a>(&self, objects: &'a [Object]) -> Intersections<'a> {
         objects
             .iter()
-            .fold(Vec::<Intersection>::with_capacity(16), |acc, object| {
+            .fold(Vec::<Intersection<'a>>::with_capacity(16), |acc, object| {
                 let mut pusher = RayIntersectionPusher {
                     intersections: acc,
-                    object: object.clone(),
+                    object,
                 };
                 object.intersects(self, &mut pusher);
 

@@ -7,92 +7,80 @@ use ray_tracer::{
         Transform, World,
     },
 };
-use std::{f64::consts::PI, sync::Arc};
+use std::f64::consts::PI;
 
 /* ---------------------------------------------------------------------------------------------- */
 
 fn main() {
-    let floor = Arc::new(
-        Object::new_plane().with_material(
+    let floor = Object::new_plane().with_material(
+        Material::new()
+            .with_pattern(Pattern::new_checker(
+                Color::white(),
+                Color::new(0.5, 0.5, 0.5),
+            ))
+            .with_reflective(0.0),
+    );
+
+    let wall_left = Object::new_plane()
+        .with_material(
             Material::new()
                 .with_pattern(Pattern::new_checker(
                     Color::white(),
                     Color::new(0.5, 0.5, 0.5),
                 ))
                 .with_reflective(0.0),
-        ),
-    );
+        )
+        .rotate_z(PI / 2.0)
+        .translate(-15.0, 0.0, 0.0)
+        .transform();
 
-    let wall_left = Arc::new(
-        Object::new_plane()
-            .with_material(
-                Material::new()
-                    .with_pattern(Pattern::new_checker(
-                        Color::white(),
-                        Color::new(0.5, 0.5, 0.5),
-                    ))
-                    .with_reflective(0.0),
-            )
-            .rotate_z(PI / 2.0)
-            .translate(-15.0, 0.0, 0.0)
-            .transform(),
-    );
+    let wall_right = Object::new_plane()
+        .with_material(
+            Material::new()
+                .with_pattern(Pattern::new_checker(
+                    Color::white(),
+                    Color::new(0.5, 0.5, 0.5),
+                ))
+                .with_reflective(0.0),
+        )
+        .rotate_x(PI / 2.0)
+        .translate(0.0, 0.0, 15.0)
+        .transform();
 
-    let wall_right = Arc::new(
-        Object::new_plane()
-            .with_material(
-                Material::new()
-                    .with_pattern(Pattern::new_checker(
-                        Color::white(),
-                        Color::new(0.5, 0.5, 0.5),
-                    ))
-                    .with_reflective(0.0),
-            )
-            .rotate_x(PI / 2.0)
-            .translate(0.0, 0.0, 15.0)
-            .transform(),
-    );
+    let cone_x = Object::new_cone(-1.0, 1.0, true)
+        .with_material(
+            Material::new()
+                .with_color(Color::red())
+                .with_diffuse(0.7)
+                .with_specular(0.5)
+                .with_reflective(0.1),
+        )
+        .rotate_z(PI / 2.0)
+        .translate(0.0, 2.0, 2.0)
+        .transform();
 
-    let cone_x = Arc::new(
-        Object::new_cone(-1.0, 1.0, true)
-            .with_material(
-                Material::new()
-                    .with_color(Color::red())
-                    .with_diffuse(0.7)
-                    .with_specular(0.5)
-                    .with_reflective(0.1),
-            )
-            .rotate_z(PI / 2.0)
-            .translate(0.0, 2.0, 2.0)
-            .transform(),
-    );
+    let cone_y = Object::new_cone(-1.0, 1.0, true)
+        .with_material(
+            Material::new()
+                .with_color(Color::blue())
+                .with_diffuse(0.7)
+                .with_specular(0.5)
+                .with_reflective(0.1),
+        )
+        .translate(-3.0, 2.0, 0.0)
+        .transform();
 
-    let cone_y = Arc::new(
-        Object::new_cone(-1.0, 1.0, true)
-            .with_material(
-                Material::new()
-                    .with_color(Color::blue())
-                    .with_diffuse(0.7)
-                    .with_specular(0.5)
-                    .with_reflective(0.1),
-            )
-            .translate(-3.0, 2.0, 0.0)
-            .transform(),
-    );
-
-    let cone_z = Arc::new(
-        Object::new_cone(-1.0, 1.0, false)
-            .with_material(
-                Material::new()
-                    .with_color(Color::green())
-                    .with_diffuse(0.7)
-                    .with_specular(0.5)
-                    .with_reflective(0.1),
-            )
-            .rotate_x(PI / 2.0)
-            .translate(3.0, 3.0, 2.0)
-            .transform(),
-    );
+    let cone_z = Object::new_cone(-1.0, 1.0, false)
+        .with_material(
+            Material::new()
+                .with_color(Color::green())
+                .with_diffuse(0.7)
+                .with_specular(0.5)
+                .with_reflective(0.1),
+        )
+        .rotate_x(PI / 2.0)
+        .translate(3.0, 3.0, 2.0)
+        .transform();
 
     let light = Light::new_point_light(Color::white(), Point::new(-5.0, 10.0, -10.0));
 

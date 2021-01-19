@@ -38,7 +38,7 @@ impl Triangle {
     }
 
     #[allow(clippy::manual_range_contains)]
-    pub fn intersects(&self, ray: &Ray, push: &mut impl IntersectionPusher) {
+    pub fn intersects<'a>(&self, ray: &Ray, push: &mut impl IntersectionPusher<'a>) {
         let dir_cross_e2 = ray.direction * self.e2;
         let det = self.e1 ^ dir_cross_e2;
 
@@ -101,20 +101,19 @@ impl Triangle {
 pub mod tests {
     use super::*;
     use crate::{primitive::Tuple, rtc::Object};
-    use std::sync::Arc;
 
     struct Push {
         pub xs: Vec<f64>,
     }
 
-    impl IntersectionPusher for Push {
+    impl IntersectionPusher<'_> for Push {
         fn t(&mut self, t: f64) {
             self.xs.push(t);
         }
         fn t_u_v(&mut self, t: f64, _u: f64, _v: f64) {
             self.xs.push(t);
         }
-        fn set_object(&mut self, _object: Arc<Object>) {
+        fn set_object(&mut self, _object: &'_ Object) {
             panic!();
         }
     }
