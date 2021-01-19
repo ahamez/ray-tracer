@@ -135,7 +135,7 @@ impl std::ops::Index<usize> for Matrix {
     type Output = [f64; 4];
 
     fn index(&self, row: usize) -> &[f64; 4] {
-        assert!(row < 4);
+        debug_assert!(row < 4);
         &self.data[row]
     }
 }
@@ -144,7 +144,7 @@ impl std::ops::Index<usize> for Matrix {
 
 impl std::ops::IndexMut<usize> for Matrix {
     fn index_mut(&mut self, row: usize) -> &mut [f64; 4] {
-        assert!(row < 4);
+        debug_assert!(row < 4);
         &mut self.data[row]
     }
 }
