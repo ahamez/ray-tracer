@@ -5,6 +5,7 @@ use crate::{
     primitive::{Point, Vector},
     rtc::{Object, Ray},
 };
+use smallvec::SmallVec;
 use std::cmp::Ordering;
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -159,7 +160,7 @@ impl<'a> IntersectionState<'a> {
     pub fn new(intersections: &Intersections<'a>, intersection_index: usize, ray: &Ray) -> Self {
         let intersection = &intersections[intersection_index];
 
-        let mut containers = Vec::<&Object>::with_capacity(intersections.len());
+        let mut containers = SmallVec::<[&Object; 32]>::new();
 
         let mut n1 = None;
         let mut n2 = None;
