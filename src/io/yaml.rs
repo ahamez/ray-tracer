@@ -22,11 +22,11 @@ fn get_definitions(yaml: &Yaml) -> Definitions {
     for elem in yaml.as_vec().unwrap().iter() {
         let hash = elem.as_hash().unwrap();
 
-        if let Some(definition_key) = hash.get(&Yaml::from_str(&"define")) {
-            let definition_value = hash.get(&Yaml::from_str(&"value")).unwrap();
+        if let Some(definition_key) = hash.get(&Yaml::from_str("define")) {
+            let definition_value = hash.get(&Yaml::from_str("value")).unwrap();
 
             // Does not handle recursive "extend"
-            let definition_value = match hash.get(&Yaml::from_str(&"extend")) {
+            let definition_value = match hash.get(&Yaml::from_str("extend")) {
                 Some(parent) => {
                     if let Some(definition_value_hash) = definition_value.as_hash() {
                         let mut parent_hash = get_hash(&definitions, parent).clone();

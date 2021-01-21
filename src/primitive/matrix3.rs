@@ -53,10 +53,10 @@ impl Matrix3 {
 
     fn cofactor(&self, row: usize, col: usize) -> f64 {
         let minor = self.minor(row, col);
-        if (row + col) % 2 != 0 {
-            -minor
-        } else {
+        if (row + col) % 2 == 0 {
             minor
+        } else {
+            -minor
         }
     }
 }

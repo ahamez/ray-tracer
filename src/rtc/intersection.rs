@@ -195,7 +195,7 @@ impl<'a> IntersectionState<'a> {
         let point = ray.position(intersection.t);
 
         let eye_v = -ray.direction;
-        let normal_v = intersection.object.normal_at(&point, &intersection);
+        let normal_v = intersection.object.normal_at(&point, intersection);
         let (inside, normal_v) = if normal_v ^ eye_v < 0.0 {
             (true, -normal_v)
         } else {

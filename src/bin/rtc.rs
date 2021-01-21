@@ -23,21 +23,19 @@ use std::{
 fn output_path(path: &std::path::Path) -> Result<String, Box<dyn std::error::Error>> {
     let file_name = path
         .file_name()
-        .and_then(|p| p.to_str())
+        .and_then(std::ffi::OsStr::to_str)
         .ok_or(format!("Can't get the file name of {:?}", path))?;
 
     let extension = path
         .extension()
-        .and_then(|p| p.to_str())
+        .and_then(std::ffi::OsStr::to_str)
         .ok_or(format!("Can't get the extension of {:?}", path))?;
 
-    let path = if let Some(stripped) = file_name.strip_suffix(extension) {
-        stripped
-    } else {
-        file_name
-    };
+    let output_path = file_name
+        .strip_suffix(extension)
+        .map_or(file_name, |stripped| stripped);
 
-    Ok(format!("./{}png", path))
+    Ok(format!("./{}png", output_path))
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -125,7 +123,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let rotate_z = clap::value_t!(matches.value_of("rotate-z"), f64).unwrap_or(0.0);
     let parallel: ParallelRendering = matches.is_present("sequential").into();
     let soft_shadows = matches.is_present("soft-shadows");
-    let path_str = matches.value_of("INPUT").unwrap();
+    let path_str = matches.value_of("INPUT").expect("Invalid INPUT");
 
     let path = std::path::Path::new(&path_str);
     let ext = match path.extension() {
@@ -153,44 +151,40 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             let cache_path = format!(".rtc_{:x}.gz", hash);
 
-            let group = match File::open(&cache_path) {
-                Err(_) => {
-                    let object = obj::parse_file(&path)?
-                        .rotate_x(rotate_x)
-                        .rotate_y(rotate_y)
-                        .rotate_z(rotate_z)
-                        .transform();
+            let group = if File::open(&cache_path).is_err() {
+                let object = obj::parse_file(path)?
+                    .rotate_x(rotate_x)
+                    .rotate_y(rotate_y)
+                    .rotate_z(rotate_z)
+                    .transform();
 
-                    let bbox = object.bounding_box();
-                    // Translate the object to touch the floor at 0.0.
-                    let object = object.translate(0.0, -bbox.min().y(), 0.0).transform();
+                let bbox = object.bounding_box();
+                // Translate the object to touch the floor at 0.0.
+                let object = object.translate(0.0, -bbox.min().y(), 0.0).transform();
 
-                    let object = if bvh_threshold != 0 {
-                        object.divide(bvh_threshold)
-                    } else {
-                        object
-                    };
-
-                    println!("Writing cached object");
-
-                    let serialized = bincode::serialize(&object)?;
-                    let mut gz = GzEncoder::new(Vec::new(), Compression::default());
-                    gz.write_all(&serialized)?;
-                    let compressed = gz.finish()?;
-                    std::fs::write(&cache_path, &compressed)?;
-
+                let object = if bvh_threshold == 0 {
                     object
-                }
+                } else {
+                    object.divide(bvh_threshold)
+                };
 
-                Ok(_) => {
-                    println!("Using cached object");
+                println!("Writing cached object");
 
-                    let compressed = std::fs::read(&cache_path)?;
-                    let mut gz = GzDecoder::new(&compressed[..]);
-                    let mut serialized = vec![];
-                    gz.read_to_end(&mut serialized)?;
-                    bincode::deserialize(&serialized)?
-                }
+                let serialized = bincode::serialize(&object)?;
+                let mut gz = GzEncoder::new(Vec::new(), Compression::default());
+                gz.write_all(&serialized)?;
+                let compressed = gz.finish()?;
+                std::fs::write(&cache_path, &compressed)?;
+
+                object
+            } else {
+                println!("Using cached object");
+
+                let compressed = std::fs::read(&cache_path)?;
+                let mut gz = GzDecoder::new(&compressed[..]);
+                let mut serialized = vec![];
+                gz.read_to_end(&mut serialized)?;
+                bincode::deserialize(&serialized)?
             };
 
             let floor = Object::new_plane().with_material(
@@ -274,7 +268,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("Computed intersections: {}", world.nb_intersections());
 
-    canvas.export(&output_path(&path)?)?;
+    canvas.export(&output_path(path)?)?;
 
     Ok(())
 }

@@ -269,7 +269,9 @@ fn parse_data(s: &str) -> Result<Data> {
     for line in buf.lines() {
         if let Ok(line) = line {
             let vec = line.split_whitespace().collect::<Vec<&str>>();
-            if !vec.is_empty() {
+            if vec.is_empty() {
+                data.ignored += 1;
+            } else {
                 if vec[0] == "g" {
                     current_group = parse_group(&vec[..], &line, line_number)?;
                 } else if vec[0] == "v" {
@@ -281,8 +283,6 @@ fn parse_data(s: &str) -> Result<Data> {
                 } else {
                     data.ignored += 1;
                 }
-            } else {
-                data.ignored += 1;
             }
         }
         line_number += 1;

@@ -71,12 +71,12 @@ impl Cylinder {
         }
 
         let t = (self.min - ray.origin.y()) / ray.direction.y();
-        if Self::check_cap(&ray, t) {
+        if Self::check_cap(ray, t) {
             push.t(t);
         }
 
         let t = (self.max - ray.origin.y()) / ray.direction.y();
-        if Self::check_cap(&ray, t) {
+        if Self::check_cap(ray, t) {
             push.t(t);
         }
     }

@@ -1,9 +1,9 @@
 mod float {
-    pub(crate) use approx_eq::ApproxEq;
-    pub(crate) use epsilon::EPSILON;
+    pub use approx_eq::ApproxEq;
+    pub use epsilon::EPSILON;
 
-    mod approx_eq;
-    mod epsilon;
+    pub mod approx_eq;
+    pub mod epsilon;
 }
 
 pub mod primitive {
