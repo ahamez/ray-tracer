@@ -15,11 +15,9 @@ rand = {version="0.8", features = ["small_rng"]}
 rayon = "1.5"
 serde = {version="1.0", features = ["derive", "rc"]}
 sha3 = "0.9"
-smallvec = "1.6"
+smallvec = {version = "1.6", features = ["union"]}
 yaml-rust = "0.4"
 
 [profile.release]
 debug = true
 
-[dependancies.smallvec]
-features = ["union"]
