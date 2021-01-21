@@ -6,9 +6,9 @@ use crate::primitive::{Matrix, Point, Tuple, Vector};
 
 pub fn translation(x: f64, y: f64, z: f64) -> Matrix {
     let mut res = Matrix::id();
-    res[0][3] = x;
-    res[1][3] = y;
-    res[2][3] = z;
+    res[(0, 3)] = x;
+    res[(1, 3)] = y;
+    res[(2, 3)] = z;
 
     res
 }
@@ -17,9 +17,9 @@ pub fn translation(x: f64, y: f64, z: f64) -> Matrix {
 
 pub fn scaling(x: f64, y: f64, z: f64) -> Matrix {
     let mut res = Matrix::id();
-    res[0][0] = x;
-    res[1][1] = y;
-    res[2][2] = z;
+    res[(0, 0)] = x;
+    res[(1, 1)] = y;
+    res[(2, 2)] = z;
 
     res
 }
@@ -28,10 +28,10 @@ pub fn scaling(x: f64, y: f64, z: f64) -> Matrix {
 
 pub fn rotation_x(angle: f64) -> Matrix {
     let mut res = Matrix::id();
-    res[1][1] = f64::cos(angle);
-    res[1][2] = -f64::sin(angle);
-    res[2][1] = f64::sin(angle);
-    res[2][2] = f64::cos(angle);
+    res[(1, 1)] = f64::cos(angle);
+    res[(1, 2)] = -f64::sin(angle);
+    res[(2, 1)] = f64::sin(angle);
+    res[(2, 2)] = f64::cos(angle);
 
     res
 }
@@ -40,10 +40,10 @@ pub fn rotation_x(angle: f64) -> Matrix {
 
 pub fn rotation_y(angle: f64) -> Matrix {
     let mut res = Matrix::id();
-    res[0][0] = f64::cos(angle);
-    res[0][2] = f64::sin(angle);
-    res[2][0] = -f64::sin(angle);
-    res[2][2] = f64::cos(angle);
+    res[(0, 0)] = f64::cos(angle);
+    res[(0, 2)] = f64::sin(angle);
+    res[(2, 0)] = -f64::sin(angle);
+    res[(2, 2)] = f64::cos(angle);
 
     res
 }
@@ -52,10 +52,10 @@ pub fn rotation_y(angle: f64) -> Matrix {
 
 pub fn rotation_z(angle: f64) -> Matrix {
     let mut res = Matrix::id();
-    res[0][0] = f64::cos(angle);
-    res[0][1] = -f64::sin(angle);
-    res[1][0] = f64::sin(angle);
-    res[1][1] = f64::cos(angle);
+    res[(0, 0)] = f64::cos(angle);
+    res[(0, 1)] = -f64::sin(angle);
+    res[(1, 0)] = f64::sin(angle);
+    res[(1, 1)] = f64::cos(angle);
 
     res
 }
@@ -64,12 +64,12 @@ pub fn rotation_z(angle: f64) -> Matrix {
 
 pub fn shearing(xy: f64, xz: f64, yx: f64, yz: f64, zx: f64, zy: f64) -> Matrix {
     let mut res = Matrix::id();
-    res[0][1] = xy;
-    res[0][2] = xz;
-    res[1][0] = yx;
-    res[1][2] = yz;
-    res[2][0] = zx;
-    res[2][1] = zy;
+    res[(0, 1)] = xy;
+    res[(0, 2)] = xz;
+    res[(1, 0)] = yx;
+    res[(1, 2)] = yz;
+    res[(2, 0)] = zx;
+    res[(2, 1)] = zy;
 
     res
 }
@@ -84,25 +84,25 @@ pub fn view_transform(from: &Point, to: &Point, up: &Vector) -> Matrix {
     let orientation = {
         let mut m = Matrix::new();
 
-        m[0][0] = left.x();
-        m[0][1] = left.y();
-        m[0][2] = left.z();
-        m[0][3] = 0.0;
+        m[(0, 0)] = left.x();
+        m[(0, 1)] = left.y();
+        m[(0, 2)] = left.z();
+        m[(0, 3)] = 0.0;
 
-        m[1][0] = true_up.x();
-        m[1][1] = true_up.y();
-        m[1][2] = true_up.z();
-        m[1][3] = 0.0;
+        m[(1, 0)] = true_up.x();
+        m[(1, 1)] = true_up.y();
+        m[(1, 2)] = true_up.z();
+        m[(1, 3)] = 0.0;
 
-        m[2][0] = -forward.x();
-        m[2][1] = -forward.y();
-        m[2][2] = -forward.z();
-        m[2][3] = 0.0;
+        m[(2, 0)] = -forward.x();
+        m[(2, 1)] = -forward.y();
+        m[(2, 2)] = -forward.z();
+        m[(2, 3)] = 0.0;
 
-        m[3][0] = 0.0;
-        m[3][1] = 0.0;
-        m[3][2] = 0.0;
-        m[3][3] = 1.0;
+        m[(3, 0)] = 0.0;
+        m[(3, 1)] = 0.0;
+        m[(3, 2)] = 0.0;
+        m[(3, 3)] = 1.0;
 
         m
     };
@@ -478,25 +478,25 @@ mod tests {
 
         let mut transform = Matrix::new();
 
-        transform[0][0] = -0.50709;
-        transform[0][1] = 0.50709;
-        transform[0][2] = 0.67612;
-        transform[0][3] = -2.36643;
+        transform[(0, 0)] = -0.50709;
+        transform[(0, 1)] = 0.50709;
+        transform[(0, 2)] = 0.67612;
+        transform[(0, 3)] = -2.36643;
 
-        transform[1][0] = 0.76772;
-        transform[1][1] = 0.60609;
-        transform[1][2] = 0.12111;
-        transform[1][3] = -2.82843;
+        transform[(1, 0)] = 0.76772;
+        transform[(1, 1)] = 0.60609;
+        transform[(1, 2)] = 0.12111;
+        transform[(1, 3)] = -2.82843;
 
-        transform[2][0] = -0.35857;
-        transform[2][1] = 0.59761;
-        transform[2][2] = -0.71714;
-        transform[2][3] = 0.0;
+        transform[(2, 0)] = -0.35857;
+        transform[(2, 1)] = 0.59761;
+        transform[(2, 2)] = -0.71714;
+        transform[(2, 3)] = 0.0;
 
-        transform[3][0] = 0.0;
-        transform[3][1] = 0.0;
-        transform[3][2] = 0.0;
-        transform[3][3] = 1.0;
+        transform[(3, 0)] = 0.0;
+        transform[(3, 1)] = 0.0;
+        transform[(3, 2)] = 0.0;
+        transform[(3, 3)] = 1.0;
 
         assert_eq!(view_transform(&from, &to, &up), transform);
     }
