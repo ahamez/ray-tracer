@@ -271,18 +271,16 @@ fn parse_data(s: &str) -> Result<Data> {
             let vec = line.split_whitespace().collect::<Vec<&str>>();
             if vec.is_empty() {
                 data.ignored += 1;
+            } else if vec[0] == "g" {
+                current_group = parse_group(&vec[..], &line, line_number)?;
+            } else if vec[0] == "v" {
+                data = parse_vertex(&vec[..], &line, line_number, data)?;
+            } else if vec[0] == "vn" {
+                data = parse_normal(&vec[..], &line, line_number, data)?;
+            } else if vec[0] == "f" {
+                data = parse_face(&vec[..], &line, line_number, data, &current_group)?;
             } else {
-                if vec[0] == "g" {
-                    current_group = parse_group(&vec[..], &line, line_number)?;
-                } else if vec[0] == "v" {
-                    data = parse_vertex(&vec[..], &line, line_number, data)?;
-                } else if vec[0] == "vn" {
-                    data = parse_normal(&vec[..], &line, line_number, data)?;
-                } else if vec[0] == "f" {
-                    data = parse_face(&vec[..], &line, line_number, data, &current_group)?;
-                } else {
-                    data.ignored += 1;
-                }
+                data.ignored += 1;
             }
         }
         line_number += 1;
