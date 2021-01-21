@@ -196,7 +196,8 @@ pub mod tests {
         assert!(push.is[0].u().approx_eq(0.45));
         assert!(push.is[0].v().approx_eq(0.25));
 
-        let comps = IntersectionState::new(&Intersections::new(push.is), 0, &ray);
+        let comps =
+            IntersectionState::new(&Intersections::new().with_intersections(push.is), 0, &ray);
         assert_eq!(comps.normal_v(), Vector::new(-0.5547, 0.83205, 0.0));
     }
 }

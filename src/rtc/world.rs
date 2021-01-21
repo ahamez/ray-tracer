@@ -247,7 +247,8 @@ pub mod tests {
         let object = &w.objects[0];
         let i = Intersection::new(4.0, object);
 
-        let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
+        let comps =
+            IntersectionState::new(&Intersections::new().with_intersections(vec![i]), 0, &ray);
         let color = w.shade_hit(&comps, 1);
 
         assert_eq!(color, Color::new(0.38066, 0.47583, 0.2855));
@@ -271,7 +272,8 @@ pub mod tests {
         let object = w.objects[1].clone();
         let i = Intersection::new(0.5, &object);
 
-        let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
+        let comps =
+            IntersectionState::new(&Intersections::new().with_intersections(vec![i]), 0, &ray);
 
         assert_eq!(
             w.shade_hit(&comps, 1),
@@ -300,7 +302,8 @@ pub mod tests {
 
         let i = Intersection::new(4.0, &s2);
 
-        let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
+        let comps =
+            IntersectionState::new(&Intersections::new().with_intersections(vec![i]), 0, &ray);
 
         assert_eq!(w.shade_hit(&comps, 1), Color::new(0.1, 0.1, 0.1));
     }
@@ -389,7 +392,8 @@ pub mod tests {
 
         let i = Intersection::new(1.0, &object);
 
-        let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
+        let comps =
+            IntersectionState::new(&Intersections::new().with_intersections(vec![i]), 0, &ray);
 
         assert_eq!(w.reflected_color(&comps, 1), Color::black());
     }
@@ -415,7 +419,8 @@ pub mod tests {
 
         let i = Intersection::new(sqrt2, object);
 
-        let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
+        let comps =
+            IntersectionState::new(&Intersections::new().with_intersections(vec![i]), 0, &ray);
 
         assert_eq!(
             w.reflected_color(&comps, 1),
@@ -444,7 +449,8 @@ pub mod tests {
 
         let i = Intersection::new(sqrt2, &object);
 
-        let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
+        let comps =
+            IntersectionState::new(&Intersections::new().with_intersections(vec![i]), 0, &ray);
 
         assert_eq!(
             w.shade_hit(&comps, 1),
@@ -491,7 +497,7 @@ pub mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let xs = Intersections::new(vec![
+        let xs = Intersections::new().with_intersections(vec![
             Intersection::new(4.0, object),
             Intersection::new(6.0, object),
         ]);
@@ -518,7 +524,7 @@ pub mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let xs = Intersections::new(vec![
+        let xs = Intersections::new().with_intersections(vec![
             Intersection::new(4.0, &object),
             Intersection::new(6.0, &object),
         ]);
@@ -545,7 +551,7 @@ pub mod tests {
             direction: Vector::new(0.0, 1.0, 0.0),
         };
 
-        let xs = Intersections::new(vec![
+        let xs = Intersections::new().with_intersections(vec![
             Intersection::new(-f64::sqrt(2.0) / 2.0, &object),
             Intersection::new(f64::sqrt(2.0) / 2.0, &object),
         ]);
@@ -589,7 +595,7 @@ pub mod tests {
         let a = &w.objects[0];
         let b = &w.objects[1];
 
-        let xs = Intersections::new(vec![
+        let xs = Intersections::new().with_intersections(vec![
             Intersection::new(-0.9899, &a),
             Intersection::new(-0.4899, &b),
             Intersection::new(0.4899, &b),
@@ -633,7 +639,8 @@ pub mod tests {
             direction: Vector::new(0.0, -f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0),
         };
 
-        let xs = Intersections::new(vec![Intersection::new(f64::sqrt(2.0), &floor)]);
+        let xs = Intersections::new()
+            .with_intersections(vec![Intersection::new(f64::sqrt(2.0), &floor)]);
 
         let comps = IntersectionState::new(&xs, 0, &ray);
 
@@ -673,7 +680,8 @@ pub mod tests {
             direction: Vector::new(0.0, -f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0),
         };
 
-        let xs = Intersections::new(vec![Intersection::new(f64::sqrt(2.0), &floor)]);
+        let xs = Intersections::new()
+            .with_intersections(vec![Intersection::new(f64::sqrt(2.0), &floor)]);
 
         let comps = IntersectionState::new(&xs, 0, &ray);
 

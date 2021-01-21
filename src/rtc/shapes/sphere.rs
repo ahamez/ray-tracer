@@ -270,7 +270,7 @@ pub mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let xs = Intersections::new(vec![
+        let xs = Intersections::new().with_intersections(vec![
             Intersection::new(2.0, &a),
             Intersection::new(2.75, &b),
             Intersection::new(3.25, &c),

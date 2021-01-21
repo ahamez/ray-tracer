@@ -17,7 +17,7 @@ pub struct Ray {
 /* ---------------------------------------------------------------------------------------------- */
 
 pub struct RayIntersectionPusher<'a> {
-    pub intersections: Vec<Intersection<'a>>,
+    pub intersections: Intersections<'a>,
     pub object: &'a Object,
 }
 
@@ -46,7 +46,7 @@ impl Ray {
     pub fn intersects<'a>(&self, objects: &'a [Object]) -> Intersections<'a> {
         objects
             .iter()
-            .fold(Vec::<Intersection<'a>>::with_capacity(16), |acc, object| {
+            .fold(Intersections::<'a>::new(), |acc, object| {
                 let mut pusher = RayIntersectionPusher {
                     intersections: acc,
                     object,
@@ -55,7 +55,7 @@ impl Ray {
 
                 pusher.intersections
             })
-            .into()
+            .sort()
     }
 }
 

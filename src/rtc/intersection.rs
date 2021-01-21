@@ -87,52 +87,71 @@ impl<'a> std::cmp::Eq for Intersection<'a> {}
 /* ---------------------------------------------------------------------------------------------- */
 
 #[derive(Debug)]
-pub struct Intersections<'a>(Vec<Intersection<'a>>);
+pub struct Intersections<'a> {
+    intersections: Vec<Intersection<'a>>,
+}
 
 /* ---------------------------------------------------------------------------------------------- */
 
 impl<'a> Intersections<'a> {
-    pub fn new(mut is: Vec<Intersection<'a>>) -> Self {
-        is.sort_unstable();
-        Intersections(is)
+    pub fn new() -> Self {
+        Self {
+            intersections: Vec::<Intersection<'a>>::with_capacity(16),
+        }
+    }
+
+    pub fn with_intersections(mut self, intersections: Vec<Intersection<'a>>) -> Self {
+        self.intersections = intersections;
+
+        self
+    }
+
+    pub fn sort(mut self) -> Self {
+        self.intersections.sort_unstable();
+
+        self
+    }
+
+    pub fn push(&mut self, i: Intersection<'a>) {
+        self.intersections.push(i);
     }
 
     pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
+        self.intersections.is_empty()
     }
 
     pub fn len(&self) -> usize {
-        self.0.len()
+        self.intersections.len()
     }
 
     pub fn hit(&self) -> Option<&Intersection> {
-        self.0.iter().find(|i| i.t >= 0.0)
+        self.intersections.iter().find(|i| i.t >= 0.0)
     }
 
     pub fn hit_index(&self) -> Option<usize> {
-        self.0.iter().position(|i| i.t >= 0.0)
+        self.intersections.iter().position(|i| i.t >= 0.0)
     }
 
     pub fn iter(&self) -> std::slice::Iter<Intersection> {
-        self.0.iter()
+        self.intersections.iter()
     }
 }
 
 /* ---------------------------------------------------------------------------------------------- */
 
-impl<'a> From<Vec<Intersection<'a>>> for Intersections<'a> {
-    fn from(is: Vec<Intersection<'a>>) -> Self {
-        Self::new(is)
+impl Default for Intersections<'_> {
+    fn default() -> Self {
+        Self::new()
     }
 }
+
+/* ---------------------------------------------------------------------------------------------- */
 
 impl<'a> std::ops::Index<usize> for Intersections<'a> {
     type Output = Intersection<'a>;
 
     fn index(&self, i: usize) -> &Intersection<'a> {
-        let &Intersections(vec) = &self;
-
-        &vec[i]
+        &self.intersections[i]
     }
 }
 
@@ -332,7 +351,7 @@ mod tests {
 
         let i0 = Intersection::new(1.0, &object);
         let i1 = Intersection::new(2.0, &object);
-        let is = Intersections::new(vec![i0.clone(), i1]);
+        let is = Intersections::new().with_intersections(vec![i0.clone(), i1]);
 
         let i = is.hit();
 
@@ -345,7 +364,7 @@ mod tests {
 
         let i0 = Intersection::new(-1.0, &object);
         let i1 = Intersection::new(2.0, &object);
-        let is = Intersections::new(vec![i0, i1.clone()]);
+        let is = Intersections::new().with_intersections(vec![i0, i1.clone()]);
 
         let i = is.hit();
 
@@ -358,7 +377,7 @@ mod tests {
 
         let i0 = Intersection::new(-1.0, &object);
         let i1 = Intersection::new(-1.0, &object);
-        let is = Intersections::new(vec![i0.clone(), i1.clone()]);
+        let is = Intersections::new().with_intersections(vec![i0.clone(), i1.clone()]);
 
         let i = is.hit();
 
@@ -373,7 +392,9 @@ mod tests {
         let i1 = Intersection::new(7.0, &object);
         let i2 = Intersection::new(-3.0, &object);
         let i3 = Intersection::new(2.0, &object);
-        let is = Intersections::new(vec![i0, i1, i2, i3.clone()]);
+        let is = Intersections::new()
+            .with_intersections(vec![i0, i1, i2, i3.clone()])
+            .sort();
 
         let i = is.hit();
 
@@ -388,7 +409,11 @@ mod tests {
         };
         let object = Object::new_sphere();
         let i = Intersection::new(4.0, &object);
-        let comps = IntersectionState::new(&Intersections::new(vec![i.clone()]), 0, &r);
+        let comps = IntersectionState::new(
+            &Intersections::new().with_intersections(vec![i.clone()]),
+            0,
+            &r,
+        );
 
         assert_eq!(comps.t, i.t);
         assert_eq!(comps.object, i.object);
@@ -406,7 +431,8 @@ mod tests {
         };
         let object = Object::new_sphere();
         let i = Intersection::new(1.0, &object);
-        let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &r);
+        let comps =
+            IntersectionState::new(&Intersections::new().with_intersections(vec![i]), 0, &r);
 
         assert_eq!(comps.point, Point::new(0.0, 0.0, 1.0));
         assert_eq!(comps.eye_v, Vector::new(0.0, 0.0, -1.0));
@@ -425,7 +451,8 @@ mod tests {
 
         let i = Intersection::new(5.0, &object);
 
-        let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &r);
+        let comps =
+            IntersectionState::new(&Intersections::new().with_intersections(vec![i]), 0, &r);
 
         assert!(comps.over_point.z() < EPSILON / 2.0);
         assert!(comps.point.z() > comps.over_point.z());
@@ -443,7 +470,8 @@ mod tests {
         let object = Object::new_plane();
         let i = Intersection::new(sqrt2, &object);
 
-        let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
+        let comps =
+            IntersectionState::new(&Intersections::new().with_intersections(vec![i]), 0, &ray);
 
         assert_eq!(comps.reflect_v, Vector::new(0.0, half_sqrt2, half_sqrt2));
     }
@@ -459,7 +487,8 @@ mod tests {
 
         let i = Intersection::new(5.0, &object);
 
-        let comps = IntersectionState::new(&Intersections::new(vec![i]), 0, &ray);
+        let comps =
+            IntersectionState::new(&Intersections::new().with_intersections(vec![i]), 0, &ray);
 
         assert!(comps.under_point.z() > EPSILON / 2.0);
         assert!(comps.point.z() < comps.under_point.z());
@@ -473,7 +502,7 @@ mod tests {
             direction: Vector::new(0.0, 1.0, 0.0),
         };
 
-        let xs = Intersections::new(vec![
+        let xs = Intersections::new().with_intersections(vec![
             Intersection::new(-f64::sqrt(2.0) / 2.0, &object),
             Intersection::new(f64::sqrt(2.0) / 2.0, &object),
         ]);
@@ -491,7 +520,7 @@ mod tests {
             direction: Vector::new(0.0, 1.0, 0.0),
         };
 
-        let xs = Intersections::new(vec![
+        let xs = Intersections::new().with_intersections(vec![
             Intersection::new(-1.0, &object),
             Intersection::new(1.0, &object),
         ]);
@@ -509,7 +538,7 @@ mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let xs = Intersections::new(vec![Intersection::new(1.8589, &object)]);
+        let xs = Intersections::new().with_intersections(vec![Intersection::new(1.8589, &object)]);
 
         let comps = IntersectionState::new(&xs, 0, &ray);
 
