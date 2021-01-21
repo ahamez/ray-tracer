@@ -8,9 +8,11 @@ use serde::{Deserialize, Serialize};
 
 /* ---------------------------------------------------------------------------------------------- */
 
+const MATRIX_SIZE: usize = 4;
+
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct Matrix {
-    data: [f64; 16],
+    data: [f64; MATRIX_SIZE * MATRIX_SIZE],
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -18,7 +20,7 @@ pub struct Matrix {
 impl Matrix {
     pub fn new() -> Matrix {
         Matrix {
-            data: [0.0; 16],
+            data: [0.0; MATRIX_SIZE * MATRIX_SIZE],
         }
     }
 
@@ -32,8 +34,8 @@ impl Matrix {
 
     pub fn transpose(&self) -> Matrix {
         let mut res = Matrix::new();
-        for i in 0..4 {
-            for j in 0..4 {
+        for i in 0..MATRIX_SIZE {
+            for j in 0..MATRIX_SIZE {
                 res[(j, i)] = self[(i, j)];
             }
         }
@@ -49,8 +51,8 @@ impl Matrix {
         } else {
             let mut res = Matrix::new();
 
-            for row in 0..4 {
-                for col in 0..4 {
+            for row in 0..MATRIX_SIZE {
+                for col in 0..MATRIX_SIZE {
                     let c = self.cofactor(row, col);
                     res[(col, row)] = c / determinant;
                 }
@@ -62,7 +64,7 @@ impl Matrix {
 
     pub fn determinant(&self) -> f64 {
         let mut res = 0.0;
-        for col in 0..4 {
+        for col in 0..MATRIX_SIZE {
             res += self[(0, col)] * self.cofactor(0, col);
         }
 
@@ -73,10 +75,10 @@ impl Matrix {
         let mut res = Matrix3::new();
 
         let mut new_row = 0;
-        for i in 0..4 {
+        for i in 0..MATRIX_SIZE {
             let mut new_col = 0;
             if i != row {
-                for j in 0..4 {
+                for j in 0..MATRIX_SIZE {
                     if j != col {
                         res[new_row][new_col] = self[(i, j)];
                         new_col += 1;
@@ -115,8 +117,8 @@ impl Default for Matrix {
 
 impl PartialEq for Matrix {
     fn eq(&self, other: &Matrix) -> bool {
-        for i in 0..4 {
-            for j in 0..4 {
+        for i in 0..MATRIX_SIZE {
+            for j in 0..MATRIX_SIZE {
                 if !self[(i, j)].approx_eq_low_precision(other[(i, j)]) {
                     return false;
                 }
@@ -132,18 +134,18 @@ impl std::ops::Index<(usize, usize)> for Matrix {
     type Output = f64;
 
     fn index(&self, (row, col): (usize, usize)) -> &Self::Output {
-        debug_assert!(row < 4);
-        debug_assert!(col < 4);
+        debug_assert!(row < MATRIX_SIZE);
+        debug_assert!(col < MATRIX_SIZE);
         // Just for a thrill 😅
-        unsafe { self.data.get_unchecked(row * 4 + col) }
+        unsafe { self.data.get_unchecked(row * MATRIX_SIZE + col) }
     }
 }
 
 impl std::ops::IndexMut<(usize, usize)> for Matrix {
     fn index_mut(&mut self, (row, col): (usize, usize)) -> &mut f64 {
-        debug_assert!(row < 4);
-        debug_assert!(col < 4);
-        unsafe { self.data.get_unchecked_mut(row * 4 + col) }
+        debug_assert!(row < MATRIX_SIZE);
+        debug_assert!(col < MATRIX_SIZE);
+        unsafe { self.data.get_unchecked_mut(row * MATRIX_SIZE + col) }
     }
 }
 
@@ -155,8 +157,8 @@ impl std::ops::Mul for Matrix {
     fn mul(self, rhs: Matrix) -> Self::Output {
         let mut res = Matrix::new();
 
-        for row in 0..4 {
-            for col in 0..4 {
+        for row in 0..MATRIX_SIZE {
+            for col in 0..MATRIX_SIZE {
                 res[(row, col)] = self[(row, 0)] * rhs[(0, col)]
                     + self[(row, 1)] * rhs[(1, col)]
                     + self[(row, 2)] * rhs[(2, col)]
