@@ -1,5 +1,10 @@
 /* ---------------------------------------------------------------------------------------------- */
 
+#[global_allocator]
+static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
+
+/* ---------------------------------------------------------------------------------------------- */
+
 use clap::{App, AppSettings, Arg};
 use flate2::{read::GzDecoder, write::GzEncoder, Compression};
 use ray_tracer::{

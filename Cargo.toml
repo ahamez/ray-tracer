@@ -11,6 +11,7 @@ clap = "2.33"
 flate2 = "1.0"
 float-cmp = "0.8"
 image = "0.23"
+jemallocator = "0.3.0"
 rand = {version="0.8", features = ["small_rng"]}
 rayon = "1.5"
 serde = {version="1.0", features = ["derive", "rc"]}
@@ -20,4 +21,3 @@ yaml-rust = "0.4"
 
 [profile.release]
 debug = true
-
