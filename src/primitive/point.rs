@@ -61,7 +61,7 @@ impl std::ops::Add<Vector> for Point {
     type Output = Point;
 
     fn add(self, rhs: Vector) -> Self::Output {
-        Point {
+        Self {
             x: self.x + rhs.x(),
             y: self.y + rhs.y(),
             z: self.z + rhs.z(),
@@ -99,7 +99,7 @@ impl std::ops::Sub<Vector> for Point {
     type Output = Point;
 
     fn sub(self, rhs: Vector) -> Self::Output {
-        Point {
+        Self {
             x: self.x - rhs.x(),
             y: self.y - rhs.y(),
             z: self.z - rhs.z(),
@@ -113,7 +113,7 @@ impl std::ops::Mul<f64> for Point {
     type Output = Point;
 
     fn mul(self, rhs: f64) -> Self::Output {
-        Point {
+        Self {
             x: self.x * rhs,
             y: self.y * rhs,
             z: self.z * rhs,
@@ -127,7 +127,7 @@ impl std::ops::Add<f64> for Point {
     type Output = Point;
 
     fn add(self, rhs: f64) -> Self::Output {
-        Point {
+        Self {
             x: self.x + rhs,
             y: self.y + rhs,
             z: self.z + rhs,

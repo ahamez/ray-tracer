@@ -76,7 +76,7 @@ impl std::ops::Neg for Vector {
     type Output = Vector;
 
     fn neg(self) -> Self::Output {
-        Vector {
+        Self {
             x: -self.x,
             y: -self.y,
             z: -self.z,
@@ -90,7 +90,7 @@ impl std::ops::Add for Vector {
     type Output = Vector;
 
     fn add(self, rhs: Vector) -> Self::Output {
-        Vector {
+        Self {
             x: self.x + rhs.x,
             y: self.y + rhs.y,
             z: self.z + rhs.z,
@@ -104,7 +104,7 @@ impl std::ops::Sub for Vector {
     type Output = Vector;
 
     fn sub(self, rhs: Vector) -> Self::Output {
-        Vector {
+        Self {
             x: self.x - rhs.x,
             y: self.y - rhs.y,
             z: self.z - rhs.z,
@@ -118,7 +118,7 @@ impl std::ops::Mul<f64> for Vector {
     type Output = Vector;
 
     fn mul(self, rhs: f64) -> Self::Output {
-        Vector {
+        Self {
             x: self.x * rhs,
             y: self.y * rhs,
             z: self.z * rhs,
@@ -143,7 +143,7 @@ impl std::ops::Mul for Vector {
     type Output = Vector;
 
     fn mul(self, rhs: Vector) -> Self::Output {
-        Vector {
+        Self {
             x: self.y * rhs.z - self.z * rhs.y,
             y: self.z * rhs.x - self.x * rhs.z,
             z: self.x * rhs.y - self.y * rhs.x,
@@ -168,7 +168,7 @@ impl std::ops::Div<f64> for Vector {
     type Output = Vector;
 
     fn div(self, rhs: f64) -> Self::Output {
-        Vector {
+        Self {
             x: self.x / rhs,
             y: self.y / rhs,
             z: self.z / rhs,
