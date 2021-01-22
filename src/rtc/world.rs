@@ -63,7 +63,7 @@ impl World {
     }
 
     fn color_at_impl(&self, ray: &Ray, remaining_recursions: u8) -> Color {
-        let intersections = self.intersects(ray);
+        let intersections = self.intersects(ray, Intersections::new());
 
         match intersections.hit_index() {
             Some(hit_index) => {
@@ -74,11 +74,11 @@ impl World {
         }
     }
 
-    fn intersects(&self, ray: &Ray) -> Intersections {
-        let is = ray.intersects(&self.objects);
-        self.nb_intersections.add(is.len());
+    fn intersects<'a>(&'a self, ray: &Ray, intersections: Intersections<'a>) -> Intersections<'a> {
+        let intersections = ray.intersects(&self.objects, intersections);
+        self.nb_intersections.add(intersections.len());
 
-        is
+        intersections
     }
 
     fn shade_hit(&self, comps: &IntersectionState, remaining_recursions: u8) -> Color {
@@ -120,7 +120,7 @@ impl World {
             origin: *point,
             direction,
         };
-        let intersections = self.intersects(&ray);
+        let intersections = self.intersects(&ray, Intersections::new());
 
         if let Some(hit) = intersections.hit() {
             if hit.object().has_shadow() && hit.t() < distance {
@@ -226,7 +226,7 @@ pub mod tests {
             direction: Vector::new(0.0, 0.0, 1.0),
         };
 
-        let xs = w.intersects(&ray);
+        let xs = w.intersects(&ray, Intersections::new());
 
         assert_eq!(xs.len(), 4);
         assert_eq!(xs[0].t(), 4.0);

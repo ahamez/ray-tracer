@@ -170,7 +170,7 @@ mod tests {
     use super::*;
     use crate::{
         primitive::{Point, Tuple, Vector},
-        rtc::IntersectionPusher,
+        rtc::{IntersectionPusher, Intersections},
     };
 
     struct Push<'a> {
@@ -226,7 +226,7 @@ mod tests {
         };
 
         let objects = vec![group];
-        let xs = ray.intersects(&objects[..]);
+        let xs = ray.intersects(&objects[..], Intersections::new());
 
         assert_eq!(xs.len(), 4);
         assert_eq!(*xs[0].object(), s2.clone());
@@ -251,7 +251,7 @@ mod tests {
             };
 
             let objects = vec![group_2];
-            let xs = ray.intersects(&objects[..]);
+            let xs = ray.intersects(&objects[..], Intersections::new());
 
             assert_eq!(xs.len(), 4);
             assert_eq!(*xs[0].object(), s2);
@@ -273,7 +273,7 @@ mod tests {
             };
 
             let objects = vec![group_2];
-            let xs = ray.intersects(&objects[..]);
+            let xs = ray.intersects(&objects[..], Intersections::new());
 
             assert_eq!(xs.len(), 4);
             assert_eq!(*xs[0].object(), s2);
@@ -295,7 +295,7 @@ mod tests {
         };
 
         let objects = vec![group];
-        let xs = ray.intersects(&objects[..]);
+        let xs = ray.intersects(&objects[..], Intersections::new());
 
         assert_eq!(xs.len(), 2);
     }
@@ -316,7 +316,7 @@ mod tests {
             };
 
             let objects = vec![group_2];
-            let xs = ray.intersects(&objects[..]);
+            let xs = ray.intersects(&objects[..], Intersections::new());
 
             assert_eq!(xs.len(), 2);
         }
@@ -332,7 +332,7 @@ mod tests {
             };
 
             let objects = vec![group_2];
-            let xs = ray.intersects(&objects[..]);
+            let xs = ray.intersects(&objects[..], Intersections::new());
 
             assert_eq!(xs.len(), 2);
         }

@@ -43,10 +43,14 @@ impl Ray {
         self.origin + self.direction * t
     }
 
-    pub fn intersects<'a>(&self, objects: &'a [Object]) -> Intersections<'a> {
+    pub fn intersects<'a>(
+        &self,
+        objects: &'a [Object],
+        intersections: Intersections<'a>,
+    ) -> Intersections<'a> {
         objects
             .iter()
-            .fold(Intersections::<'a>::new(), |acc, object| {
+            .fold(intersections, |acc, object| {
                 let mut pusher = RayIntersectionPusher {
                     intersections: acc,
                     object,
