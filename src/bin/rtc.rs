@@ -271,8 +271,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let rendering_duration = rendering_start.elapsed();
     println!("Time elapsed in rendering: {:?}", rendering_duration);
 
-    println!("Computed intersections: {}", world.nb_intersections());
-
     canvas.export(&output_path(path)?)?;
 
     Ok(())

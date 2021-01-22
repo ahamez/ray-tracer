@@ -5,7 +5,6 @@ use crate::{
     primitive::Point,
     rtc::{Color, IntersectionState, Intersections, Light, Object, Ray},
 };
-use atomic_counter::{AtomicCounter, RelaxedCounter};
 use serde::{Deserialize, Serialize};
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -15,8 +14,6 @@ pub struct World {
     objects: Vec<Object>,
     lights: Vec<Light>,
     recursion_limit: u8,
-    #[serde(skip)]
-    nb_intersections: RelaxedCounter,
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -54,10 +51,6 @@ impl World {
         &self.lights
     }
 
-    pub fn nb_intersections(&self) -> usize {
-        self.nb_intersections.get()
-    }
-
     pub fn color_at(&self, ray: &Ray) -> Color {
         self.color_at_impl(ray, self.recursion_limit)
     }
@@ -75,10 +68,7 @@ impl World {
     }
 
     fn intersects<'a>(&'a self, ray: &Ray, intersections: Intersections<'a>) -> Intersections<'a> {
-        let intersections = ray.intersects(&self.objects, intersections);
-        self.nb_intersections.add(intersections.len());
-
-        intersections
+        ray.intersects(&self.objects, intersections)
     }
 
     fn shade_hit(&self, comps: &IntersectionState, remaining_recursions: u8) -> Color {
@@ -183,7 +173,6 @@ impl Default for World {
             objects: vec![],
             lights: vec![],
             recursion_limit: 4,
-            nb_intersections: RelaxedCounter::new(0),
         }
     }
 }
