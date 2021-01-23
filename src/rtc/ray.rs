@@ -17,7 +17,7 @@ pub struct Ray {
 /* ---------------------------------------------------------------------------------------------- */
 
 pub struct RayIntersectionPusher<'a> {
-    pub intersections: Intersections<'a>,
+    pub intersections: &'a mut Intersections<'a>,
     pub object: &'a Object,
 }
 
@@ -46,20 +46,19 @@ impl Ray {
     pub fn intersects<'a>(
         &self,
         objects: &'a [Object],
-        intersections: Intersections<'a>,
-    ) -> Intersections<'a> {
-        objects
-            .iter()
-            .fold(intersections, |acc, object| {
-                let mut pusher = RayIntersectionPusher {
-                    intersections: acc,
-                    object,
-                };
-                object.intersects(self, &mut pusher);
+        mut intersections: &'a mut Intersections<'a>,
+    ) -> &'a Intersections<'a> {
+        for object in objects.iter() {
+            let mut pusher = RayIntersectionPusher {
+                intersections,
+                object,
+            };
+            object.intersects(self, &mut pusher);
 
-                pusher.intersections
-            })
-            .sort()
+            intersections = pusher.intersections;
+        }
+
+        intersections.sort()
     }
 }
 

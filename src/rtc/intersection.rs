@@ -86,9 +86,9 @@ impl<'a> std::cmp::Eq for Intersection<'a> {}
 
 /* ---------------------------------------------------------------------------------------------- */
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Intersections<'a> {
-    intersections: Vec<Intersection<'a>>,
+    intersections: SmallVec<[Intersection<'a>; 16]>,
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -96,17 +96,17 @@ pub struct Intersections<'a> {
 impl<'a> Intersections<'a> {
     pub fn new() -> Self {
         Self {
-            intersections: Vec::<Intersection<'a>>::with_capacity(16),
+            intersections: SmallVec::<[Intersection<'a>; 16]>::new(),
         }
     }
 
     pub fn with_intersections(mut self, intersections: Vec<Intersection<'a>>) -> Self {
-        self.intersections = intersections;
+        self.intersections = intersections.into();
 
         self
     }
 
-    pub fn sort(mut self) -> Self {
+    pub fn sort(&mut self) -> &mut Self {
         self.intersections.sort_unstable();
 
         self
@@ -394,7 +394,8 @@ mod tests {
         let i3 = Intersection::new(2.0, &object);
         let is = Intersections::new()
             .with_intersections(vec![i0, i1, i2, i3.clone()])
-            .sort();
+            .sort()
+            .clone();
 
         let i = is.hit();
 

@@ -226,7 +226,8 @@ mod tests {
         };
 
         let objects = vec![group];
-        let xs = ray.intersects(&objects[..], Intersections::new());
+        let mut xs = Intersections::new();
+        let xs = ray.intersects(&objects[..], &mut xs);
 
         assert_eq!(xs.len(), 4);
         assert_eq!(*xs[0].object(), s2.clone());
@@ -251,7 +252,8 @@ mod tests {
             };
 
             let objects = vec![group_2];
-            let xs = ray.intersects(&objects[..], Intersections::new());
+            let mut xs = Intersections::new();
+            let xs = ray.intersects(&objects[..], &mut xs);
 
             assert_eq!(xs.len(), 4);
             assert_eq!(*xs[0].object(), s2);
@@ -273,7 +275,8 @@ mod tests {
             };
 
             let objects = vec![group_2];
-            let xs = ray.intersects(&objects[..], Intersections::new());
+            let mut xs = Intersections::new();
+            let xs = ray.intersects(&objects[..], &mut xs);
 
             assert_eq!(xs.len(), 4);
             assert_eq!(*xs[0].object(), s2);
@@ -295,7 +298,8 @@ mod tests {
         };
 
         let objects = vec![group];
-        let xs = ray.intersects(&objects[..], Intersections::new());
+        let mut xs = Intersections::new();
+        let xs = ray.intersects(&objects[..], &mut xs);
 
         assert_eq!(xs.len(), 2);
     }
@@ -316,7 +320,8 @@ mod tests {
             };
 
             let objects = vec![group_2];
-            let xs = ray.intersects(&objects[..], Intersections::new());
+            let mut xs = Intersections::new();
+            let xs = ray.intersects(&objects[..], &mut xs);
 
             assert_eq!(xs.len(), 2);
         }
@@ -332,7 +337,8 @@ mod tests {
             };
 
             let objects = vec![group_2];
-            let xs = ray.intersects(&objects[..], Intersections::new());
+            let mut xs = Intersections::new();
+            let xs = ray.intersects(&objects[..], &mut xs);
 
             assert_eq!(xs.len(), 2);
         }
