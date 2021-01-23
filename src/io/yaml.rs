@@ -4,7 +4,7 @@ use crate::{
     primitive::{Point, Tuple, Vector},
     rtc::{
         rotation_x, rotation_y, rotation_z, scaling, shearing, translation, view_transform, Camera,
-        Color, Light, Material, Object, Pattern, Transform, World,
+        Color, Light, Material, Object, Pattern, Transform,
     },
 };
 use std::collections::HashMap;
@@ -418,7 +418,7 @@ fn mk_light(hash: &yaml::Hash) -> Light {
 /* ---------------------------------------------------------------------------------------------- */
 
 // TODO: don't unwrap() everywhere...
-pub fn parse(path: &std::path::Path) -> (World, Camera) {
+pub fn parse(path: &std::path::Path) -> (Vec<Object>, Vec<Light>, Camera) {
     let yaml = std::fs::read_to_string(path).unwrap();
     let docs = YamlLoader::load_from_str(&yaml).unwrap();
     let doc = &docs[0];
@@ -451,10 +451,7 @@ pub fn parse(path: &std::path::Path) -> (World, Camera) {
         }
     }
 
-    (
-        World::new().with_objects(objects).with_lights(lights),
-        camera.unwrap(),
-    )
+    (objects, lights, camera.unwrap())
 }
 
 /* ---------------------------------------------------------------------------------------------- */

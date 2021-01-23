@@ -45,6 +45,15 @@ fn output_path(path: &std::path::Path) -> Result<String, Box<dyn std::error::Err
 
 /* ---------------------------------------------------------------------------------------------- */
 
+#[derive(PartialEq)]
+enum FileType {
+    Yaml,
+    Obj,
+    Unsupported,
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = App::new("Ray Tracer")
         .setting(AppSettings::AllowNegativeNumbers)
@@ -119,8 +128,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
         .get_matches();
 
+    let path_str = matches.value_of("INPUT").expect("Invalid INPUT");
+
+    let path = std::path::Path::new(&path_str);
+    let ext = match path.extension() {
+        Some(ext) => match ext.to_str() {
+            Some("yml") | Some("yaml") => FileType::Yaml,
+            Some("obj") => FileType::Obj,
+            _ => FileType::Unsupported,
+        },
+        None => todo!(),
+    };
+
     let factor = clap::value_t!(matches.value_of("factor"), usize).unwrap_or(1);
-    let bvh_threshold = clap::value_t!(matches.value_of("bvh-threshold"), usize).unwrap_or(4);
+    let bvh_threshold = clap::value_t!(matches.value_of("bvh-threshold"), usize)
+        .unwrap_or_else(|_| if ext == FileType::Yaml { 0 } else { 4 });
     let aa_level = clap::value_t!(matches.value_of("aa-level"), usize).unwrap_or(1);
     let fov = clap::value_t!(matches.value_of("fov"), f64).unwrap_or(1.0);
     let rotate_x = clap::value_t!(matches.value_of("rotate-x"), f64).unwrap_or(0.0);
@@ -128,24 +150,30 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let rotate_z = clap::value_t!(matches.value_of("rotate-z"), f64).unwrap_or(0.0);
     let parallel: ParallelRendering = matches.is_present("sequential").into();
     let soft_shadows = matches.is_present("soft-shadows");
-    let path_str = matches.value_of("INPUT").expect("Invalid INPUT");
-
-    let path = std::path::Path::new(&path_str);
-    let ext = match path.extension() {
-        Some(ext) => ext,
-        None => todo!(),
-    };
 
     println!("Input file: {}", path_str);
     println!("Factor: {}", factor);
-    println!("BVH: {}", bvh_threshold != 0);
+    println!("BVH: {} (threshold={})", bvh_threshold != 0, bvh_threshold);
     println!("FoV: {}", fov);
     println!("Parallel rendering: {}", parallel);
 
     let construction_start = Instant::now();
-    let (world, camera) = match ext.to_str() {
-        Some("yml") => yaml::parse(&path),
-        Some("obj") => {
+    let (world, camera) = match ext {
+        FileType::Yaml => {
+            let (objects, lights, camera) = yaml::parse(&path);
+
+            let objects = if bvh_threshold == 0 {
+                objects
+            } else {
+                vec![Object::new_group(objects).divide(bvh_threshold)]
+            };
+
+            (
+                World::new().with_objects(objects).with_lights(lights),
+                camera,
+            )
+        }
+        FileType::Obj => {
             let hash = Sha3_256::new()
                 .chain(path_str)
                 .chain(rotate_x.to_le_bytes())
@@ -254,8 +282,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             (world, camera)
         }
-        Some(_) => panic!(),
-        None => panic!(),
+        _ => {
+            eprintln!("Unsupported file format");
+            return Ok(());
+        }
     };
 
     let camera_h_size = camera.h_size();
