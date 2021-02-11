@@ -113,7 +113,7 @@ impl Data {
 
         let scale = sx.max(sy.max(sz)) / 2.0;
 
-        for vertex in self.vertices.iter_mut() {
+        for vertex in &mut self.vertices {
             *vertex = Point::new(
                 (vertex.x() - (bbox_min.x() + sx / 2.0)) / scale,
                 (vertex.y() - (bbox_min.y() + sy / 2.0)) / scale,
@@ -132,7 +132,7 @@ impl Data {
         let mut y_max = NEG_INFINITY;
         let mut z_max = NEG_INFINITY;
 
-        for vertex in self.vertices.iter() {
+        for vertex in &self.vertices {
             x_min = x_min.min(vertex.x());
             y_min = y_min.min(vertex.y());
             z_min = z_min.min(vertex.z());

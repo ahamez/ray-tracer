@@ -62,6 +62,7 @@ impl Light {
         }
     }
 
+    #[must_use]
     pub fn intensity_at(&self, world: &World, point: &Point) -> f64 {
         match &self.light {
             LightType::AreaLight(l) => l.intensity_at(world, point),

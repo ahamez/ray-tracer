@@ -58,7 +58,7 @@ impl<'a> Intersection<'a> {
 
 impl<'a> std::cmp::PartialOrd for Intersection<'a> {
     fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
-        Some(self.cmp(&other))
+        Some(self.cmp(other))
     }
 }
 
@@ -277,7 +277,7 @@ impl<'a> IntersectionState<'a> {
     }
 
     pub fn object(&self) -> &Object {
-        &self.object
+        self.object
     }
 
     pub fn over_point(&self) -> Point {

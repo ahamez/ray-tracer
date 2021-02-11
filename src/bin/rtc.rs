@@ -160,7 +160,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let construction_start = Instant::now();
     let (world, camera) = match ext {
         FileType::Yaml => {
-            let (objects, lights, camera) = yaml::parse(&path);
+            let (objects, lights, camera) = yaml::parse(path);
 
             let objects = if bvh_threshold == 0 {
                 objects

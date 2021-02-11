@@ -130,8 +130,8 @@ impl Camera {
     fn color_at(&self, world: &World, col: usize, row: usize) -> Color {
         let mut color = Color::black();
 
-        for x_offset in self.anti_aliasing_offsets.iter() {
-            for y_offset in self.anti_aliasing_offsets.iter() {
+        for x_offset in &self.anti_aliasing_offsets {
+            for y_offset in &self.anti_aliasing_offsets {
                 let ray = self.ray_for_pixel(col, row, *x_offset, *y_offset);
                 color = color + world.color_at(&ray);
             }
@@ -152,7 +152,7 @@ impl Camera {
 
         for row in 0..self.v_size {
             for col in 0..self.h_size {
-                image[row][col] = self.color_at(&world, col, row);
+                image[row][col] = self.color_at(world, col, row);
             }
         }
 
@@ -171,7 +171,7 @@ impl Camera {
                 for row in 0..BAND_SIZE {
                     for col in 0..self.h_size {
                         band[row * self.h_size + col] =
-                            self.color_at(&world, col, row + i * BAND_SIZE);
+                            self.color_at(world, col, row + i * BAND_SIZE);
                     }
                 }
             });

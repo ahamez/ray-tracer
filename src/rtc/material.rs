@@ -91,7 +91,7 @@ impl Material {
         normal_v: &Vector,
         intensity: f64,
     ) -> Color {
-        let color = self.pattern.pattern_at_object(&object, &position);
+        let color = self.pattern.pattern_at_object(object, position);
         let effective_color = color * light.intensity();
         let ambient = effective_color * self.ambient;
 

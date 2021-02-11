@@ -188,12 +188,12 @@ fn mk_vector_from_key(hash: &yaml::Hash, key: &str) -> Option<Vector> {
 /* ---------------------------------------------------------------------------------------------- */
 
 fn mk_pattern(defs: &Definitions, hash: &yaml::Hash) -> Option<Pattern> {
-    if let Some(color) = hash.get(&Yaml::from_str(&"color")) {
+    if let Some(color) = hash.get(&Yaml::from_str("color")) {
         Some(Pattern::new_plain(mk_color(color)))
-    } else if let Some(pattern) = hash.get(&Yaml::from_str(&"pattern")) {
+    } else if let Some(pattern) = hash.get(&Yaml::from_str("pattern")) {
         let pattern_hash = pattern.as_hash().unwrap();
         let ty = pattern_hash
-            .get(&Yaml::from_str(&"type"))
+            .get(&Yaml::from_str("type"))
             .unwrap()
             .as_str()
             .unwrap();
@@ -201,7 +201,7 @@ fn mk_pattern(defs: &Definitions, hash: &yaml::Hash) -> Option<Pattern> {
         let pattern = match ty {
             "checkers" => {
                 let colors = pattern_hash
-                    .get(&Yaml::from_str(&"colors"))
+                    .get(&Yaml::from_str("colors"))
                     .unwrap()
                     .as_vec()
                     .unwrap();
@@ -211,7 +211,7 @@ fn mk_pattern(defs: &Definitions, hash: &yaml::Hash) -> Option<Pattern> {
 
             "gradient" => {
                 let colors = pattern_hash
-                    .get(&Yaml::from_str(&"colors"))
+                    .get(&Yaml::from_str("colors"))
                     .unwrap()
                     .as_vec()
                     .unwrap();
@@ -221,31 +221,31 @@ fn mk_pattern(defs: &Definitions, hash: &yaml::Hash) -> Option<Pattern> {
 
             "ring" => {
                 let colors = pattern_hash
-                    .get(&Yaml::from_str(&"colors"))
+                    .get(&Yaml::from_str("colors"))
                     .unwrap()
                     .as_vec()
                     .unwrap();
 
-                let v: Vec<_> = colors.iter().map(|c| mk_color(&c)).collect();
+                let v: Vec<_> = colors.iter().map(|c| mk_color(c)).collect();
 
                 Pattern::new_ring(v)
             }
 
             "stripes" => {
                 let colors = pattern_hash
-                    .get(&Yaml::from_str(&"colors"))
+                    .get(&Yaml::from_str("colors"))
                     .unwrap()
                     .as_vec()
                     .unwrap();
 
-                let v: Vec<_> = colors.iter().map(|c| mk_color(&c)).collect();
+                let v: Vec<_> = colors.iter().map(|c| mk_color(c)).collect();
 
                 Pattern::new_stripe(v)
             }
             _ => panic!("Unknown pattern: {:?}", pattern),
         };
 
-        Some(transform(defs, pattern, &pattern_hash))
+        Some(transform(defs, pattern, pattern_hash))
     } else {
         None
     }
@@ -256,30 +256,30 @@ fn mk_pattern(defs: &Definitions, hash: &yaml::Hash) -> Option<Pattern> {
 fn mk_material(defs: &Definitions, hash: &yaml::Hash) -> Material {
     let default = Material::new();
 
-    match hash.get(&Yaml::from_str(&"material")) {
+    match hash.get(&Yaml::from_str("material")) {
         Some(material_yaml) => {
             let material_hash = get_hash(defs, &material_yaml);
 
             Material::new()
-                .with_ambient(mk_f64_from_key(&material_hash, "ambient").unwrap_or(default.ambient))
-                .with_diffuse(mk_f64_from_key(&material_hash, "diffuse").unwrap_or(default.diffuse))
+                .with_ambient(mk_f64_from_key(material_hash, "ambient").unwrap_or(default.ambient))
+                .with_diffuse(mk_f64_from_key(material_hash, "diffuse").unwrap_or(default.diffuse))
                 .with_reflective(
-                    mk_f64_from_key(&material_hash, "reflective").unwrap_or(default.reflective),
+                    mk_f64_from_key(material_hash, "reflective").unwrap_or(default.reflective),
                 )
                 .with_refractive_index(
-                    mk_f64_from_key(&material_hash, "refractive-index")
+                    mk_f64_from_key(material_hash, "refractive-index")
                         .unwrap_or(default.refractive_index),
                 )
                 .with_shininess(
-                    mk_f64_from_key(&material_hash, "shininess").unwrap_or(default.shininess),
+                    mk_f64_from_key(material_hash, "shininess").unwrap_or(default.shininess),
                 )
                 .with_specular(
-                    mk_f64_from_key(&material_hash, "specular").unwrap_or(default.specular),
+                    mk_f64_from_key(material_hash, "specular").unwrap_or(default.specular),
                 )
                 .with_transparency(
-                    mk_f64_from_key(&material_hash, "transparency").unwrap_or(default.transparency),
+                    mk_f64_from_key(material_hash, "transparency").unwrap_or(default.transparency),
                 )
-                .with_pattern(mk_pattern(defs, &material_hash).unwrap_or(default.pattern))
+                .with_pattern(mk_pattern(defs, material_hash).unwrap_or(default.pattern))
         }
         None => default,
     }
@@ -308,7 +308,7 @@ where
         }
     }
 
-    if let Some(transform_array) = hash.get(&Yaml::from_str(&"transform")) {
+    if let Some(transform_array) = hash.get(&Yaml::from_str("transform")) {
         let transform_array = transform_array.as_vec().unwrap();
 
         let mut transformations_yaml = vec![];
@@ -359,10 +359,10 @@ fn mk_object(defs: &Definitions, hash: &yaml::Hash, ty: &str) -> Object {
         "sphere" => Object::new_sphere(),
         _ => panic!("Unexpected object type: {:?}", ty),
     }
-    .with_material(mk_material(defs, &hash))
-    .with_shadow(mk_bool_from_key(&hash, "shadow").unwrap_or(true));
+    .with_material(mk_material(defs, hash))
+    .with_shadow(mk_bool_from_key(hash, "shadow").unwrap_or(true));
 
-    transform(defs, object, &hash)
+    transform(defs, object, hash)
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -370,14 +370,14 @@ fn mk_object(defs: &Definitions, hash: &yaml::Hash, ty: &str) -> Object {
 fn mk_camera(hash: &yaml::Hash) -> Camera {
     Camera::new()
         .with_size(
-            mk_usize_from_key(&hash, "width").unwrap(),
-            mk_usize_from_key(&hash, "height").unwrap(),
+            mk_usize_from_key(hash, "width").unwrap(),
+            mk_usize_from_key(hash, "height").unwrap(),
         )
-        .with_fov(mk_f64_from_key(&hash, "field-of-view").unwrap())
+        .with_fov(mk_f64_from_key(hash, "field-of-view").unwrap())
         .with_transformation(&view_transform(
-            &mk_point_from_key(&hash, "from").unwrap(),
-            &mk_point_from_key(&hash, "to").unwrap(),
-            &mk_vector_from_key(&hash, "up").unwrap(),
+            &mk_point_from_key(hash, "from").unwrap(),
+            &mk_point_from_key(hash, "to").unwrap(),
+            &mk_vector_from_key(hash, "up").unwrap(),
         ))
 }
 
@@ -433,18 +433,18 @@ pub fn parse(path: &std::path::Path) -> (Vec<Object>, Vec<Light>, Camera) {
     for elem in doc.as_vec().unwrap().iter() {
         let hash = elem.as_hash().unwrap();
 
-        if let Some(x) = hash.get(&Yaml::from_str(&"add")) {
+        if let Some(x) = hash.get(&Yaml::from_str("add")) {
             let ty = x.as_str().unwrap().as_ref();
 
             match ty {
                 "camera" => {
-                    camera = Some(mk_camera(&hash));
+                    camera = Some(mk_camera(hash));
                 }
                 "light" => {
-                    lights.push(mk_light(&hash));
+                    lights.push(mk_light(hash));
                 }
                 "cube" | "plane" | "sphere" => {
-                    objects.push(mk_object(&definitions, &hash, ty));
+                    objects.push(mk_object(&definitions, hash, ty));
                 }
                 _ => unimplemented!(),
             }
