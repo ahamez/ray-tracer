@@ -62,7 +62,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .short("f")
                 .long("factor")
                 .value_name("INTEGER")
-                .help("Sets a factor to apply on width/height")
+                .help("Set a factor to apply on width/height")
                 .takes_value(true),
         )
         .arg(
