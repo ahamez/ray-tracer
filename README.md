@@ -19,6 +19,8 @@ My main objective is to be fluent in Rust 🗣🦀. So, if some seasoned rustace
 
 ![Shadow Glamour Shot](/samples/render/shadow-glamour-shot.png?raw=true "Shadow Glamour Shot")
 
+![Github Skyline](/samples/render/ahamez-2020.png?raw=true "Github Skyline")
+
 ![Plane](/samples/render/ch09_plane.png?raw=true "Plane")
 
 ![Pattern](/samples/render/ch10_pattern.png?raw=true "Pattern")
