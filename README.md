@@ -11,7 +11,7 @@ My main objective is to be fluent in Rust 🗣🦀. So, if some seasoned rustace
 * Avoid creating a new vec for each call to a shape intersects() method using a kind of closure (it provides an interesting speedup as it prevents the dynamic allocation of many temporaries)
 * Use f64 everywhere
 * Naive anti-aliasing
-* Use enums rather than traits to describe polymorphic behaviors (shapes, ligths, etc.)
+* Use enums rather than traits to describe polymorphic behaviors (shapes, lights, etc.)
 
 ## Some samples
 
