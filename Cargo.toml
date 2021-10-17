@@ -17,7 +17,7 @@ rayon = "1.5"
 serde = {version="1.0", features = ["derive", "rc"]}
 sha3 = "0.9"
 # smallvec = {version = "1.6", features = ["union"]} Requires Rust 1.49
-smallvec = "1.6"
+smallvec = "1.7"
 yaml-rust = "0.4"
 
 [profile.release]
