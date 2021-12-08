@@ -15,7 +15,7 @@ jemallocator = "0.3.0"
 rand = {version="0.8", features = ["small_rng"]}
 rayon = "1.5"
 serde = {version="1.0", features = ["derive", "rc"]}
-sha3 = "0.9"
+sha3 = "0.10"
 # smallvec = {version = "1.6", features = ["union"]} Requires Rust 1.49
 smallvec = "1.7"
 yaml-rust = "0.4"
