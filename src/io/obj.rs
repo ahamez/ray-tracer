@@ -68,7 +68,7 @@ struct FaceVertex {
     pub normal_index: Option<usize>,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 struct Face {
     pub vertices: Vec<FaceVertex>,
     pub group: Option<String>,
@@ -77,15 +77,6 @@ struct Face {
 impl Face {
     fn has_normals(&self) -> bool {
         self.vertices[0].normal_index != None
-    }
-}
-
-impl Default for Face {
-    fn default() -> Self {
-        Self {
-            vertices: vec![],
-            group: None,
-        }
     }
 }
 
