@@ -416,7 +416,7 @@ pub fn parse(path: &std::path::Path) -> (Vec<Object>, Vec<Light>, Camera) {
         let hash = elem.as_hash().unwrap();
 
         if let Some(x) = hash.get(&Yaml::from_str("add")) {
-            let ty = x.as_str().unwrap().as_ref();
+            let ty = x.as_str().unwrap();
 
             match ty {
                 "camera" => {
