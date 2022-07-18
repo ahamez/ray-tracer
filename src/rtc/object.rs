@@ -266,7 +266,7 @@ impl Transform for Object {
                 let children_group_builders = g
                     .children()
                     .iter()
-                    .map(|child| GroupBuilder::from_object(child))
+                    .map(GroupBuilder::from_object)
                     .collect();
 
                 // We then create a new top GroupBuilder Node from which the new transformation is

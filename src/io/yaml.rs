@@ -86,10 +86,7 @@ fn mk_bool(yaml: &Yaml) -> bool {
 /* ---------------------------------------------------------------------------------------------- */
 
 fn mk_bool_from_key(hash: &yaml::Hash, key: &str) -> Option<bool> {
-    match hash.get(&Yaml::from_str(key)) {
-        None => None,
-        Some(x) => Some(mk_bool(x)),
-    }
+    hash.get(&Yaml::from_str(key)).map(mk_bool)
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -104,10 +101,7 @@ fn mk_usize(yaml: &Yaml) -> usize {
 /* ---------------------------------------------------------------------------------------------- */
 
 fn mk_usize_from_key(hash: &yaml::Hash, key: &str) -> Option<usize> {
-    match hash.get(&Yaml::from_str(key)) {
-        None => None,
-        Some(x) => Some(mk_usize(x)),
-    }
+    hash.get(&Yaml::from_str(key)).map(mk_usize)
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -125,10 +119,7 @@ fn mk_f64(yaml: &Yaml) -> f64 {
 /* ---------------------------------------------------------------------------------------------- */
 
 fn mk_f64_from_key(hash: &yaml::Hash, key: &str) -> Option<f64> {
-    match hash.get(&Yaml::from_str(key)) {
-        None => None,
-        Some(x) => Some(mk_f64(x)),
-    }
+    hash.get(&Yaml::from_str(key)).map(mk_f64)
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -143,10 +134,7 @@ fn mk_color(yaml: &Yaml) -> Color {
 /* ---------------------------------------------------------------------------------------------- */
 
 fn mk_color_from_key(hash: &yaml::Hash, key: &str) -> Option<Color> {
-    match hash.get(&Yaml::from_str(key)) {
-        None => None,
-        Some(x) => Some(mk_color(x)),
-    }
+    hash.get(&Yaml::from_str(key)).map(mk_color)
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -161,10 +149,7 @@ fn mk_point(yaml: &Yaml) -> Point {
 /* ---------------------------------------------------------------------------------------------- */
 
 fn mk_point_from_key(hash: &yaml::Hash, key: &str) -> Option<Point> {
-    match hash.get(&Yaml::from_str(key)) {
-        None => None,
-        Some(x) => Some(mk_point(x)),
-    }
+    hash.get(&Yaml::from_str(key)).map(mk_point)
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -179,10 +164,7 @@ fn mk_vector(yaml: &Yaml) -> Vector {
 /* ---------------------------------------------------------------------------------------------- */
 
 fn mk_vector_from_key(hash: &yaml::Hash, key: &str) -> Option<Vector> {
-    match hash.get(&Yaml::from_str(key)) {
-        None => None,
-        Some(x) => Some(mk_vector(x)),
-    }
+    hash.get(&Yaml::from_str(key)).map(mk_vector)
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -226,7 +208,7 @@ fn mk_pattern(defs: &Definitions, hash: &yaml::Hash) -> Option<Pattern> {
                     .as_vec()
                     .unwrap();
 
-                let v: Vec<_> = colors.iter().map(|c| mk_color(c)).collect();
+                let v: Vec<_> = colors.iter().map(mk_color).collect();
 
                 Pattern::new_ring(v)
             }
@@ -238,7 +220,7 @@ fn mk_pattern(defs: &Definitions, hash: &yaml::Hash) -> Option<Pattern> {
                     .as_vec()
                     .unwrap();
 
-                let v: Vec<_> = colors.iter().map(|c| mk_color(c)).collect();
+                let v: Vec<_> = colors.iter().map(mk_color).collect();
 
                 Pattern::new_stripe(v)
             }
