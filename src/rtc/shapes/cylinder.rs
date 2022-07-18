@@ -29,7 +29,7 @@ impl Cylinder {
         let a = ray.direction.x().powi(2) + ray.direction.z().powi(2);
 
         if a.approx_eq(0.0) {
-            self.intersects_caps(&ray, push);
+            self.intersects_caps(ray, push);
         } else {
             let b = 2.0 * (ray.origin.x() * ray.direction.x() + ray.origin.z() * ray.direction.z());
             let c = ray.origin.x().powi(2) + ray.origin.z().powi(2) - 1.0;
@@ -54,7 +54,7 @@ impl Cylinder {
                 push.t(t1);
             }
 
-            self.intersects_caps(&ray, push);
+            self.intersects_caps(ray, push);
         }
     }
 

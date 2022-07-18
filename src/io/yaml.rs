@@ -258,7 +258,7 @@ fn mk_material(defs: &Definitions, hash: &yaml::Hash) -> Material {
 
     match hash.get(&Yaml::from_str("material")) {
         Some(material_yaml) => {
-            let material_hash = get_hash(defs, &material_yaml);
+            let material_hash = get_hash(defs, material_yaml);
 
             Material::new()
                 .with_ambient(mk_f64_from_key(material_hash, "ambient").unwrap_or(default.ambient))
@@ -302,7 +302,7 @@ where
                 Some(_) => transformations.push(transform.clone()),
                 None => {
                     let embedded_transformations = get_array(defs, transform);
-                    get_transformations(defs, &embedded_transformations, &mut transformations);
+                    get_transformations(defs, embedded_transformations, transformations);
                 }
             }
         }
@@ -428,7 +428,7 @@ pub fn parse(path: &std::path::Path) -> (Vec<Object>, Vec<Light>, Camera) {
     let mut camera = None;
 
     // First, look for all definitions
-    let definitions = get_definitions(&doc);
+    let definitions = get_definitions(doc);
 
     for elem in doc.as_vec().unwrap().iter() {
         let hash = elem.as_hash().unwrap();

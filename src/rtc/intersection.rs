@@ -42,7 +42,7 @@ impl<'a> Intersection<'a> {
     }
 
     pub fn object(&self) -> &'a Object {
-        &self.object
+        self.object
     }
 
     pub fn u(&self) -> f64 {

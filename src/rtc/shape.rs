@@ -30,31 +30,31 @@ pub enum Shape {
 impl Shape {
     pub fn intersects<'a>(&'a self, ray: &Ray, push: &mut impl IntersectionPusher<'a>) {
         match self {
-            Shape::Cone(c) => c.intersects(&ray, push),
-            Shape::Cube() => Cube::intersects(&ray, push),
-            Shape::Cylinder(c) => c.intersects(&ray, push),
+            Shape::Cone(c) => c.intersects(ray, push),
+            Shape::Cube() => Cube::intersects(ray, push),
+            Shape::Cylinder(c) => c.intersects(ray, push),
             Shape::Dummy() => unreachable!("Dummy::intersects() should never be called"),
-            Shape::Group(g) => g.intersects(&ray, push),
-            Shape::Plane() => Plane::intersects(&ray, push),
-            Shape::SmoothTriangle(t) => t.intersects(&ray, push),
-            Shape::Sphere() => Sphere::intersects(&ray, push),
-            Shape::TestShape(t) => t.intersects(&ray, push),
-            Shape::Triangle(t) => t.intersects(&ray, push),
+            Shape::Group(g) => g.intersects(ray, push),
+            Shape::Plane() => Plane::intersects(ray, push),
+            Shape::SmoothTriangle(t) => t.intersects(ray, push),
+            Shape::Sphere() => Sphere::intersects(ray, push),
+            Shape::TestShape(t) => t.intersects(ray, push),
+            Shape::Triangle(t) => t.intersects(ray, push),
         }
     }
 
     pub fn normal_at(&self, object_point: &Point, hit: &Intersection) -> Vector {
         match self {
-            Shape::Cone(c) => c.normal_at(&object_point),
-            Shape::Cube() => Cube::normal_at(&object_point),
-            Shape::Cylinder(c) => c.normal_at(&object_point),
+            Shape::Cone(c) => c.normal_at(object_point),
+            Shape::Cube() => Cube::normal_at(object_point),
+            Shape::Cylinder(c) => c.normal_at(object_point),
             Shape::Dummy() => unreachable!("Dummy::normal_at() should never be called"),
-            Shape::Group(g) => g.normal_at(&object_point),
-            Shape::Plane() => Plane::normal_at(&object_point),
-            Shape::SmoothTriangle(t) => t.normal_at(&object_point, hit),
-            Shape::Sphere() => Sphere::normal_at(&object_point),
-            Shape::TestShape(t) => t.normal_at(&object_point),
-            Shape::Triangle(t) => t.normal_at(&object_point),
+            Shape::Group(g) => g.normal_at(object_point),
+            Shape::Plane() => Plane::normal_at(object_point),
+            Shape::SmoothTriangle(t) => t.normal_at(object_point, hit),
+            Shape::Sphere() => Sphere::normal_at(object_point),
+            Shape::TestShape(t) => t.normal_at(object_point),
+            Shape::Triangle(t) => t.normal_at(object_point),
         }
     }
 

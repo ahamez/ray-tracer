@@ -58,7 +58,7 @@ impl Cone {
                 push.t(t1);
             }
         }
-        self.intersects_caps(&ray, push);
+        self.intersects_caps(ray, push);
     }
 
     fn check_cap(ray: &Ray, t: f64, radius: f64) -> bool {
@@ -74,12 +74,12 @@ impl Cone {
         }
 
         let t = (self.min - ray.origin.y()) / ray.direction.y();
-        if Self::check_cap(&ray, t, self.min) {
+        if Self::check_cap(ray, t, self.min) {
             push.t(t);
         }
 
         let t = (self.max - ray.origin.y()) / ray.direction.y();
-        if Self::check_cap(&ray, t, self.max) {
+        if Self::check_cap(ray, t, self.max) {
             push.t(t);
         }
     }

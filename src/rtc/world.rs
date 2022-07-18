@@ -60,7 +60,7 @@ impl World {
 
         match intersections.hit_index() {
             Some(hit_index) => {
-                let comps = IntersectionState::new(&intersections, hit_index, &ray);
+                let comps = IntersectionState::new(&intersections, hit_index, ray);
                 self.shade_hit(&comps, remaining_recursions)
             }
             None => Color::black(),
@@ -69,11 +69,11 @@ impl World {
 
     fn shade_hit(&self, comps: &IntersectionState, remaining_recursions: u8) -> Color {
         self.lights.iter().fold(Color::black(), |acc, light| {
-            let light_intensity = light.intensity_at(&self, &comps.over_point());
+            let light_intensity = light.intensity_at(self, &comps.over_point());
 
             let surface_color = comps.object().material().lighting(
-                &comps.object(),
-                &light,
+                comps.object(),
+                light,
                 &comps.over_point(),
                 &comps.eye_v(),
                 &comps.normal_v(),
