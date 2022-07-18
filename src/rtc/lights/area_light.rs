@@ -90,7 +90,7 @@ impl AreaLight {
 
         for v in 0..self.vsteps {
             for u in 0..self.usteps {
-                let light_position = self.point_on_light(u, v, || random());
+                let light_position = self.point_on_light(u, v, &mut random);
                 if !world.is_shadowed(&light_position, point) {
                     total += 1.0;
                 }
