@@ -161,15 +161,12 @@ impl<'a> std::ops::Index<usize> for Intersections<'a> {
 pub struct IntersectionState<'a> {
     cos_i: f64,
     eye_v: Vector,
-    inside: bool,
     n1: f64,
     n2: f64,
     normal_v: Vector,
     object: &'a Object,
     over_point: Point,
-    point: Point,
     reflect_v: Vector,
-    t: f64,
     under_point: Point,
 }
 
@@ -216,10 +213,10 @@ impl<'a> IntersectionState<'a> {
 
         let eye_v = -ray.direction;
         let normal_v = intersection.object.normal_at(&point, intersection);
-        let (inside, normal_v) = if normal_v ^ eye_v < 0.0 {
-            (true, -normal_v)
+        let normal_v = if normal_v ^ eye_v < 0.0 {
+            -normal_v
         } else {
-            (false, normal_v)
+            normal_v
         };
         let reflect_v = ray.direction.reflect(&normal_v);
         let over_point = point + normal_v * EPSILON;
@@ -228,15 +225,12 @@ impl<'a> IntersectionState<'a> {
         Self {
             cos_i: normal_v ^ eye_v,
             eye_v,
-            inside,
             n1: n1.unwrap_or(1.0),
             n2: n2.unwrap_or(1.0),
             normal_v,
             object: intersection.object,
             over_point,
-            point,
             reflect_v,
-            t: intersection.t,
             under_point,
         }
     }
@@ -415,12 +409,9 @@ mod tests {
             &r,
         );
 
-        assert_eq!(comps.t, i.t);
         assert_eq!(comps.object, i.object);
-        assert_eq!(comps.point, Point::new(0.0, 0.0, -1.0));
         assert_eq!(comps.eye_v, Vector::new(0.0, 0.0, -1.0));
         assert_eq!(comps.normal_v, Vector::new(0.0, 0.0, -1.0));
-        assert_eq!(comps.inside, false);
     }
 
     #[test]
@@ -434,10 +425,8 @@ mod tests {
         let comps =
             IntersectionState::new(&Intersections::new().with_intersections(vec![i]), 0, &r);
 
-        assert_eq!(comps.point, Point::new(0.0, 0.0, 1.0));
         assert_eq!(comps.eye_v, Vector::new(0.0, 0.0, -1.0));
         assert_eq!(comps.normal_v, Vector::new(0.0, 0.0, -1.0));
-        assert_eq!(comps.inside, true);
     }
 
     #[test]
@@ -455,7 +444,6 @@ mod tests {
             IntersectionState::new(&Intersections::new().with_intersections(vec![i]), 0, &r);
 
         assert!(comps.over_point.z() < EPSILON / 2.0);
-        assert!(comps.point.z() > comps.over_point.z());
     }
 
     #[test]
@@ -491,7 +479,6 @@ mod tests {
             IntersectionState::new(&Intersections::new().with_intersections(vec![i]), 0, &ray);
 
         assert!(comps.under_point.z() > EPSILON / 2.0);
-        assert!(comps.point.z() < comps.under_point.z());
     }
 
     #[test]
