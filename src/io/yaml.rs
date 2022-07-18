@@ -295,7 +295,7 @@ where
     fn get_transformations(
         defs: &Definitions,
         array: &[Yaml],
-        mut transformations: &mut Vec<Yaml>,
+        transformations: &mut Vec<Yaml>,
     ) {
         for transform in array {
             match transform[0].as_str() {
